@@ -12,16 +12,6 @@ const OnlineProfileTextOwnersNotesMaxLen = 4000;
 const ONLINE_PROFILE_DESCRIPTION_COMPRESSION_MAGIC = String.fromCharCode(9580);
 
 /**
- * Setup OnlineProfile UI in a specific mode.
- *
- * @param {"Description" | "OwnersNotes"} mode - Initial display mode.
- * @returns {void}
- */
-function OnlineProfileStart(mode) {
-	CommonSetScreen("Character", "OnlineProfile");
-}
-
-/**
  * Loads the online profile screen by creating its input
  * @type {ScreenLoadHandler}
  */
@@ -30,12 +20,6 @@ async function OnlineProfileLoad() {
 		throw new Error('Missing "InformationSheetSelection" data');
 	}
 }
-
-/**
- * Handles unloading the online profile screen
- * @returns {void}
- */
-function OnlineProfileUnload() {}
 
 /**
  * Runs and draws the online profile screen
@@ -58,4 +42,20 @@ function OnlineProfileExit(Save=false) {
 	if (!InformationSheetSelection) return;
 	if (Save) { /* nothing */ }
 	CommonSetScreen("Character", "InformationSheet");
+}
+
+/**
+ * Handles unloading the online profile screen
+ * @returns {void}
+ */
+function OnlineProfileUnload() {}
+
+/**
+ * Setup OnlineProfile UI in a specific mode.
+ *
+ * @param {"Description" | "OwnersNotes"} mode - Initial display mode.
+ * @returns {void}
+ */
+function OnlineProfileStart(mode) {
+	CommonSetScreen("Character", "OnlineProfile");
 }
