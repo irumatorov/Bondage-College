@@ -3125,6 +3125,7 @@ ItemDevicesBoxingBagSetAttachPhoto,SourceCharacter attaches a photo on Destinati
 ItemDevicesBoxingBagSetRemovePhoto,SourceCharacter removes the photo on DestinationCharacter punching bag.
 ItemDevicesGiantStuffedToySelect,Configure the stuffed bear
 ItemDevicesGiantStuffedToyBear,Opacity
+ItemDevicesGiantStuffedToySetBear,Bear
 ItemDevicesGlassJarSelectBase,Configure the glass tube
 ItemDevicesGlassJarSelectWindow,Set the window
 ItemDevicesGlassJarSelectLegRestraint,Set the leg restraint

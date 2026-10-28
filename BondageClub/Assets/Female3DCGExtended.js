@@ -13637,7 +13637,6 @@ var AssetFemale3DCGExtended = {
 						{
 							Property: {
 								Block: [
-									"ItemDevices",
 									"ItemPelvis",
 									"ItemVulva",
 									"ItemVulvaPiercings",
@@ -13650,7 +13649,6 @@ var AssetFemale3DCGExtended = {
 						{
 							Property: {
 								Block: [
-									"ItemDevices",
 									"ItemHead",
 									"ItemHood",
 									"ItemEars",
@@ -13721,8 +13719,12 @@ var AssetFemale3DCGExtended = {
 					DrawImages: false,
 					Key: "o",
 					Options: [
-						{ Property: { SetPose: ["BackElbowTouch", "KneelingSpread"] } },
-						{ Property: { SetPose: ["OverTheHead", "KneelingSpread"] } },
+						{
+							Property: { SetPose: ["BackElbowTouch", "KneelingSpread"] },
+						},
+						{
+							Property: { SetPose: ["OverTheHead", "KneelingSpread"] },
+						},
 					],
 				},
 				{
