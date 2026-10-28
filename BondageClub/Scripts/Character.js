@@ -2713,17 +2713,18 @@ function CharacterValidateNickname(C, Nick, fromOwner = false) {
  * @param {string} [notes] - String containing the notes.  If undefined, existing notes will be erased.
  */
 function CharacterSetOwnersNotes(C, notes = undefined) {
-	if (C.IsOnline() && CommonIsObject(C.Ownership) && C.Ownership.Notes !== notes && C.IsFullyOwnedByPlayer()) {
-		let Notes = undefined;
-		if (typeof notes === "string" && notes.length > 0) {
-			C.Ownership.Notes = notes.slice(0, OnlineProfileTextOwnersNotesMaxLen);
-			Notes = LZString.compressToUTF16(C.Ownership.Notes);
-		} else {
-			C.Ownership.Notes = undefined;
-		}
-
-		ServerSend("AccountOwnership", { MemberNumber: C.MemberNumber, Action: "UpdateNotes", Notes });
+	if (!C.IsOnline() && !C.IsPlayer()) return;
+	if (!C.IsFullyOwnedByPlayer()) return;
+	if (!CommonIsObject(C.Ownership) || C.Ownership.Notes === notes) return;
+	let Notes = undefined;
+	if (typeof notes === "string" && notes.length > 0) {
+		C.Ownership.Notes = notes.slice(0, OnlineProfileTextOwnersNotesMaxLen);
+		Notes = LZString.compressToUTF16(C.Ownership.Notes);
+	} else {
+		C.Ownership.Notes = undefined;
 	}
+
+	ServerSend("AccountOwnership", { MemberNumber: C.MemberNumber, Action: "UpdateNotes", Notes });
 }
 
 /**
