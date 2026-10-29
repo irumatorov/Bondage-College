@@ -198,7 +198,7 @@ function ChatRoomCharacterViewClickCharacter(C, CharX, CharY, Zoom, ClickX, Clic
 				if (PreferenceArousalAtLeast(Player, "Manual") && !PreferenceArousalAtLeast(Player, "Automatic")) {
 					var Arousal = Math.round((CharY + 625 * Zoom - MouseY) / (4 * Zoom));
 					ActivitySetArousal(Player, Arousal);
-					if (Player.ArousalSettings.AffectExpression) ActivityExpression(Player, Player.ArousalSettings.Progress);
+					ActivityExpression(Player, Player.ArousalSettings.Progress);
 					if (Player.ArousalSettings.Progress == 100) ActivityOrgasmPrepare(Player);
 				}
 				return;

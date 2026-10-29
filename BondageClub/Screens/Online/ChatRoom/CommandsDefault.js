@@ -1132,7 +1132,7 @@ const CommonCommands = [
 			const clamped = CommonClamp(arousal, 0, 100);
 
 			ActivitySetArousal(Player, clamped);
-			if (Player.ArousalSettings.AffectExpression) ActivityExpression(Player, Player.ArousalSettings.Progress);
+			ActivityExpression(Player, Player.ArousalSettings.Progress);
 			if (Player.ArousalSettings.Progress === 100) ActivityOrgasmPrepare(Player);
 		}
 	},

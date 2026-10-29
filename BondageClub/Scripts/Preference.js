@@ -363,6 +363,9 @@ function PreferenceInitPlayer(C, data) {
 	C.LabelColor = ServerAccountDataSyncedValidate.LabelColor(data.LabelColor, C);
 	C.AllowedInteractions = data.AllowedInteractions ?? data.ItemPermission ?? 2;
 
+	// Erections used to follow the facial expressions setting
+	if (CommonIsObject(data.ArousalSettings) && data.ArousalSettings.AffectErection == null)
+		data.ArousalSettings.AffectErection = data.ArousalSettings.AffectExpression;
 	C.ArousalSettings = ValidationApplyRecord(data.ArousalSettings, C, PreferenceArousalSettingsValidate);
 	C.AudioSettings = ValidationApplyRecord(data.AudioSettings, C, PreferenceAudioSettingsValidate);
 
@@ -582,6 +585,7 @@ var PreferenceArousalSettingsDefault = {
 	OrgasmStage: 0,
 	OrgasmCount: 0,
 	DisableAdvancedVibes: false,
+	AffectErection: true,
 };
 
 /**
@@ -751,6 +755,9 @@ var PreferenceArousalSettingsValidate = {
 	},
 	DisableAdvancedVibes: (arg, C) => {
 		return typeof arg === "boolean" ? arg : PreferenceArousalSettingsDefault.DisableAdvancedVibes;
+	},
+	AffectErection: (arg, C) => {
+		return typeof arg === "boolean" ? arg : PreferenceArousalSettingsDefault.AffectErection;
 	},
 };
 

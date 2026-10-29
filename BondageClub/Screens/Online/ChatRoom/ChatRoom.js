@@ -5465,8 +5465,7 @@ function ChatRoomSyncArousal(data) {
 	character.ArousalSettings.OrgasmCount = data.OrgasmCount;
 	character.ArousalSettings.Progress = data.Progress;
 	character.ArousalSettings.ProgressTimer = data.ProgressTimer;
-	if ((character.ArousalSettings.AffectExpression == null) || character.ArousalSettings.AffectExpression)
-		ActivityExpression(character, character.ArousalSettings.Progress);
+	ActivityExpression(character, character.ArousalSettings.Progress);
 
 	// Update the cached copy in the chatroom
 	const roomCharacter = ChatRoomData.Character.find(c => c.MemberNumber === data.MemberNumber);

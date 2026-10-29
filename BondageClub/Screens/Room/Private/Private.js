@@ -1187,7 +1187,7 @@ function PrivateClickCharacter() {
 									if ((Player.ArousalSettings.Active == "Manual") || (Player.ArousalSettings.Active == "Hybrid")) {
 										var Arousal = Math.round((625 - MouseY) / 4);
 										ActivitySetArousal(Player, Arousal);
-										if ((Player.ArousalSettings.AffectExpression == null) || Player.ArousalSettings.AffectExpression) ActivityExpression(Player, Player.ArousalSettings.Progress);
+										ActivityExpression(Player, Player.ArousalSettings.Progress);
 										if (Player.ArousalSettings.Progress == 100) ActivityOrgasmPrepare(Player);
 									}
 									return;

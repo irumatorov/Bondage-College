@@ -109,6 +109,7 @@ interface ArousalSettingsType {
 	OrgasmStage: 0 | 1 | 2;
 	OrgasmCount: number;
 	DisableAdvancedVibes: boolean;
+	AffectErection: boolean;
 }
 
 // #endregion

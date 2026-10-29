@@ -42,6 +42,7 @@ function PreferenceSubscreenArousalRun() {
 
 		// Draws the labels and check boxes
 		DrawCheckbox(1250, 276, 64, 64, TextGet("ArousalAffectExpression"), Player.ArousalSettings.AffectExpression);
+		DrawCheckbox(1505, 356, 64, 64, TextGet("ArousalAffectErection"), Player.ArousalSettings.AffectErection);
 		DrawText(TextGet("ArousalVisible"), 1240, 225, "Black", "Gray");
 		DrawText(TextGet("ArousalFetish"), 550, 555, "Black", "Gray");
 		DrawText(TextGet("ArousalActivity"), 550, 640, "Black", "Gray");
@@ -129,6 +130,10 @@ function PreferenceSubscreenArousalClick() {
 		// Meter affect your facial expressions check box
 		if (MouseIn(1250, 276, 64, 64))
 			Player.ArousalSettings.AffectExpression = !Player.ArousalSettings.AffectExpression;
+
+		// Meter affect your erection check box
+		if (MouseIn(1505, 356, 64, 64))
+			Player.ArousalSettings.AffectErection = !Player.ArousalSettings.AffectErection;
 
 		// Arousal visible control
 		if (MouseIn(1505, 193, 400, 64)) {
