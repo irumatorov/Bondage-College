@@ -1357,6 +1357,27 @@ function DrawLineCorner(x0, y0, x1, y1, x2, y2, lineWidth = 2, color = "black") 
 }
 
 /**
+ * Draws a curved line from one point to another, bent towards a control point
+ * @param {number} x0 - X co-ordinate of starting point
+ * @param {number} y0 - Y co-ordinate of starting point
+ * @param {number} cx - X co-ordinate of the control point
+ * @param {number} cy - Y co-ordinate of the control point
+ * @param {number} x1 - X co-ordinate of end point
+ * @param {number} y1 - Y co-ordinate of end point
+ * @param {number} lineWidth - The width of the line
+ * @param {string} color - The color of the line
+ * @returns {void} - Nothing
+ */
+function DrawQuadraticCurve(x0, y0, cx, cy, x1, y1, lineWidth = 2, color = "black") {
+	MainCanvas.beginPath();
+	MainCanvas.lineWidth = lineWidth;
+	MainCanvas.moveTo(x0, y0);
+	MainCanvas.quadraticCurveTo(cx, cy, x1, y1);
+	MainCanvas.strokeStyle = color;
+	MainCanvas.stroke();
+}
+
+/**
  * Gets a character's custom background from the assets it wears
  *
  * @param {Character} C - The character to get the background for
