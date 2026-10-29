@@ -25,10 +25,8 @@ var BrowserStorageCache;
 async function GameStart(isNode=false) {
 	ServerURL = CommonGetServer();
 	//CheatImport();
-	if (!isNode) {
-		console.log("Version: " + GameVersion + ", Server: " + ServerURL);
-		if (!GameVersionFormat.test(GameVersion)) console.error("GameVersion is not valid!");
-	}
+	console.log("Version: " + GameVersion + ", Server: " + ServerURL);
+	if (!GameVersionFormat.test(GameVersion)) console.error("GameVersion is not valid!");
 	CurrentTime = CommonTime();
 
 	CommonIsMobile = CommonDetectMobile();
@@ -43,9 +41,7 @@ async function GameStart(isNode=false) {
 	GLDrawLoad(null, false);
 	AssetLoadAll();
 	MapDataLoad();
-	if (!isNode) {
-		await AssetInventoryIDValidate();
-	}
+	await AssetInventoryIDValidate();
 	CommandsLoad();
 	ControllerStart();
 	await TextPrefetchFile(InterfaceStringsPath).loadedPromise;

@@ -592,7 +592,7 @@ describe("CommonModulo", () => {
 	});
 });
 
-fdescribe("CommonCycle", () => {
+describe("CommonCycle", () => {
 	const cycle = ["A", "B", "C"];
 	it("returns the first value in case of an invalid parameter", () => {
 		expect(Game.CommonCycle(null, cycle, true)).toBe("A");
