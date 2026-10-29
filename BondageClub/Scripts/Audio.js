@@ -882,8 +882,8 @@ function AudioBackgroundMusicPlay(Music, Location = undefined) {
 		return;
 	}
 
-	// We're already playing that
-	const isNew = AudioBackgroundMusic.src !== Music;
+	// We're already playing that; the browser keeps the link encoded (a space becomes %20), so it's compared that way
+	const isNew = AudioBackgroundMusic.src !== new URL(Music, document.baseURI).href;
 	if (!isNew && !AudioBackgroundMusic.paused) return;
 
 	if (isNew) {
@@ -897,8 +897,8 @@ function AudioBackgroundMusicPlay(Music, Location = undefined) {
 
 		/** @param {typeof AudioBackgroundMusic} audio  */
 		function syncPlayback(audio) {
-			if (Location !== undefined && isNaN(audio.duration)) {
-				console.error(`audio source ${Music} has no duration; cannot sync playback`);
+			if (audio._playState?.location !== undefined && isNaN(audio.duration)) {
+				console.error(`audio source ${audio.src} has no duration; cannot sync playback`);
 				return false;
 			}
 
