@@ -10,7 +10,7 @@ BackgroundSizeModeShowFullOriginalRatio,"Full image, original aspect ratio"
 BackgroundFilterLabel,Color filter:
 BackgroundFilterNote,"You can put a color filter that will go over your background.  For example, use #00000080 to dim the lights."
 BackgroundMusicLabel,Custom music:
-BackgroundMusicNote,Put the address of the background mp3 music file to use.
+BackgroundMusicNote,Put the address of the background mp3 music file or YouTube video to use.
 BackgroundMusicSync,Synchronize music track across the room
 ResetButtonTooltip,Reset
 OpenLibraryButtonTooltip,Library
