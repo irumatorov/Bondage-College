@@ -5444,6 +5444,11 @@ ItemMiscPetPotatoSetFloor,SourceCharacter puts the AssetName down.
 ItemMiscPetPotatoSetLap,SourceCharacter picks up the AssetName.
 ItemMiscPortalLinkPadlockDetail,Can only be opened using a PortalLink Tablet
 ItemMiscPortalLinkPadlockIntro,"""Accidents hurts… Safety First!"""
+ItemMiscPumpkinPotChain,Nipples
+ItemMiscPumpkinPotNone,No Chain
+ItemMiscPumpkinPotSelect,Configure the candy bucket chains
+ItemMiscPumpkinPotSetNone,SourceCharacter removes the nipple chains from DestinationCharacter pumpkin candy bucket.
+ItemMiscPumpkinPotSetChain,SourceCharacter adds nipple chains to DestinationCharacter pumpkin candy bucket.
 ItemMiscServingTrayCake,Cake
 ItemMiscServingTrayCookies,Cookies
 ItemMiscServingTrayDrinks,Drinks

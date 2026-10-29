@@ -20726,6 +20726,11 @@ var AssetFemale3DCGExtended = {
 				Iterations: 0,
 			},
 		}, //BountySuitcaseEmpty
+		PumpkinPot: {
+			Archetype: ExtendedArchetype.TYPED,
+			DrawImages: false,
+			Options: [{ Name: "None" }, { Name: "Chain" }],
+		}, // PumpkinPot
 	}, // ItemMisc
 	ItemPelvis: {
 		FuturisticChastityBelt: {

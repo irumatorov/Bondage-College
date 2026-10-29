@@ -67395,6 +67395,37 @@ var AssetFemale3DCG = [
 					BuyGroup: true,
 				},
 			},
+			{
+				Name: "PumpkinPot",
+				InventoryID: 1433,
+				Value: 13,
+				Random: false,
+				Left: 170,
+				Top: 310,
+				Fetish: ["Sadism"],
+				Priority: 48,
+				ParentGroup: {},
+				Layer: [
+					{
+						Name: "Pumpkin",
+					},
+					{
+						Name: "Candy",
+					},
+					{
+						Name: "Eyes",
+					},
+					{
+						Name: "Chain",
+						AllowTypes: { typed: 1 },
+					},
+				],
+				Attribution: {
+					Author: "Echo (SugarChain)",
+					OriginalName: "南瓜盆",
+					License: "CC BY-SA-NC 4.0",
+				},
+			},
 		],
 		Color: ["Default"],
 	},
@@ -73049,7 +73080,7 @@ var AssetFemale3DCG = [
 					{ Name: "Piston", Priority: 5 },
 					{ Name: "Phallus", Priority: 22 },
 					{
-						Name: "Mask", 
+						Name: "Mask",
 						HasImage: false,
 						AllowColorize: false,
 						AllowTypes: { d: [1, 2, 3, 4, 5] },
