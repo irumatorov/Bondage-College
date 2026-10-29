@@ -244,6 +244,16 @@ class DictionaryBuilder {
 	}
 
 	/**
+	 * Adds a tether dictionary entry
+	 * @param {ChatRoomMapTether | null} tether - The tether, or `null` when the leash is untied
+	 * @returns {this}
+	 */
+	mapViewTether(tether) {
+		this._addEntry({ Tag: "MapViewTether", Tether: tether });
+		return this;
+	}
+
+	/**
 	 * Adds a changeKey dictionary entry
 	 * @param {("gold" | "silver" | "bronze")[]} keys
 	 * @param {boolean} giveKey
@@ -533,6 +543,14 @@ function IsMsgIdDictionaryEntry(entry) {
  */
 function IsMapViewTeleportEventDictionaryEntry(entry) {
 	return CommonIsObject(entry) && "Tag" in entry && entry.Tag === "MapViewTeleport";
+}
+
+/**
+ * @param {ChatMessageDictionaryEntry} entry
+ * @returns {entry is MapViewTetherEventDictionaryEntry}
+ */
+function IsMapViewTetherEventDictionaryEntry(entry) {
+	return CommonIsObject(entry) && "Tag" in entry && entry.Tag === "MapViewTether" && "Tether" in entry;
 }
 
 /**

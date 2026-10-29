@@ -10,6 +10,8 @@ type ChatRoomMapPos = {
 type ChatRoomMapData = {
 	Pos: ChatRoomMapPos
 	PrivateState: Record<string, any>
+	/** The map object the character's leash is tied to */
+	Tether?: ChatRoomMapTether
 }
 
 interface ServerAccountImmutableData {
@@ -803,6 +805,15 @@ interface MapViewTeleportEventDictionaryEntry {
 }
 
 /**
+ * A dictionary entry for tether events: tying a leash to a tether point, untying it, or the resulting tether
+ */
+interface MapViewTetherEventDictionaryEntry {
+	Tag: "MapViewTether";
+	/** The tether, or `null` when the leash is untied */
+	Tether: ChatRoomMapTether | null;
+}
+
+/**
  * A dictionary entry for change key events
  */
 interface MapViewChangeKeyEventDictionaryEntry {
@@ -872,6 +883,7 @@ type ChatMessageDictionaryEntry =
 	| ReplyIdDictionaryEntry
 	| MapViewTeleportEventDictionaryEntry
 	| MapViewChangeKeyEventDictionaryEntry
+	| MapViewTetherEventDictionaryEntry
 	| GGTSDictionaryEntry
 	| ModSdkModsQueryPayloadDictionaryEntry
 	| ModSdkModsReplyPayloadDictionaryEntry

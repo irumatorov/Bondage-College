@@ -48,6 +48,8 @@ var ChatRoomMapViewTypeList = ["Never", "Hybrid", "Always"];
 var ChatRoomMapViewUpdatePlayerTime = 500;
 const ChatRoomMapViewWhisperRange = 1;
 const ChatRoomMapViewInteractionRange = 1;
+/** How far a leashed character can go from where her leash is held, in tiles */
+const ChatRoomMapViewLeashRange = 2;
 const ChatRoomMapViewRemoteRange = ChatRoomMapViewPerceptionRangeMax;
 const ChatRoomMapSignTextMaxLength = 150;
 var ChatRoomMapViewEditorMaxRecentElements = 16;
@@ -136,6 +138,7 @@ function ChatRoomMapViewInitialize(mode) {
 function ChatRoomMapViewInitializeCharacter(C) {
 	if (ChatRoomData?.MapData?.Type !== "Always" && ChatRoomData?.MapData?.Type !== "Hybrid") return null;
 	// We use LastMapData here in case it's a relog into the room
+	const isEntering = C.MapData == null;
 	const oldData = C.MapData ??
 		(C.IsPlayer() && Player.ImmersionSettings.ReturnToChatRoom && Player.LastChatRoom?.Name === ChatRoomData?.Name ?
 			Player.LastMapData
@@ -143,6 +146,8 @@ function ChatRoomMapViewInitializeCharacter(C) {
 		);
 	C.LastMapData = C.MapData = ServerAccountDataSyncedValidate.MapData(oldData, C);
 	if (C.IsPlayer()) {
+		// Nobody enters a room with her leash already tied to a tether point
+		if (isEntering) delete C.MapData.Tether;
 		// We throw in an update so that everyone sees us at the proper location
 		ServerSend("ChatRoomCharacterMapDataUpdate", C.MapData);
 	}
@@ -894,6 +899,7 @@ function ChatRoomMapViewRun(time) {
 	// Syncs the room map data with the server if needed
 	ChatRoomMapViewMovementProcess();
 	ChatRoomMapViewLeash();
+	ChatRoomMapViewTether();
 	ChatRoomMapViewUpdateRoomSync();
 	ChatRoomMapViewUpdatePlayerSync();
 	ChatRoomMapViewUpdateLastMapDataSync();
@@ -1606,6 +1612,15 @@ function ChatRoomMapViewDrawGrid(Left, Top, Width, Height) {
 
 	}
 
+	ChatRoomMapViewDrawTethers(
+		pos => [
+			Left + (pos.X - PlayerX) * TileWidth + ChatRoomMapViewPerceptionRange * TileWidth,
+			Top + (pos.Y - PlayerY) * TileHeight + ChatRoomMapViewPerceptionRange * TileWidth,
+		],
+		TileWidth,
+		TileHeight,
+	);
+
 	for (let X = 0; X < ChatRoomMapViewWidth; X++) {
 		for (let Y = 0; Y < ChatRoomMapViewHeight; Y++) {
 			const tileEffects = MapManager.Map.getEffects(X, Y);
@@ -1912,65 +1927,349 @@ function ChatRoomMapViewMovementProcess() {
  * @returns {void} - Nothing
  */
 function ChatRoomMapViewLeash() {
-
-	// Finds the leash holder character
 	if (ChatRoomLeashPlayer == null) return;
-	for (let C of ChatRoomCharacter)
-		if ((C.MemberNumber == ChatRoomLeashPlayer) && !C.IsPlayer()) {
+	const holder = ChatRoomCharacter.find(C => C.MemberNumber === ChatRoomLeashPlayer && !C.IsPlayer());
+	if (holder?.MapData?.Pos) ChatRoomMapViewPullWithinLeashRange(holder.MapData.Pos);
+}
 
-			// Validates the data first
-			if ((Player.MapData == null) || (Player.MapData.Pos.X == null) || (Player.MapData.Pos.Y == null)) return;
-			if ((C.MapData?.Pos == null) || (C.MapData.Pos.X == null) || (C.MapData.Pos.Y == null)) return;
+/**
+ * Pulls the player back within leash range of where her leash is held
+ * @param {ChatRoomMapPos} anchor - Where the leash is held: its holder, or the tether point it's tied to
+ * @returns {void} - Nothing
+ */
+function ChatRoomMapViewPullWithinLeashRange(anchor) {
 
-			// Leash range is 2 tiles
-			let Distance = Math.max(Math.abs(Player.MapData.Pos.X - C.MapData.Pos.X), Math.abs(Player.MapData.Pos.Y - C.MapData.Pos.Y));
-			if (Distance <= 2) return;
+	// Validates the data first
+	if (Player.MapData?.Pos?.X == null || Player.MapData.Pos.Y == null) return;
+	if (anchor.X == null || anchor.Y == null) return;
 
-			// The X and Y variance tells us where to pull the character
-			let VarX = Player.MapData.Pos.X - C.MapData.Pos.X;
-			let VarY = Player.MapData.Pos.Y - C.MapData.Pos.Y;
-			let TargetX = Player.MapData.Pos.X;
-			let TargetY = Player.MapData.Pos.Y;
-			if (VarX > 2) TargetX = C.MapData.Pos.X + 2;
-			if (VarX < -2) TargetX = C.MapData.Pos.X - 2;
-			if (VarY > 2) TargetY = C.MapData.Pos.Y + 2;
-			if (VarY < -2) TargetY = C.MapData.Pos.Y - 2;
+	// The X and Y variance tells us where to pull the character
+	const varX = Player.MapData.Pos.X - anchor.X;
+	const varY = Player.MapData.Pos.Y - anchor.Y;
+	if (Math.max(Math.abs(varX), Math.abs(varY)) <= ChatRoomMapViewLeashRange) return;
+	let targetX = Player.MapData.Pos.X;
+	let targetY = Player.MapData.Pos.Y;
+	if (varX > ChatRoomMapViewLeashRange) targetX = anchor.X + ChatRoomMapViewLeashRange;
+	if (varX < -ChatRoomMapViewLeashRange) targetX = anchor.X - ChatRoomMapViewLeashRange;
+	if (varY > ChatRoomMapViewLeashRange) targetY = anchor.Y + ChatRoomMapViewLeashRange;
+	if (varY < -ChatRoomMapViewLeashRange) targetY = anchor.Y - ChatRoomMapViewLeashRange;
 
-			// If the new target tile cannot be entered, we try another one nearby
-			if (ChatRoomMapViewCanEnterTile(TargetX, TargetY) <= 0) {
+	// If the new target tile cannot be entered, we try another one nearby
+	if (ChatRoomMapViewCanEnterTile(targetX, targetY) <= 0) {
 
-				// Tries to bring the character one extra tile toward the leash holder on the invert axis (X instead of Y or vice versa)
-				if ((Math.abs(VarX) > 2) && (Math.abs(VarX) > Math.abs(VarY)) && (VarY > 0)) TargetY--;
-				if ((Math.abs(VarX) > 2) && (Math.abs(VarX) > Math.abs(VarY)) && (VarY < 0)) TargetY++;
-				if ((Math.abs(VarY) > 2) && (Math.abs(VarX) < Math.abs(VarY)) && (VarX > 0)) TargetX--;
-				if ((Math.abs(VarY) > 2) && (Math.abs(VarX) < Math.abs(VarY)) && (VarX < 0)) TargetX++;
+		// Tries to bring the character one extra tile toward the anchor on the invert axis (X instead of Y or vice versa)
+		const pullX = Math.abs(varX) > ChatRoomMapViewLeashRange && Math.abs(varX) > Math.abs(varY);
+		const pullY = Math.abs(varY) > ChatRoomMapViewLeashRange && Math.abs(varX) < Math.abs(varY);
+		if (pullX && varY > 0) targetY--;
+		if (pullX && varY < 0) targetY++;
+		if (pullY && varX > 0) targetX--;
+		if (pullY && varX < 0) targetX++;
 
-				// If we still cannot move there
-				if (ChatRoomMapViewCanEnterTile(TargetX, TargetY) <= 0) {
+		// If we still cannot move there
+		if (ChatRoomMapViewCanEnterTile(targetX, targetY) <= 0) {
 
-					// Bring the character 1 tile near the leash holder
-					if (VarX > 1) TargetX = C.MapData.Pos.X + 1;
-					if (VarX < -1) TargetX = C.MapData.Pos.X - 1;
-					if (VarY > 1) TargetY = C.MapData.Pos.Y + 1;
-					if (VarY < -1) TargetY = C.MapData.Pos.Y - 1;
+			// Bring the character 1 tile near the anchor
+			if (varX > 1) targetX = anchor.X + 1;
+			if (varX < -1) targetX = anchor.X - 1;
+			if (varY > 1) targetY = anchor.Y + 1;
+			if (varY < -1) targetY = anchor.Y - 1;
 
-					// If it still doesn't work, we give up
-					if (ChatRoomMapViewCanEnterTile(TargetX, TargetY) <= 0) return;
-
-				}
-
-			}
-
-			// Sends the movement packet
-			Player.MapData.Pos.X = TargetX;
-			Player.MapData.Pos.Y = TargetY;
-			ChatRoomMapViewUpdatePlayerFlag();
-			return;
+			// If it still doesn't work, we give up
+			if (ChatRoomMapViewCanEnterTile(targetX, targetY) <= 0) return;
 
 		}
 
+	}
+
+	// Sends the movement packet
+	Player.MapData.Pos.X = targetX;
+	Player.MapData.Pos.Y = targetY;
+	ChatRoomMapViewUpdatePlayerFlag();
 }
 
+/**
+ * Checks if there's a tether point at a position of the current map
+ * @param {ChatRoomMapPos} pos
+ * @returns {boolean}
+ */
+function ChatRoomMapViewIsTetherPoint(pos) {
+	if (!Player.MapData || !MapIsPosition(pos)) return false;
+	return MapManager.Map.getObjectConfig(pos.X, pos.Y)?.Type === "Tether"
+		&& MapManager.Map.isValidObjectConfig(MapCoordinatesToIndex(pos.X, pos.Y), "Tether");
+}
+
+/**
+ * Checks if a character is within reach of a position
+ * @param {Character} C
+ * @param {ChatRoomMapPos} pos
+ * @returns {boolean}
+ */
+function ChatRoomMapViewIsWithinReach(C, pos) {
+	return C.MapData?.Pos != null && MapGetDistance(C.MapData.Pos, pos) <= ChatRoomMapViewInteractionRange;
+}
+
+/**
+ * Checks if the player can tie a character's leash to a tether point; works on herself too
+ * @param {Character} C
+ * @param {ChatRoomMapPos} pos - The tether point
+ * @returns {boolean}
+ */
+function ChatRoomMapViewCanTetherTie(C, pos) {
+	if (C.MapData?.Tether || !Player.CanInteract()) return false;
+	if (!C.IsPlayer() && (!ServerChatRoomGetAllowItem(Player, C) || C.OnlineSharedSettings?.AllowPlayerLeashing === false)) return false;
+	return ChatRoomCanBeLeashedBy(Player.MemberNumber, C)
+		&& ChatRoomMapViewIsTetherPoint(pos)
+		&& ChatRoomMapViewIsWithinReach(Player, pos)
+		&& ChatRoomMapViewIsWithinReach(C, pos);
+}
+
+/**
+ * Checks if the player can untie a character's leash from its tether point:
+ * her own leash if she could tie it herself or one she tied, within reach of the tether point, or anyone else's as a room admin
+ * @param {Character} C
+ * @returns {boolean}
+ */
+function ChatRoomMapViewCanTetherUntie(C) {
+	const tether = C.MapData?.Tether;
+	if (!tether || !Player.CanInteract()) return false;
+	if (C.IsPlayer()) {
+		if (!ChatRoomCanBeLeashedBy(Player.MemberNumber, Player)) return false;
+	} else if (ChatRoomPlayerIsAdmin()) {
+		return true;
+	} else if (tether.MemberNumber !== Player.MemberNumber) {
+		return false;
+	}
+	return ChatRoomMapViewIsWithinReach(Player, tether.Position);
+}
+
+/**
+ * Shows the menu of a tether point: admins choose if it is one, and anyone within reach ties leashes to it or unties them
+ * @param {number} x
+ * @param {number} y
+ * @returns {void} - Nothing
+ */
+function ChatRoomMapViewShowTetherPointMenu(x, y) {
+	const pos = { X: x, Y: y };
+	const isTetherPoint = ChatRoomMapViewIsTetherPoint(pos);
+	if (!isTetherPoint && !ChatRoomPlayerIsAdmin()) return;
+
+	/** @type {HTMLElement[]} */
+	const children = [];
+	if (ChatRoomPlayerIsAdmin()) {
+		children.push(ElementCheckbox.CreateLabelled(
+			null,
+			TextGet("MapViewTetherPointToggle"),
+			function() {
+				MapManager.Map.setObjectConfig(x, y, this.checked ? { Type: "Tether" } : undefined);
+				MapManager.Map.updateGlobalMapData();
+				ChatRoomMapViewShowTetherPointMenu(x, y);
+			},
+			{ checked: isTetherPoint },
+		));
+	}
+
+	if (isTetherPoint) {
+		/** @type {(label: string, onClick: () => void) => HTMLButtonElement} */
+		const button = (label, onClick) => ElementCreate({
+			tag: "button",
+			classList: ["chat-room-map-view-dialog-button"],
+			children: [label],
+			eventListeners: {
+				click: () => {
+					onClick();
+					ChatRoomMapViewHideDialogMenu();
+				},
+			},
+		});
+		const buttons = [];
+		for (const C of [Player, ...ChatRoomCharacter.filter(c => !c.IsPlayer())]) {
+			const tether = C.MapData?.Tether;
+			const tiedHere = tether?.Position.X === x && tether.Position.Y === y;
+			if (tiedHere && ChatRoomMapViewCanTetherUntie(C)) {
+				const label = C.IsPlayer() ? TextGet("MapViewTetherUntieSelf") : TextGet("MapViewTetherUntieOther").replace("TargetCharacterName", CharacterNickname(C));
+				buttons.push(button(label, () => ChatRoomMapViewSendTetherRequest(C, null)));
+			} else if (ChatRoomMapViewCanTetherTie(C, pos)) {
+				const label = C.IsPlayer() ? TextGet("MapViewTetherTieSelf") : TextGet("MapViewTetherTieOther").replace("TargetCharacterName", CharacterNickname(C));
+				buttons.push(button(label, () => ChatRoomMapViewSendTetherRequest(C, { Position: pos, MemberNumber: Player.MemberNumber })));
+			}
+		}
+		if (buttons.length > 0) {
+			children.push(ElementCreate({ tag: "div", classList: ["chat-room-map-view-dialog-buttons"], children: buttons }));
+		} else {
+			children.push(ElementCreate({ tag: "div", children: [TextGet("MapViewTetherNobody")] }));
+		}
+	}
+
+	ChatRoomMapViewShowDialogMenu(TextGet("MapViewTetherPoint"), ElementCreate({
+		tag: "div",
+		classList: ["chat-room-map-view-dialog-tether-point"],
+		children,
+	}));
+}
+
+/**
+ * Asks a character's client to tie her leash to a tether point, or to untie it
+ * @param {Character} C - The character whose leash is tied or untied
+ * @param {ChatRoomMapTether | null} tether - The tether, or `null` to untie the leash
+ * @returns {void} - Nothing
+ */
+function ChatRoomMapViewSendTetherRequest(C, tether) {
+	if (C.IsPlayer()) {
+		ChatRoomMapViewAcceptTether(Player, tether);
+		return;
+	}
+	const dictionary = new DictionaryBuilder().mapViewTether(tether).build();
+	ServerSend("ChatRoomChat", { Content: "ChatRoomMapViewTether", Type: "Hidden", Dictionary: dictionary, Target: C.MemberNumber });
+}
+
+/**
+ * Ties the player's leash to a tether point, or unties it, from another character's hidden message
+ * @param {OnlineCharacter} sender
+ * @param {ServerChatRoomMessage} data
+ * @returns {void} - Nothing
+ */
+function ChatRoomMapViewTetherHiddenMessage(sender, data) {
+	const entry = data.Dictionary?.find(e => IsMapViewTetherEventDictionaryEntry(e));
+	const senderNumber = sender.MemberNumber;
+	if (!entry || !Player.MapData) return;
+	if (entry.Tether) {
+		if (Player.MapData.Tether || !MapIsPosition(entry.Tether.Position)) return;
+		const position = { X: entry.Tether.Position.X, Y: entry.Tether.Position.Y };
+		if (
+			Player.OnlineSharedSettings.AllowPlayerLeashing !== false
+			&& ServerChatRoomGetAllowItem(sender, Player)
+			&& ChatRoomCanBeLeashedBy(senderNumber, Player)
+			&& ChatRoomMapViewIsTetherPoint(position)
+			&& ChatRoomMapViewIsWithinReach(sender, position)
+			&& ChatRoomMapViewIsWithinReach(Player, position)
+		) {
+			ChatRoomMapViewAcceptTether(sender, { Position: position, MemberNumber: senderNumber });
+		}
+	} else if (Player.MapData.Tether && (Player.MapData.Tether.MemberNumber === senderNumber || ChatRoomCharacterIsAdmin(sender))) {
+		ChatRoomMapViewAcceptTether(sender, null);
+	}
+}
+
+/**
+ * Ties the player's leash to a tether point, or unties it, as a character asked, and tells the room who did it
+ * @param {Character} C - The character who ties or unties the leash
+ * @param {ChatRoomMapTether | null} tether - The tether, or `null` to untie the leash
+ * @returns {void} - Nothing
+ */
+function ChatRoomMapViewAcceptTether(C, tether) {
+	const dictionary = new DictionaryBuilder().sourceCharacter(C).destinationCharacter(Player).build();
+	ServerSend("ChatRoomChat", { Content: tether ? "MapViewTetherTie" : "MapViewTetherUntie", Type: "Action", Dictionary: dictionary });
+	ChatRoomMapViewSetTether(tether);
+}
+
+/**
+ * Ties the player's leash to a tether point, or unties it, and tells the room with her map data.
+ * A leash tied to a tether point isn't held by anyone.
+ * @param {ChatRoomMapTether | null} tether - The tether, or `null` to untie the leash
+ * @returns {void} - Nothing
+ */
+function ChatRoomMapViewSetTether(tether) {
+	if (!Player.MapData) return;
+	if (tether && ChatRoomLeashPlayer != null) {
+		ServerSend("ChatRoomChat", { Content: "RemoveLeash", Type: "Hidden", Target: ChatRoomLeashPlayer });
+		ChatRoomLeashPlayer = null;
+	}
+	if (tether) {
+		Player.MapData.Tether = tether;
+	} else {
+		delete Player.MapData.Tether;
+	}
+	ServerSend("ChatRoomCharacterMapDataUpdate", Player.MapData);
+	CharacterRefreshLeash(Player);
+}
+
+/**
+ * Checks if the player's leash can still be tied where it is: the room still has a map,
+ * the object is still a tether point and she can still be leashed by whoever tied it.
+ * Works in any view: the map is read again from the room data when the map view isn't showing it.
+ * @param {ChatRoomMapTether} tether
+ * @returns {boolean}
+ */
+function ChatRoomMapViewTetherIsValid(tether) {
+	const mapType = ChatRoomData?.MapData?.Type;
+	if (mapType !== "Always" && mapType !== "Hybrid") return false;
+	if (!ChatRoomMapViewIsActive()) MapManager.OnMapDataUpdated();
+	return ChatRoomMapViewIsTetherPoint(tether.Position) && ChatRoomCanBeLeashedBy(tether.MemberNumber, Player);
+}
+
+/**
+ * Checks if someone who could untie the player's leash is in the room with her: whoever tied it or a room admin.
+ * Like a locked room, a tether point doesn't hold anyone with nobody around to let her go.
+ * @param {ChatRoomMapTether} tether
+ * @returns {boolean}
+ */
+function ChatRoomMapViewTetherHasKeeper(tether) {
+	return ChatRoomCharacter.some(C => !C.IsPlayer() && (C.MemberNumber === tether.MemberNumber || ChatRoomCharacterIsAdmin(C)));
+}
+
+/**
+ * Checks if the player's leash is tied to a tether point that holds her: it's still valid and someone who could untie it is in the room
+ * @returns {boolean}
+ */
+function ChatRoomMapViewTetherHolds() {
+	const tether = Player.MapData?.Tether;
+	return !!tether && ChatRoomMapViewTetherIsValid(tether) && ChatRoomMapViewTetherHasKeeper(tether);
+}
+
+/**
+ * Unties the player's leash from a tether point that doesn't hold her anymore,
+ * telling the room when it slips off because nobody who could untie it is left
+ * @returns {void} - Nothing
+ */
+function ChatRoomMapViewTetherRelease() {
+	const tether = Player.MapData?.Tether;
+	if (!tether) return;
+	if (ChatRoomMapViewTetherIsValid(tether)) {
+		const dictionary = new DictionaryBuilder().destinationCharacter(Player).build();
+		ServerSend("ChatRoomChat", { Content: "MapViewTetherSlip", Type: "Action", Dictionary: dictionary });
+	}
+	ChatRoomMapViewSetTether(null);
+}
+
+/**
+ * Keeps the player within leash range of the tether point her leash is tied to,
+ * and unties it when the tether point doesn't hold her anymore
+ * @returns {void} - Nothing
+ */
+function ChatRoomMapViewTether() {
+	const tether = Player.MapData?.Tether;
+	if (!tether) return;
+	if (!ChatRoomMapViewTetherHolds()) {
+		ChatRoomMapViewTetherRelease();
+		return;
+	}
+	ChatRoomMapViewPullWithinLeashRange(tether.Position);
+}
+
+/**
+ * Draws the leashes tied to tether points, from the characters to the tether points
+ * @param {(pos: ChatRoomMapPos) => [x: number, y: number]} toScreen - Gets the screen position of a tile's top left corner
+ * @param {number} tileWidth
+ * @param {number} tileHeight
+ * @returns {void} - Nothing
+ */
+function ChatRoomMapViewDrawTethers(toScreen, tileWidth, tileHeight) {
+	MainCanvas.save();
+	for (const C of ChatRoomCharacter) {
+		const pos = C.MapData?.Pos;
+		const tether = C.MapData?.Tether;
+		if (!pos || !tether || !ChatRoomMapViewCharacterIsVisible(C)) continue;
+		const [charX, charY] = toScreen(pos);
+		const [pointX, pointY] = toScreen(tether.Position);
+		const neckX = charX + tileWidth / 2;
+		const neckY = charY - tileHeight * 0.45;
+		const ringX = pointX + tileWidth / 2;
+		const ringY = pointY - tileHeight * 0.1;
+		const sagY = Math.max(neckY, ringY) + tileHeight * 0.25;
+		DrawQuadraticCurve(neckX, neckY, (neckX + ringX) / 2, sagY, ringX, ringY, Math.max(2, tileWidth * 0.03), "#2b2b2b");
+	}
+	MainCanvas.restore();
+}
 
 /**
  * Draws the map and characters of the chat room map on the left side of the screen
