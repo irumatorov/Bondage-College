@@ -1093,6 +1093,18 @@ async function CharacterLoadCSVDialog(C, info) {
  */
 function CharacterArchetypeClothes(C, Archetype, ForceColor) {
 
+	/**
+	 * @param {Character} char
+	 * @param {AssetName} asset
+	 * @param {AssetGroupName} group
+	 * @param {ItemColor} [color]
+	 */
+	const quickWear = (char, asset, group, color) => {
+		InventoryWear(char, asset, group, color, undefined, undefined, undefined, false);
+	};
+
+	let addedItems = false;
+
 	// Maid archetype
 	if (Archetype == "Maid") {
 		InventoryAdd(C, "MaidOutfit1", "Cloth", false);
@@ -1102,31 +1114,32 @@ function CharacterArchetypeClothes(C, Archetype, ForceColor) {
 		InventoryAdd(C, "MaidHairband1", "Hat", false);
 		InventoryAdd(C, "MaidLatex", "Cloth", false);
 		InventoryAdd(C, "MaidLatexHairband", "Hat", false);
-		let Outfit = Math.floor(Math.random() * 7); // Bigger odds of having the base maid outfit
+		addedItems = true;
+		const Outfit = Math.floor(Math.random() * 7); // Bigger odds of having the base maid outfit
 		if (Outfit == 0) {
-			InventoryWear(C, "MaidOutfit2", "Cloth");
-			InventoryWear(C, "MaidHairband1", "Hat");
+			quickWear(C, "MaidOutfit2", "Cloth");
+			quickWear(C, "MaidHairband1", "Hat");
 		} else if (Math.random() > 0.75) {
-			InventoryWear(C, "MaidLatex", "Cloth", ['#202020', '#B0B0B0', 'Default']);
-			InventoryWear(C, "MaidLatexHairband", "Hat");
+			quickWear(C, "MaidLatex", "Cloth", ['#202020', '#B0B0B0', 'Default']);
+			quickWear(C, "MaidLatexHairband", "Hat");
 		} else if (Outfit == 2) {
-			InventoryWear(C, "MaidDress3", "Cloth");
-			InventoryWear(C, "MaidHairband1", "Hat");
+			quickWear(C, "MaidDress3", "Cloth");
+			quickWear(C, "MaidHairband1", "Hat");
 		} else if (Outfit == 3) {
-			InventoryWear(C, "MaidDress4", "Cloth");
-			InventoryWear(C, "MaidHairband1", "Hat");
+			quickWear(C, "MaidDress4", "Cloth");
+			quickWear(C, "MaidHairband1", "Hat");
 		} else {
-			InventoryWear(C, "MaidOutfit1", "Cloth");
-			InventoryWear(C, "MaidHairband1", "Hat");
+			quickWear(C, "MaidOutfit1", "Cloth");
+			quickWear(C, "MaidHairband1", "Hat");
 		}
-		if (InventoryGet(C, "Socks") == null) InventoryWear(C, "Socks4", "Socks", "#AAAAAA");
-		if (InventoryGet(C, "Shoes") == null) InventoryWear(C, "Shoes2", "Shoes", "#222222");
-		if ((InventoryGet(C, "Gloves") == null) && (Math.random() > 0.5)) InventoryWear(C, "Gloves1", "Gloves", "#AAAAAA");
-		InventoryRemove(C, "ClothAccessory");
-		InventoryRemove(C, "HairAccessory1");
-		InventoryRemove(C, "HairAccessory2");
-		InventoryRemove(C, "HairAccessory3");
-		InventoryRemove(C, "ClothLower");
+		if (InventoryGet(C, "Socks") == null) quickWear(C, "Socks4", "Socks", "#AAAAAA");
+		if (InventoryGet(C, "Shoes") == null) quickWear(C, "Shoes2", "Shoes", "#222222");
+		if ((InventoryGet(C, "Gloves") == null) && (Math.random() > 0.5)) quickWear(C, "Gloves1", "Gloves", "#AAAAAA");
+		InventoryRemove(C, "ClothAccessory", false);
+		InventoryRemove(C, "HairAccessory1", false);
+		InventoryRemove(C, "HairAccessory2", false);
+		InventoryRemove(C, "HairAccessory3", false);
+		InventoryRemove(C, "ClothLower", false);
 		C.AllowItem = (LogQuery("LeadSorority", "Maid"));
 	}
 
@@ -1134,88 +1147,95 @@ function CharacterArchetypeClothes(C, Archetype, ForceColor) {
 	if (Archetype == "Mistress") {
 		/** @type {HexColor[]} */
 		let ColorList = ["#333333", "#AA4444", "#AAAAAA"];
-		let Color = (ForceColor == null) ? CommonRandomItemFromList(null, ColorList) : ForceColor;
-		CharacterAppearanceSetItem(C, "Hat", null);
+		let Color = (ForceColor == null) ? CommonGetRandomItemFromList(ColorList) : ForceColor;
 		InventoryAdd(C, "MistressGloves", "Gloves", false);
-		InventoryWear(C, "MistressGloves", "Gloves", Color);
 		InventoryAdd(C, "MistressBoots", "Shoes", false);
-		InventoryWear(C, "MistressBoots", "Shoes", Color);
 		InventoryAdd(C, "MistressTop", "Cloth", false);
-		InventoryWear(C, "MistressTop", "Cloth", Color);
 		InventoryAdd(C, "MistressBottom", "ClothLower", false);
-		InventoryWear(C, "MistressBottom", "ClothLower", Color);
 		InventoryAdd(C, "MistressPadlock", "ItemMisc", false);
 		InventoryAdd(C, "MistressTimerPadlock", "ItemMisc", false);
 		InventoryAdd(C, "MistressPadlockKey", "ItemMisc", false);
 		InventoryAdd(C, "DeluxeBoots", "Shoes", false);
-		InventoryRemove(C, "ClothAccessory");
-		InventoryRemove(C, "HairAccessory1");
-		InventoryRemove(C, "HairAccessory2");
-		InventoryRemove(C, "HairAccessory3");
-		InventoryRemove(C, "Socks");
+		addedItems = true;
+		quickWear(C, "MistressGloves", "Gloves", Color);
+		quickWear(C, "MistressBoots", "Shoes", Color);
+		quickWear(C, "MistressTop", "Cloth", Color);
+		quickWear(C, "MistressBottom", "ClothLower", Color);
+		InventoryRemove(C, "Hat", false);
+		InventoryRemove(C, "ClothAccessory", false);
+		InventoryRemove(C, "HairAccessory1", false);
+		InventoryRemove(C, "HairAccessory2", false);
+		InventoryRemove(C, "HairAccessory3", false);
+		InventoryRemove(C, "Socks", false);
 	}
 
 	// Employee archetype
 	if (Archetype == "Employee") {
 		InventoryAdd(C, "VirginKiller1", "Cloth", false);
-		CharacterAppearanceSetItem(C, "Cloth", C.Inventory[C.Inventory.length - 1].Asset);
-		CharacterAppearanceSetColorForGroup(C, "Default", "Cloth");
 		InventoryAdd(C, "Jeans1", "ClothLower", false);
-		CharacterAppearanceSetItem(C, "ClothLower", C.Inventory[C.Inventory.length - 1].Asset);
-		CharacterAppearanceSetColorForGroup(C, "Default", "ClothLower");
 		InventoryAdd(C, "SunGlasses1", "Glasses", false);
-		CharacterAppearanceSetItem(C, "Glasses", C.Inventory[C.Inventory.length - 1].Asset);
-		CharacterAppearanceSetColorForGroup(C, "Default", "Glasses");
+		addedItems = true;
+		quickWear(C, "VirginKiller1", "Cloth", "Default");
+		quickWear(C, "Jeans1", "ClothLower", "Default");
+		quickWear(C, "SunGlasses1", "Glasses", "Default");
 	}
 
 	// Anime girl archetype
 	if (Archetype == "AnimeGirl") {
-		CharacterNaked(C);
-		InventoryWear(C, "Panties1", "Panties", "#CCCCCC");
-		InventoryWear(C, "Bra1", "Bra", "#CCCCCC");
+		CharacterNaked(C, false);
 		InventoryAdd(C, "AnimeGirl", "Cloth", false);
-		InventoryWear(C, "AnimeGirl", "Cloth");
 		InventoryAdd(C, "AnimeGirlNecklace", "Necklace", false);
-		InventoryWear(C, "AnimeGirlNecklace", "Necklace");
 		InventoryAdd(C, "AnimeGirlBoots", "Shoes", false);
-		InventoryWear(C, "AnimeGirlBoots", "Shoes");
 		InventoryAdd(C, "AnimeGirlTiara", "Hat", false);
-		InventoryWear(C, "AnimeGirlTiara", "Hat");
 		InventoryAdd(C, "AnimeGirlGloves", "Gloves", false);
-		InventoryWear(C, "AnimeGirlGloves", "Gloves");
 		InventoryAdd(C, "AnimeGirlWand", "ItemHandheld", false);
+		addedItems = true;
+		quickWear(C, "Panties1", "Panties", "#CCCCCC");
+		quickWear(C, "Bra1", "Bra", "#CCCCCC");
+		quickWear(C, "AnimeGirl", "Cloth");
+		quickWear(C, "AnimeGirlNecklace", "Necklace");
+		quickWear(C, "AnimeGirlBoots", "Shoes");
+		quickWear(C, "AnimeGirlTiara", "Hat");
+		quickWear(C, "AnimeGirlGloves", "Gloves");
 		if (C.CanInteract()) {
-			if (Math.random() >= 0.5) InventoryWear(C, "AnimeGirlWand", "ItemHandheld");
-			else InventoryRemove(C, "ItemHandheld");
+			if (Math.random() >= 0.5) {
+				quickWear(C, "AnimeGirlWand", "ItemHandheld");
+			} else {
+				InventoryRemove(C, "ItemHandheld", false);
+			}
 		}
 	}
 
 	// Rope bunny archetype
 	if (Archetype == "Bunny") {
-		CharacterNaked(C);
-		InventoryWear(C, CommonRandomItemFromList("", ["BunnySuit", "LatexBunnySuit"]), "Bra", CommonRandomItemFromList(null, ["Default", "#BBBBBB", "#222222", "#882222", "#BB8888", "#BB00BB"]));
-		InventoryWear(C, "BunnyCollarCuffs", "ClothAccessory");
-		InventoryWear(C, CommonRandomItemFromList("", ["BunnyEars1", "BunnyEars2"]), "HairAccessory1");
-		InventoryWear(C, "BunnyTailStrap", "TailStraps");
-		if (Math.random() > 0.5) InventoryWear(C, "Pantyhose1", "Socks");
-		InventoryWear(C, CommonRandomItemFromList("", ["AnkleStrapShoes", "StilettoHeels", "Shoes5"]), "Shoes");
+		CharacterNaked(C, false);
+		quickWear(C, CommonGetRandomItemFromList(["BunnySuit", "LatexBunnySuit"]), "Bra", CommonGetRandomItemFromList(["Default", "#BBBBBB", "#222222", "#882222", "#BB8888", "#BB00BB"]));
+		quickWear(C, "BunnyCollarCuffs", "ClothAccessory");
+		quickWear(C, CommonGetRandomItemFromList(["BunnyEars1", "BunnyEars2"]), "HairAccessory1");
+		quickWear(C, "BunnyTailStrap", "TailStraps");
+		if (Math.random() > 0.5) quickWear(C, "Pantyhose1", "Socks");
+		quickWear(C, CommonGetRandomItemFromList(["AnkleStrapShoes", "StilettoHeels", "Shoes5"]), "Shoes");
 	}
 
 	// Succubus archetype
 	if (Archetype == "Succubus") {
-		CharacterNaked(C);
-		let Color = CommonRandomItemFromList(null, /** @type {const} */(["Default", "#222222", "#BBBBBB", "#882222"]));
-		InventoryWear(C, CommonRandomItemFromList("", ["BondageDress1", "BondageDress2", "CorsetDress", "EveningGown", "Dress3"]), "Cloth", Color);
-		InventoryWear(C, CommonRandomItemFromList("", ["CatEye", "CatEye2", "LargeSolid", "SuperstarBlurred", "UndershadowedSolid"]), "EyeShadow", Color);
+		CharacterNaked(C, false);
+		let Color = CommonGetRandomItemFromList(/** @type {const} */(["Default", "#222222", "#BBBBBB", "#882222"]));
+		quickWear(C, CommonGetRandomItemFromList(["BondageDress1", "BondageDress2", "CorsetDress", "EveningGown", "Dress3"]), "Cloth", Color);
+		quickWear(C, CommonGetRandomItemFromList(["CatEye", "CatEye2", "LargeSolid", "SuperstarBlurred", "UndershadowedSolid"]), "EyeShadow", Color);
 		if (Math.random() > 0.5) {
-			InventoryWear(C, CommonRandomItemFromList("", ["GradientPantyhose", "Socks5", "Stockings1", "Stockings2"]), "Socks", Color);
-			InventoryWear(C, "SuccubusHorns", "HairAccessory1", Color);
+			quickWear(C, CommonGetRandomItemFromList(["GradientPantyhose", "Socks5", "Stockings1", "Stockings2"]), "Socks", Color);
+			quickWear(C, "SuccubusHorns", "HairAccessory1", Color);
 		}
-		InventoryWear(C, CommonRandomItemFromList("", ["SuccubusTailStrap", "SuccubusHeartTailStrap"]), "TailStraps", Color);
-		InventoryWear(C, CommonRandomItemFromList("", ["BatWings", "DevilWings", "SuccubusWings"]), "Wings", Color);
-		InventoryWear(C, CommonRandomItemFromList("", ["AnkleStrapShoes", "StilettoHeels", "Shoes5", "CustomHeels", "ThighBoots"]), "Shoes", Color);
+		quickWear(C, CommonGetRandomItemFromList(["SuccubusTailStrap", "SuccubusHeartTailStrap"]), "TailStraps", Color);
+		quickWear(C, CommonGetRandomItemFromList(["BatWings", "DevilWings", "SuccubusWings"]), "Wings", Color);
+		quickWear(C, CommonGetRandomItemFromList(["AnkleStrapShoes", "StilettoHeels", "Shoes5", "CustomHeels", "ThighBoots"]), "Shoes", Color);
 	}
 
+	CharacterRefresh(C);
+	if (C.IsPlayer() && addedItems) {
+		ServerPlayerInventorySync();
+	}
 }
 
 /**
