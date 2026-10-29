@@ -62,7 +62,7 @@ function PreferenceSubscreenGraphicsLoad() {
 			container: {
 				classList: ["preference-settings-dropdown"],
 				children: [
-					GraphicsCreateHint("preference-graphics-font-hint", TextGet("GraphicsFontDisclaimer"), "left"),
+					ElementText.CreateHint("preference-graphics-font-hint", TextGet("GraphicsFontDisclaimer"), "left"),
 				],
 			},
 		}
@@ -118,7 +118,7 @@ function PreferenceSubscreenGraphicsLoad() {
 			container: {
 				classList: ["preference-settings-dropdown"],
 				children: [
-					GraphicsCreateHint("preference-graphics-animation-quality-hint", TextGet("GeneralAnimationQualityHint"), "left"),
+					ElementText.CreateHint("preference-graphics-animation-quality-hint", TextGet("GeneralAnimationQualityHint"), "left"),
 				],
 			}
 		}
@@ -134,7 +134,7 @@ function PreferenceSubscreenGraphicsLoad() {
 				PreferenceGraphicsWebGLOptions.antialias = this.checked;
 			},
 			{ checked: PreferenceGraphicsWebGLOptions.antialias },
-			{ container: { children: [GraphicsCreateHint("preference-graphics-antialias-hint", TextGet("GraphicsSupportHint"), "left")], classList: ["preference-settings-checkbox"] } }
+			{ container: { children: [ElementText.CreateHint("preference-graphics-antialias-hint", TextGet("GraphicsSupportHint"), "left")], classList: ["preference-settings-checkbox"] } }
 		);
 
 		const powerModeOptions = PreferenceGraphicsPowerModes.map((m) => ({
@@ -151,7 +151,7 @@ function PreferenceSubscreenGraphicsLoad() {
 				const next = /** @type {WebGLPowerPreference} */ (this.value);
 				if (PreferenceGraphicsPowerModes.indexOf(next) < 0) return;
 				PreferenceGraphicsWebGLOptions.powerPreference = next;
-			}, null, { container: { classList: ["preference-settings-dropdown"], children: [GraphicsCreateHint("preference-graphics-power-mode-hint", TextGet("GraphicsSupportHint"), "left")] } }
+			}, null, { container: { classList: ["preference-settings-dropdown"], children: [ElementText.CreateHint("preference-graphics-power-mode-hint", TextGet("GraphicsSupportHint"), "left")] } }
 		);
 		webglBlock.push(antialiasingCheckbox, powerModeDropdown);
 	} else {
@@ -228,7 +228,7 @@ function PreferenceSubscreenGraphicsLoad() {
 			Player.GraphicsSettings.AllowBlur = this.checked;
 		},
 		{ checked: Player.GraphicsSettings.AllowBlur },
-		{ container: { children: [GraphicsCreateHint("preference-graphics-allow-blur-hint", TextGet("AllowBlurHint"), "left")], classList: ["preference-settings-checkbox"] } }
+		{ container: { children: [ElementText.CreateHint("preference-graphics-allow-blur-hint", TextGet("AllowBlurHint"), "left")], classList: ["preference-settings-checkbox"] } }
 	);
 
 	const maxFpsOptions = PreferenceGraphicsFrameLimit.map((n) => ({
@@ -300,7 +300,7 @@ function PreferenceSubscreenGraphicsLoad() {
 			container: {
 				classList: ["preference-settings-dropdown"],
 				children: [
-					GraphicsCreateHint("preference-graphics-show-fullscreen-button-hint", TextGet("ShowFullscreenButtonHint"), "left"),
+					ElementText.CreateHint("preference-graphics-show-fullscreen-button-hint", TextGet("ShowFullscreenButtonHint"), "left"),
 				],
 			},
 		}
@@ -374,23 +374,4 @@ function PreferenceSubscreenGraphicsUnload() {
 		GLDrawSetOptions(PreferenceGraphicsWebGLOptions);
 		GLDrawResetCanvas();
 	}
-}
-
-/**
- * Creates a hint button with a tooltip
- * @param {string | null} id
- * @param {string} tooltip
- * @param {"left" | "right" | "top" | "bottom"} tooltipPosition
- * @returns {HTMLButtonElement}
- */
-function GraphicsCreateHint(id, tooltip, tooltipPosition) {
-	return ElementButton.Create(id, null, {
-		image: "Icons/Question.png",
-		noStyling: true,
-		tooltipPosition: tooltipPosition,
-		tooltip: tooltip,
-		tooltipRole: "description",
-	}, {
-		button: { classList: ["hint-button"] }
-	});
 }
