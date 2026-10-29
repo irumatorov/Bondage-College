@@ -21894,6 +21894,59 @@ var AssetFemale3DCGExtended = {
 				Chat: "BodyMarkingsWombTattoosSet",
 			},
 		}, //WombTattoos
+		FortuneChastityBelt: {
+			Archetype: ExtendedArchetype.MODULAR,
+			ChangeWhenLocked: false,
+			ChatTags: [
+				CommonChatTags.SOURCE_CHAR,
+				CommonChatTags.DEST_CHAR,
+				CommonChatTags.ASSET_NAME,
+			],
+			BaselineProperty: {
+				OrgasmCount: 0,
+				RuinedOrgasmCount: 0,
+			},
+			Modules: [
+				{
+					Name: "Shield",
+					Key: "s",
+					DrawImages: false,
+					Options: [
+						{},
+						{
+							Prerequisite: ["CanCoverVulva"],
+							Property: {
+								Effect: [E.Chaste],
+								Block: ["ItemVulva", "ItemVulvaPiercings"],
+							},
+						},
+						{
+							Property: {
+								Effect: [E.ButtChaste],
+								Block: ["ItemButt"],
+							},
+						},
+						{
+							Prerequisite: ["CanCoverVulva"],
+							Property: {
+								Effect: [E.Chaste, E.ButtChaste],
+								Block: ["ItemVulva", "ItemVulvaPiercings", "ItemButt"],
+							},
+						},
+					],
+				},
+				{
+					Name: "OrgasmPrevention",
+					Key: "o",
+					DrawImages: false,
+					Options: [
+						{},
+						{ Property: { Effect: ["DenialMode"] } },
+						{ Property: { Effect: ["DenialMode", "RuinOrgasms"] } },
+					],
+				},
+			],
+		}, // FortuneChastityBelt
 	}, // ItemPelvis
 	ItemEars: {
 		FuturisticEarphones: {
