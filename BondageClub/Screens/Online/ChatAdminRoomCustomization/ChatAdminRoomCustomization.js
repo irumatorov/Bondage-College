@@ -4,6 +4,8 @@ var ChatAdminRoomCustomizationBackground = "Sheet";
 var ChatAdminRoomCustomizationCurrent = null;
 /** @type {null | HTMLAudioElement} */
 var ChatAdminRoomCustomizationAudio = null;
+/** @type {AudioYouTubeTrack} Previews the music when it's a YouTube link */
+var ChatAdminRoomCustomizationYouTube = AudioYouTubeCreateTrack();
 const ChatAdminRoomCustomizationImageFormats = [".jpg", ".jpeg", ".png", ".webp"];
 var ChatAdminRoomCustomizationMusicLibrary = [
 	{
@@ -591,7 +593,7 @@ function ChatAdminRoomCustomizationSyncPlayButton() {
 	if (!button) return;
 
 	const audio = ChatAdminRoomCustomizationAudio;
-	const playing = !!audio && !audio.paused && !audio.ended;
+	const playing = ChatAdminRoomCustomizationYouTube.playing || (!!audio && !audio.paused && !audio.ended);
 	button.disabled = !playing && !ChatAdminRoomCustomizationCurrent?.MusicURL;
 	button.setAttribute("aria-pressed", String(playing));
 	const label = TextGet(playing ? "MusicPause" : "MusicPlay");
@@ -605,6 +607,7 @@ function ChatAdminRoomCustomizationSyncPlayButton() {
  */
 function ChatAdminRoomCustomizationStopMusic() {
 	ChatAdminRoomCustomizationAudio?.pause();
+	AudioYouTubeStop(ChatAdminRoomCustomizationYouTube);
 	ChatAdminRoomCustomizationSyncPlayButton();
 }
 
@@ -627,10 +630,20 @@ function ChatAdminRoomCustomizationPlayPreview(player, url) {
 function ChatAdminRoomCustomizationToggleMusic() {
 	const url = ChatAdminRoomCustomizationCurrent?.MusicURL;
 	const audio = ChatAdminRoomCustomizationAudio;
-	if (!url || (audio && !audio.paused && audio.dataset.source === url)) {
+	const youTube = ChatAdminRoomCustomizationYouTube;
+	const videoId = url ? AudioYouTubeVideoId(url) : null;
+	if (!url || (audio && !audio.paused && audio.dataset.source === url) || (youTube.playing && youTube.videoId === videoId)) {
 		ChatAdminRoomCustomizationStopMusic();
 		return;
 	}
+
+	if (videoId) {
+		audio?.pause();
+		CommonPromiseCatch(AudioYouTubePlay(youTube, videoId, undefined, Player.AudioSettings.MusicVolume));
+		ChatAdminRoomCustomizationSyncPlayButton();
+		return;
+	}
+	AudioYouTubeStop(youTube);
 
 	const player = audio ?? (ChatAdminRoomCustomizationAudio = new Audio());
 	if (!audio) {
@@ -654,6 +667,11 @@ function ChatAdminRoomCustomizationToggleMusic() {
 function ChatAdminRoomCustomizationUpdateMusicPreview() {
 	const url = ChatAdminRoomCustomizationCurrent?.MusicURL;
 	const audio = ChatAdminRoomCustomizationAudio;
+	const youTube = ChatAdminRoomCustomizationYouTube;
+	if (youTube.playing && youTube.videoId !== (url ? AudioYouTubeVideoId(url) : null)) {
+		ChatAdminRoomCustomizationStopMusic();
+		return;
+	}
 	const playing = !!audio && !audio.paused && !audio.ended;
 	if (audio && playing && audio.dataset.source !== url) {
 		if (!ChatAdminRoomCustomizationCurrent?.MusicURL) {

@@ -2032,7 +2032,7 @@ var ServerChatRoomDataValidationRecord = {
 				musicURL = musicURL.trim();
 				if (musicURL === "")
 					return undefined;
-				if (!CommonURLHasExtension(musicURL, AudioSupportedMusicFormats))
+				if (!CommonURLHasExtension(musicURL, AudioSupportedMusicFormats) && !AudioYouTubeVideoId(musicURL))
 					return undefined;
 				return musicURL;
 			},

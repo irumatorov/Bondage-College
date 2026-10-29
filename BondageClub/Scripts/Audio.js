@@ -7,6 +7,15 @@ var AudioBackgroundMusic = new Audio();
 
 const AudioSupportedMusicFormats = [".mp3", ".mp4"];
 
+/** @type {AudioYouTubeTrack} Plays the background music when it's a YouTube link */
+var AudioBackgroundMusicYouTube = AudioYouTubeCreateTrack();
+
+/** @type {null | Promise<NonNullable<Window["YT"]>>} The YouTube IFrame player API, once loaded */
+var AudioYouTubeAPI = null;
+
+/** The YouTube player states that are acted on */
+const AudioYouTubeState = { Ended: 0, Playing: 1 };
+
 /** @type {AudioEffect[]} */
 var AudioList = [
 	{ Name: "AirDoorClosing", File: "AirDoorClosing" },
@@ -825,7 +834,9 @@ function AudioBackgroundMusicSetVolume(volume) {
 		AudioBackgroundMusicStop();
 		return;
 	}
-	CommonPromiseCatch(AudioBackgroundMusic.play());
+	const track = AudioBackgroundMusicYouTube;
+	if (track.videoId) CommonPromiseCatch(AudioYouTubePlay(track, track.videoId, track.start, volume));
+	else CommonPromiseCatch(AudioBackgroundMusic.play());
 }
 
 /**
@@ -833,6 +844,7 @@ function AudioBackgroundMusicSetVolume(volume) {
  */
 function AudioBackgroundMusicStop() {
 	AudioBackgroundMusic.pause();
+	AudioYouTubePause(AudioBackgroundMusicYouTube);
 }
 
 /**
@@ -850,14 +862,28 @@ function AudioBackgroundMusicPlay(Music, Location = undefined) {
 		return;
 	}
 
+	// A YouTube link plays the video's sound instead of the file
+	const videoId = AudioYouTubeVideoId(Music);
+	if (videoId) {
+		if (AudioBackgroundMusic.src) {
+			AudioBackgroundMusic.pause();
+			AudioBackgroundMusic.removeAttribute("src");
+			AudioBackgroundMusic.load();
+		}
+		const start = Location === undefined ? undefined : CommonTime() - Location * 1000;
+		CommonPromiseCatch(AudioYouTubePlay(AudioBackgroundMusicYouTube, videoId, start, Player.AudioSettings.MusicVolume));
+		return;
+	}
+	AudioYouTubeStop(AudioBackgroundMusicYouTube);
+
 	// Only allows .mp3 and .mp4 files for now
 	if (!CommonURLHasExtension(Music, AudioSupportedMusicFormats)) {
 		AudioBackgroundMusicStop();
 		return;
 	}
 
-	// We're already playing that
-	const isNew = AudioBackgroundMusic.src !== Music;
+	// We're already playing that; the browser keeps the link encoded (a space becomes %20), so it's compared that way
+	const isNew = AudioBackgroundMusic.src !== new URL(Music, document.baseURI).href;
 	if (!isNew && !AudioBackgroundMusic.paused) return;
 
 	if (isNew) {
@@ -871,8 +897,8 @@ function AudioBackgroundMusicPlay(Music, Location = undefined) {
 
 		/** @param {typeof AudioBackgroundMusic} audio  */
 		function syncPlayback(audio) {
-			if (Location !== undefined && isNaN(audio.duration)) {
-				console.error(`audio source ${Music} has no duration; cannot sync playback`);
+			if (audio._playState?.location !== undefined && isNaN(audio.duration)) {
+				console.error(`audio source ${audio.src} has no duration; cannot sync playback`);
 				return false;
 			}
 
@@ -899,4 +925,169 @@ function AudioBackgroundMusicPlay(Music, Location = undefined) {
 	} else {
 		AudioBackgroundMusic.pause();
 	}
+}
+
+/**
+ * Gets the ID of the YouTube video a link points to
+ * @param {string} url - A youtube.com/watch, youtu.be, shorts, live or embed link
+ * @returns {null | string} - The video ID, or `null` if it's not a YouTube video link
+ */
+function AudioYouTubeVideoId(url) {
+	let parsed;
+	try {
+		parsed = new URL(url.trim());
+	} catch (_err) {
+		return null;
+	}
+	if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return null;
+	const host = parsed.hostname.replace(/^(www|m|music)\./, "");
+	let videoId = null;
+	if (host === "youtu.be") {
+		videoId = parsed.pathname.slice(1);
+	} else if (host === "youtube.com" || host === "youtube-nocookie.com") {
+		if (parsed.pathname === "/watch") videoId = parsed.searchParams.get("v");
+		else videoId = /^\/(?:shorts|live|embed)\/([^/]+)/.exec(parsed.pathname)?.[1] ?? null;
+	}
+	return videoId && /^[\w-]{11}$/.test(videoId) ? videoId : null;
+}
+
+/**
+ * Creates a YouTube track; its player is only made the first time it plays
+ * @returns {AudioYouTubeTrack}
+ */
+function AudioYouTubeCreateTrack() {
+	return { player: null, videoId: null, loaded: false, start: undefined, playing: false, synced: false };
+}
+
+/**
+ * Loads the YouTube IFrame player API, once
+ * @returns {Promise<NonNullable<Window["YT"]>>}
+ */
+function AudioYouTubeLoadAPI() {
+	if (!AudioYouTubeAPI) {
+		AudioYouTubeAPI = new Promise((resolve, reject) => {
+			window.onYouTubeIframeAPIReady = () => {
+				if (window.YT) resolve(window.YT);
+				else reject(new Error("The YouTube player failed to load"));
+			};
+			const script = document.createElement("script");
+			script.src = "https://www.youtube.com/iframe_api";
+			script.addEventListener("error", () => {
+				AudioYouTubeAPI = null;
+				reject(new Error("The YouTube player failed to load"));
+			});
+			document.head.append(script);
+		});
+	}
+	return AudioYouTubeAPI;
+}
+
+/**
+ * Gets the player of a YouTube track, making it if needed. The player is hidden: only the sound is used.
+ * @param {AudioYouTubeTrack} track
+ * @returns {Promise<AudioYouTubePlayer>}
+ */
+function AudioYouTubeGetPlayer(track) {
+	if (!track.player) {
+		track.player = AudioYouTubeLoadAPI().then((YT) => new Promise((resolve) => {
+			const element = ElementCreate({ tag: "div" });
+			ElementCreate({
+				tag: "div",
+				attributes: { "aria-hidden": "true" },
+				style: { position: "fixed", left: "0", top: "0", width: "1px", height: "1px", overflow: "hidden", opacity: "0", "pointer-events": "none" },
+				children: [element],
+				parent: document.body,
+			});
+			new YT.Player(element, {
+				width: 1,
+				height: 1,
+				playerVars: { controls: 0, disablekb: 1, playsinline: 1 },
+				events: {
+					onReady: (event) => resolve(event.target),
+					onStateChange: (event) => AudioYouTubeStateChange(track, event.target, event.data),
+					onError: (event) => console.warn(`YouTube music ${track.videoId} can't be played, error ${event.data}`),
+				},
+			});
+		}));
+		track.player.catch(() => track.player = null);
+	}
+	return track.player;
+}
+
+/**
+ * Keeps a YouTube track in sync with the room when it starts playing, and loops it when it ends
+ * @param {AudioYouTubeTrack} track
+ * @param {AudioYouTubePlayer} player
+ * @param {number} state
+ * @returns {void}
+ */
+function AudioYouTubeStateChange(track, player, state) {
+	if (state === AudioYouTubeState.Ended) {
+		player.seekTo(0, true);
+		player.playVideo();
+		return;
+	}
+	if (state !== AudioYouTubeState.Playing) return;
+	if (!track.playing) {
+		player.pauseVideo();
+		return;
+	}
+	if (track.synced) return;
+	track.synced = true;
+	const duration = player.getDuration();
+	if (track.start !== undefined && duration > 0) player.seekTo(((CommonTime() - track.start) / 1000) % duration, true);
+}
+
+/**
+ * Plays a YouTube video's sound on a track, looping like the background music does
+ * @param {AudioYouTubeTrack} track
+ * @param {string} videoId
+ * @param {number | undefined} start - When the music started for the room ({@link CommonTime}), or `undefined` to play on from where it is
+ * @param {number} volume - From 0 to 1
+ * @returns {Promise<void>}
+ */
+async function AudioYouTubePlay(track, videoId, start, volume) {
+	if (track.videoId !== videoId) {
+		track.videoId = videoId;
+		track.loaded = false;
+	}
+	track.start = start;
+	track.playing = volume > 0;
+	const player = await AudioYouTubeGetPlayer(track);
+	if (track.videoId !== videoId) return;
+
+	player.setVolume(Math.round(CommonClamp(volume, 0, 1) * 100));
+	if (!track.playing) {
+		player.pauseVideo();
+		return;
+	}
+	if (!track.loaded) {
+		track.loaded = true;
+		track.synced = false;
+		player.loadVideoById(videoId);
+	} else if (player.getPlayerState() !== AudioYouTubeState.Playing) {
+		track.synced = false;
+		player.playVideo();
+	}
+}
+
+/**
+ * Pauses a YouTube track
+ * @param {AudioYouTubeTrack} track
+ * @returns {void}
+ */
+function AudioYouTubePause(track) {
+	track.playing = false;
+	track.player?.then((player) => player.pauseVideo(), () => {});
+}
+
+/**
+ * Stops a YouTube track and forgets its video
+ * @param {AudioYouTubeTrack} track
+ * @returns {void}
+ */
+function AudioYouTubeStop(track) {
+	AudioYouTubePause(track);
+	track.videoId = null;
+	track.loaded = false;
 }

@@ -4511,6 +4511,51 @@ interface AudioEffect {
 	File: string | string[];
 }
 
+/** The parts of the YouTube IFrame player API used to play a video's sound */
+interface AudioYouTubePlayer {
+	loadVideoById(videoId: string): void;
+	playVideo(): void;
+	pauseVideo(): void;
+	seekTo(seconds: number, allowSeekAhead: boolean): void;
+	setVolume(volume: number): void;
+	getPlayerState(): number;
+	getDuration(): number;
+}
+
+interface AudioYouTubePlayerOptions {
+	width: number;
+	height: number;
+	playerVars: Record<string, number>;
+	events: {
+		onReady: (event: { target: AudioYouTubePlayer }) => void;
+		onStateChange: (event: { target: AudioYouTubePlayer, data: number }) => void;
+		onError: (event: { data: number }) => void;
+	};
+}
+
+/** A hidden YouTube player that plays the sound of a video, like music from an mp3 file */
+interface AudioYouTubeTrack {
+	/** The player, created the first time the track plays */
+	player: null | Promise<AudioYouTubePlayer>;
+	/** The video to play */
+	videoId: null | string;
+	/** Whether the video is loaded in the player */
+	loaded: boolean;
+	/** When the music started for the room ({@link CommonTime}), to play in sync with it; `undefined` plays on from where it is */
+	start: undefined | number;
+	/** Whether the track should be playing */
+	playing: boolean;
+	/** Whether the track was synced since it last started playing */
+	synced: boolean;
+}
+
+interface Window {
+	/** The YouTube IFrame player API, once loaded */
+	YT?: { Player: new (element: HTMLElement, options: AudioYouTubePlayerOptions) => AudioYouTubePlayer };
+	/** Called by the YouTube IFrame player API once it's loaded */
+	onYouTubeIframeAPIReady?: () => void;
+}
+
 /**
  * Sound effect detector for chat messages.
  */
