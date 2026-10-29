@@ -18,6 +18,16 @@ var CommonTouchList = null;
 /** @type {BrowserCache} */
 var BrowserStorageCache;
 
+// One wheel step for every 10 pixels of accumulated pinch movement.
+const PINCH_STEP_DISTANCE = 10;
+
+/** @type {Map<number, { x: number, y: number }>} */
+const GamePointers = new Map();
+
+/** @type {number | null} */
+let GamePinchDistance = null;
+let GamePinchWheelAccumulator = 0;
+
 /**
  * Start BC after the webpage has fully loaded
  * @param {boolean} isNode Whether BC is run through the browser or via Node (_i.e._ the testing suite)
@@ -293,6 +303,24 @@ function GamePaste(event) {
  * @param {HTMLCanvasElement} canvas
  */
 function GamePointerDown(event, canvas) {
+	if (event.pointerType === "touch") {
+		GamePointers.set(event.pointerId, {
+			x: event.clientX,
+			y: event.clientY
+		});
+
+		if (GamePointers.size === 2) {
+			const [a, b] = GamePointers.values();
+
+			GamePinchDistance = Math.hypot(
+				a.x - b.x,
+				a.y - b.y
+			);
+
+			GamePinchWheelAccumulator = 0;
+		}
+	}
+
 	CommonMouseDown(event);
 	// Guarantees that a `pointdown` event is followed up with `pointerup`
 	canvas.setPointerCapture(event.pointerId);
@@ -307,6 +335,14 @@ function GamePointerUp(event, canvas) {
 	GamePointerMove(event, false);
 	CommonMouseUp(event);
 	canvas.releasePointerCapture(event.pointerId);
+	if (event.pointerType === "touch") {
+		GamePointers.delete(event.pointerId);
+
+		if (GamePointers.size < 2) {
+			GamePinchDistance = null;
+			GamePinchWheelAccumulator = 0;
+		}
+	}
 }
 
 /**
@@ -336,6 +372,43 @@ function GamePointerMove(event, forwardToScreens = true) {
 	if (forwardToScreens) {
 		CommonMouseMove(event);
 	}
+	if (event.pointerType === "touch") {
+		GamePointers.set(event.pointerId, {
+			x: event.clientX,
+			y: event.clientY
+		});
+
+		if (GamePointers.size !== 2 || GamePinchDistance === null) {
+			return;
+		}
+
+		const [a, b] = GamePointers.values();
+
+		const currentDistance = Math.hypot(
+			a.x - b.x,
+			a.y - b.y
+		);
+
+		const distanceChange = currentDistance - GamePinchDistance;
+
+		GamePinchWheelAccumulator += distanceChange;
+
+		while (Math.abs(GamePinchWheelAccumulator) >= PINCH_STEP_DISTANCE) {
+			const direction = GamePinchWheelAccumulator > 0 ? 1 : -1;
+
+			const wheelEvent = new WheelEvent("wheel", {
+				deltaY: direction,
+				deltaX: 0,
+				deltaMode: WheelEvent.DOM_DELTA_PIXEL
+			});
+
+			MainCanvas.canvas.dispatchEvent(wheelEvent);
+
+			GamePinchWheelAccumulator -= direction * PINCH_STEP_DISTANCE;
+		}
+
+		GamePinchDistance = currentDistance;
+	}
 }
 
 /**
@@ -356,6 +429,14 @@ function GamePointerCancel(event, canvas) {
 	MouseY = -1;
 	CommonTouchList = null;
 	canvas.releasePointerCapture(event.pointerId);
+	if (event.pointerType === "touch") {
+		GamePointers.delete(event.pointerId);
+
+		if (GamePointers.size < 2) {
+			GamePinchDistance = null;
+			GamePinchWheelAccumulator = 0;
+		}
+	}
 }
 
 /**
