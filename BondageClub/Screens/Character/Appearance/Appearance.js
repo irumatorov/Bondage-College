@@ -458,6 +458,17 @@ function CharacterAppearanceIsLayerVisible(C, layer, asset, typeRecord=null) {
 }
 
 /**
+ * Gets the layer as the item draws it, using the item's {@link ItemProperties.OverridePoseMapping} if it has one
+ * @param {Item} item - The item the layer belongs to
+ * @param {AssetLayer} layer - The layer
+ * @returns {AssetLayer} - The layer, or a copy of it with the item's pose mapping
+ */
+function CharacterAppearanceGetItemLayer(item, layer) {
+	const poseMapping = item.Property?.OverridePoseMapping;
+	return poseMapping ? { ...layer, PoseMapping: poseMapping } : layer;
+}
+
+/**
  * Builds a filtered and sorted set of appearance layers, each representing a drawable layer of a character's current appearance. Layers
  * that will not be drawn (because their asset is not visible or they do not permit the current asset type) are filtered out at this stage.
  * @param {Character} C - The character to build the layers for
@@ -473,6 +484,7 @@ function CharacterAppearanceSortLayers(C) {
 			// Check if we need to draw a different variation (from type property)
 			const typeRecord = item.Property && item.Property.TypeRecord;
 			const layersToDraw = asset.Layer
+				.map(layer => CharacterAppearanceGetItemLayer(item, layer))
 				.filter(layer => CharacterAppearanceIsLayerVisible(C, layer, asset, typeRecord) && !layer.TextureMask)
 				.map(layer => {
 					/** @type {Mutable<AssetLayer>} */
@@ -571,7 +583,9 @@ function CharacterAppearanceVisible(C, AssetName, GroupName, Recursive = true) {
 		return true;
 	}
 
-	if (C.Pose.some(p => assetToCheck && assetToCheck.Layer.every(l => l.PoseMapping[p] === PoseType.HIDE))) return false;
+	const wornItem = InventoryGet(C, GroupName);
+	const poseMapping = assetToCheck && wornItem?.Asset === assetToCheck ? wornItem.Property?.OverridePoseMapping : undefined;
+	if (C.Pose.some(p => assetToCheck && assetToCheck.Layer.every(l => (poseMapping ?? l.PoseMapping)[p] === PoseType.HIDE))) return false;
 
 	for (const item of C.DrawAppearance) {
 		if (CharacterAppearanceItemIsHidden(item.Asset.Name, item.Asset.Group.Name)) continue;

@@ -622,7 +622,7 @@ function CommonDrawComputeDrawingCoordinates(C, asset, layer, groupName, propert
 
 	// Offset Y to counteract height modifiers for fixed-position assets
 	let fixedYOffset = 0;
-	if (asset.FixedPosition || layer.FixedPosition) {
+	if (asset.FixedPosition || layer.FixedPosition || properties?.FixedPosition) {
 		if (C.IsInverted()) {
 			fixedYOffset =
 				-Y +

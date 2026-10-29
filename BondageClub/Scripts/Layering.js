@@ -602,7 +602,7 @@ var Layering = {
 		const item = this.Item;
 		const character = this.Character;
 		const layerName = layer.Name ?? "";
-		const isVisible = CharacterAppearanceIsLayerVisible(character, layer, layer.Asset, item.Property?.TypeRecord);
+		const isVisible = CharacterAppearanceIsLayerVisible(character, CharacterAppearanceGetItemLayer(item, layer), layer.Asset, item.Property?.TypeRecord);
 		return {
 			tag: "fieldset",
 			classList: ["layering-layer-fieldset"],
@@ -820,7 +820,7 @@ var Layering = {
 									return {
 										tag: /** @type {const} */("div"),
 										classList: ["layering-pair"],
-										attributes: { hidden: !isShowingHiddenLayers && !CharacterAppearanceIsLayerVisible(character, layer, layer.Asset, item.Property?.TypeRecord) },
+										attributes: { hidden: !isShowingHiddenLayers && !CharacterAppearanceIsLayerVisible(character, CharacterAppearanceGetItemLayer(item, layer), layer.Asset, item.Property?.TypeRecord) },
 										children: [
 											{
 												tag: /** @type {const} */("label"),

@@ -8956,6 +8956,8 @@ ItemNeckAsylumCollarPadded,Plus padded layer
 ItemNeckAsylumCollarSetNormal,SourceCharacter removes padded layer under the DestinationCharacter Asylum Collar.
 ItemNeckAsylumCollarSetPadded,SourceCharacter adds a padded layer under the DestinationCharacter Asylum Collar.
 ItemHandheldPlushie,Plushies
+ItemHandheldPlushieSelectMenu,Choose what to change:
+ItemHandheldPlushieModuleBase,Plushie
 ItemHandheldPlushieSelectBase,Select a plushie:
 ItemHandheldPlushieModuleDenOfSin,Den of Sin
 ItemHandheldPlushieSelectDenOfSin,The Den of Sin:
@@ -9322,6 +9324,14 @@ ItemHandheldPlushieOptionAybesSuite3,Domi
 ItemHandheldPlushieSetAybesSuite3,SourceCharacter places a cute Domi plushie in DestinationCharacter hands.
 ItemHandheldPlushieOptionAybesSuite4,Elaina
 ItemHandheldPlushieSetAybesSuite4,SourceCharacter places a cute Elaina plushie in DestinationCharacter hands.
+ItemHandheldPlushieModulePosition,Position
+ItemHandheldPlushieSelectPosition,Where the plushie is:
+ItemHandheldPlushieOptionPosition0,In hands
+ItemHandheldPlushieSetPosition0,SourceCharacter puts the plushie back in DestinationCharacter hands.
+ItemHandheldPlushieOptionPosition1,On head
+ItemHandheldPlushieSetPosition1,SourceCharacter sits the plushie on top of DestinationCharacter head.
+ItemHandheldPlushieOptionPosition2,On the floor
+ItemHandheldPlushieSetPosition2,SourceCharacter sets the plushie down at DestinationCharacter feet.
 ItemHandheldCigaretteSelect,Choose position of the cigarette:
 ItemHandheldCigaretteInMouth,In Mouth
 ItemHandheldCigaretteInHand,In Hand
