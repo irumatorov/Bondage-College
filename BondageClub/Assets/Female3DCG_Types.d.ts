@@ -1306,7 +1306,7 @@ interface ModularItemModule extends Omit<ModularItemModuleConfig, "DrawData"> {
 	Options: ModularItemOption[];
 	/** A boolean indicating whether or not images should be drawn within this particular module. */
 	DrawImages: boolean;
-	drawData: ExtendedItemDrawData<ElementMetaData.Typed>;
+	drawData: ExtendedItemDrawData<ElementMetaData.Modular>;
 }
 
 /** Partially parsed extended item option subtype for modular items */
