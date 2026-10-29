@@ -53110,6 +53110,22 @@ var AssetFemale3DCG = [
 						Name: "AlenaBrenhines",
 						AllowTypes: { MansionValentine: 9 },
 					},
+					{
+						Name: "Aybes_the_chasted",
+						AllowTypes: { AybesSuite: 1 },
+					},
+					{
+						Name: "Ash_the_cute",
+						AllowTypes: { AybesSuite: 2 },
+					},
+					{
+						Name: "Domi_the_gremlin",
+						AllowTypes: { AybesSuite: 3 },
+					},
+					{
+						Name: "puppygirl_Elaina",
+						AllowTypes: { AybesSuite: 4 },
+					},
 				],
 			},
 			{
