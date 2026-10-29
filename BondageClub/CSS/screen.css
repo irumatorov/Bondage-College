@@ -113,6 +113,10 @@
 	grid-area: unset;
 }
 
+.screen-hgroup-in-header .screen-header *:not([role="menubar"]) {
+	direction: ltr;
+}
+
 .screen-hgroup-in-header .screen-header {
 	direction: rtl;
 	display: grid;
