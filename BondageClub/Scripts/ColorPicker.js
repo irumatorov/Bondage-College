@@ -143,6 +143,32 @@ function ColorPickerHSVToCSS(HSV) {
 }
 
 /**
+ * Translates a CSS hex color into the uppercase `#RRGGBB` and `[0, 1]` opacity used by the color picker.
+ * `#RGB` is expanded. `#RRGGBBAA` keeps its alpha byte; shorter hex is fully opaque.
+ * @param {string | undefined} color
+ * @returns {null | { color: HexColor, opacity: number }} `null` when `color` is not a hex color
+ */
+function ColorPickerCSSToColor(color) {
+	const parsed = ColorPicker._setColorParseColor({ colorString: color ?? "" }, null, null);
+	if (!parsed.hsv || !CommonIsColor(parsed.output)) return null;
+	const alpha = ColorPicker._setColorParseOpacity({ colorString: color ?? "" });
+	return { color: /** @type {HexColor} */(parsed.output), opacity: (alpha ?? 255) / 255 };
+}
+
+/**
+ * Translates a color-picker color and `[0, 1]` opacity back into a CSS hex color.
+ * Fully opaque colors omit the alpha byte.
+ * @param {string} color
+ * @param {number} opacity
+ * @returns {null | HexColor} `null` when `color` is not a hex color or `opacity` is not a finite number
+ */
+function ColorPickerColorToCSS(color, opacity) {
+	if (!CommonIsFinite(opacity, 0, 1)) return null;
+	const parsed = ColorPicker._setColorParseColor({ colorString: color }, null, Math.round(opacity * 255));
+	return parsed.hsv && CommonIsColor(parsed.output, { allowAlpha: true }) ? /** @type {HexColor} */(parsed.output) : null;
+}
+
+/**
  * Returns the array of default colors for the list of favorite colors.
  * @returns {HSVColor[]} - Array of default colors
  */
@@ -930,8 +956,8 @@ var ColorPicker = {
 	 * {@link ColorPicker.setColor} helper for parsing color values (be it stringified or as HSV)
 	 * @private
 	 * @param {Pick<ColorPickerColorInput, "colorString" | "hsv">} value
-	 * @param {HTMLInputElement} outputInput
-	 * @param {null | number} opacity
+	 * @param {null | HTMLInputElement} outputInput - Current text input, used when `value` carries neither a string nor an HSV color
+	 * @param {null | number} opacity - Opacity byte in `[0, 255]`. `255` and `null` leave the color without an alpha byte
 	 * @returns {{ hsv: null | HSVColor, output: string }}
 	 */
 	_setColorParseColor(value, outputInput, opacity) {
@@ -955,12 +981,13 @@ var ColorPicker = {
 			colorIsHex = true;
 			output = ColorPickerHSVToCSS(hsv);
 		} else {
-			if (CommonIsColor(outputInput.value, { allowAlpha: true })) {
+			const current = outputInput?.value ?? "";
+			if (CommonIsColor(current, { allowAlpha: true })) {
 				colorIsHex = true;
-				output = CommonColorTrimAlpha(outputInput.value);
+				output = CommonColorTrimAlpha(current);
 			} else {
 				colorIsHex = false;
-				output = outputInput.value;
+				output = current;
 			}
 		}
 
@@ -974,13 +1001,13 @@ var ColorPicker = {
 	 * {@link ColorPicker.setColor} helper for parsing opacity values
 	 * @private
 	 * @param {Pick<ColorPickerColorInput, "opacity" | "colorString">} value
-	 * @param {HTMLInputElement} opacityInput
+	 * @param {null | HTMLInputElement} [opacityInput] - Slider whose min, max, and disabled state clamp the result. Omitted, the byte is clamped to `[0, 255]`
 	 * @param {null | { overrideEditOpacity?: boolean }} options
 	 * @returns {null | number}
 	 */
-	_setColorParseOpacity(value, opacityInput, options=null) {
+	_setColorParseOpacity(value, opacityInput=null, options=null) {
 		options ??= {};
-		if (opacityInput.disabled && !options.overrideEditOpacity) {
+		if (opacityInput?.disabled && !options.overrideEditOpacity) {
 			return null;
 		}
 
@@ -996,8 +1023,8 @@ var ColorPicker = {
 		}
 
 		if (opacity != null) {
-			const opacityMin = CommonParseInt(opacityInput.min) ?? 0;
-			const opacityMax = CommonParseInt(opacityInput.max) ?? 255;
+			const opacityMin = CommonParseInt(opacityInput?.min ?? "") ?? 0;
+			const opacityMax = CommonParseInt(opacityInput?.max ?? "") ?? 255;
 			return CommonClamp(opacity, opacityMin, opacityMax);
 		} else {
 			return null;

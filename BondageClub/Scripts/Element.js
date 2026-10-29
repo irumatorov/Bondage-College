@@ -2785,6 +2785,25 @@ var ElementText = {
 		});
 		return element;
 	},
+
+	/**
+	 * Creates a hint button with a tooltip
+	 * @param {string | null} id
+	 * @param {string} tooltip
+	 * @param {"left" | "right" | "top" | "bottom"} [tooltipPosition]
+	 * @returns {HTMLButtonElement}
+	 */
+	CreateHint: function CreateHint(id, tooltip, tooltipPosition) {
+		return ElementButton.Create(id, null, {
+			image: "Icons/Question.png",
+			noStyling: true,
+			tooltipPosition,
+			tooltip,
+			tooltipRole: "description",
+		}, {
+			button: { classList: ["hint-button"] },
+		});
+	},
 };
 
 /**

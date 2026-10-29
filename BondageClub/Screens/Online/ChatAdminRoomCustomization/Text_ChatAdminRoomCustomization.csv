@@ -14,7 +14,8 @@ BackgroundMusicNote,Put the address of the background mp3 music file to use.
 BackgroundMusicSync,Synchronize music track across the room
 ResetButtonTooltip,Reset
 OpenLibraryButtonTooltip,Library
-PreviewButtonTooltip,Preview
+MusicPlay,Play
+MusicPause,Pause
 ClearButtonTooltip,Clear All
 SaveButtonTooltip,Save
 CancelButtonTooltip,Cancel
@@ -31,3 +32,8 @@ MusicLibraryElectroDance2023,Electro Dance 2023
 MusicLibraryElectroRoyKnox,Electro by Roy Knox
 MusicLibraryDanceElectroPop,Dance Electro Pop
 MusicLibraryDarkTechno,Dark Techno
+SectionBackground,Background
+SectionMusic,Music
+FillModeShort,Fill mode
+PreviewEmpty,No background image
+MusicSource,Source
