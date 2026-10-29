@@ -89,7 +89,19 @@ const _Game = {
 	...CONSTANTS,
 	window: window,
 	document: document,
-	console: console,
+	console: Object.assign(
+		console,
+		{
+			// NOTE: Use `jest.spyOn(console, foo).mockImplementation(() => undefined)` for checking console output during the tests
+			// Make sure to only do this _after_ calling `Game.load()`
+			trace: () => undefined,
+			debug: () => undefined,
+			info: () => undefined,
+			log: () => undefined,
+			warn: () => undefined,
+			error: () => undefined,
+		},
+	),
 	XMLHttpRequest: XMLHttpRequest,
 	Image: Image,
 	Element,

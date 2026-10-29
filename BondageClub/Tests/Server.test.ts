@@ -168,17 +168,8 @@ describe("ServerBundledItemFromAppearanceItem", () => {
 			Property: { TypeRecord: initialItemType },
 		};
 
-		let bundle: ItemBundle;
-		let itemRestored: null | Item;
-		const consoleError = Game.console.error;
-		try {
-			// Silence `console.error()` calls due to expected invalid `TypeRecord` values
-			Game.console.error = () => undefined;
-			bundle = Game.ServerBundledItemFromAppearanceItem(item);
-			itemRestored = Game.ServerBundledItemToAppearanceItem("Female3DCG", bundle);
-		} finally {
-			Game.console.error = consoleError;
-		}
+		const bundle: ItemBundle = Game.ServerBundledItemFromAppearanceItem(item);
+		const itemRestored: null | Item = Game.ServerBundledItemToAppearanceItem("Female3DCG", bundle);
 
 		expect(bundle, "item to bundle conversion").toEqual({
 			Group: "ItemPelvis",

@@ -57,9 +57,9 @@ beforeEach(() => {
 	createImageBitmap = jest.fn(async () => makeBitmap());
 	Game.createImageBitmap = createImageBitmap;
 
-	jest.spyOn(console, "log").mockImplementation(() => {});
-	jest.spyOn(console, "warn").mockImplementation(() => {});
-	jest.spyOn(console, "error").mockImplementation(() => {});
+	jest.spyOn(console, "log").mockImplementation(() => undefined);
+	jest.spyOn(console, "warn").mockImplementation(() => undefined);
+	jest.spyOn(console, "error").mockImplementation(() => undefined);
 
 	cache = makeCache();
 });
