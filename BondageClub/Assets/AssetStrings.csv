@@ -9264,6 +9264,18 @@ ItemHandheldPlushieOptionMansionValentine8,Kaede Valentine
 ItemHandheldPlushieSetMansionValentine8,SourceCharacter places a cute Kaede Valentine plushie in DestinationCharacter hands.
 ItemHandheldPlushieOptionMansionValentine9,Alena Brenhines
 ItemHandheldPlushieSetMansionValentine9,SourceCharacter places a cute Alena Brenhines plushie in DestinationCharacter hands.
+ItemHandheldPlushieModuleAybesSuite,Aybes Suite
+ItemHandheldPlushieSelectAybesSuite,Aybes Suite
+ItemHandheldPlushieOptionAybesSuite0,None
+ItemHandheldPlushieSetAybesSuite0,SourceCharacter removes a plushie from DestinationCharacter hands.
+ItemHandheldPlushieOptionAybesSuite1,Aybes
+ItemHandheldPlushieSetAybesSuite1,SourceCharacter places a cute Aybes plushie in DestinationCharacter hands.
+ItemHandheldPlushieOptionAybesSuite2,Ash The cute
+ItemHandheldPlushieSetAybesSuite2,SourceCharacter places a cute Ash plushie in DestinationCharacter hands.
+ItemHandheldPlushieOptionAybesSuite3,Domi
+ItemHandheldPlushieSetAybesSuite3,SourceCharacter places a cute Domi plushie in DestinationCharacter hands.
+ItemHandheldPlushieOptionAybesSuite4,Elaina
+ItemHandheldPlushieSetAybesSuite4,SourceCharacter places a cute Elaina plushie in DestinationCharacter hands.
 ItemHandheldCigaretteSelect,Choose position of the cigarette:
 ItemHandheldCigaretteInMouth,In Mouth
 ItemHandheldCigaretteInHand,In Hand
