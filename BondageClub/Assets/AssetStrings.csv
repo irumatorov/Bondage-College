@@ -3230,6 +3230,27 @@ ItemDevicesLegSpreadDisplayStandSetv0,SourceCharacter removes the genital prop o
 ItemDevicesLegSpreadDisplayStandSetv1,SourceCharacter adds a genital prop on DestinationCharacter stand.
 ItemDevicesLegSpreadDisplayStandSetd0,SourceCharacter resets the height on DestinationCharacter stand.
 ItemDevicesLegSpreadDisplayStandSetd1,SourceCharacter changes the height on DestinationCharacter stand.
+ItemDevicesShackledOneBarPrisonSelectBase,Configure the device
+ItemDevicesShackledOneBarPrisonSelectLegPose,Set the leg pose
+ItemDevicesShackledOneBarPrisonSelectPistonMovement,Set the dildo insertion speed or position
+ItemDevicesShackledOneBarPrisonModuleLegPose,Leg Pose
+ItemDevicesShackledOneBarPrisonModulePistonMovement,Dildo Speed
+ItemDevicesShackledOneBarPrisonOptiono0,Opened
+ItemDevicesShackledOneBarPrisonOptiono1,Closed
+ItemDevicesShackledOneBarPrisonOptiono2,Spread
+ItemDevicesShackledOneBarPrisonOptiond0,Stop Lowest
+ItemDevicesShackledOneBarPrisonOptiond1,Stop Highest
+ItemDevicesShackledOneBarPrisonOptiond2,Slow
+ItemDevicesShackledOneBarPrisonOptiond3,Medium
+ItemDevicesShackledOneBarPrisonOptiond4,Fast
+ItemDevicesShackledOneBarPrisonSeto0,SourceCharacter opens the legs on DestinationCharacter one bar prison.
+ItemDevicesShackledOneBarPrisonSeto1,SourceCharacter closes the legs on DestinationCharacter one bar prison.
+ItemDevicesShackledOneBarPrisonSeto2,SourceCharacter spreads the legs on DestinationCharacter one bar prison.
+ItemDevicesShackledOneBarPrisonSetd0,SourceCharacter stops the dildo at the lowest position on DestinationCharacter one bar prison.
+ItemDevicesShackledOneBarPrisonSetd1,SourceCharacter stops the dildo at the highest position on DestinationCharacter one bar prison.
+ItemDevicesShackledOneBarPrisonSetd2,SourceCharacter sets the dildo insertion to slow speed on DestinationCharacter one bar prison.
+ItemDevicesShackledOneBarPrisonSetd3,SourceCharacter sets the dildo insertion to medium speed on DestinationCharacter one bar prison.
+ItemDevicesShackledOneBarPrisonSetd4,SourceCharacter sets the dildo insertion to fast speed on DestinationCharacter one bar prison.
 ItemDevicesTrashCanSelect,Configure the trash can
 ItemDevicesTrashCanCloseLid,Close Lid
 ItemDevicesTrashCanOpenFlap,Open Flap
