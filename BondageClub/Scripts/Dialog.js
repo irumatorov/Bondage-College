@@ -573,7 +573,8 @@ function DialogPrerequisite(dialog) {
 			return false;
 		}
 
-		const result = fn();
+		// @ts-expect-error We do want to pass the proper target so `this` doesn't vanish into `undefined`
+		const result = fn.apply(obj);
 		return neg ? !result : !!result;
 	}
 
