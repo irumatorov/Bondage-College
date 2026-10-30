@@ -1001,7 +1001,7 @@ async function AssetLoadDescription(Family) {
 	// Finds the full path of the CSV file to use cache
 	const path = "Assets/" + Family + ".csv";
 	if (!CommonCSVCache[path]) {
-		const response = await CommonFetch(path);
+		const response = await CommonFetch(path, { headers: [["accept", "text/csv"]] });
 		if (response.status !== 200) {
 			console.error(`Failed to load asset descriptions`);
 		} else {
