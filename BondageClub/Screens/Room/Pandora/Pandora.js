@@ -1138,27 +1138,27 @@ function PandoraPlayerUngag() {
  * @returns {void} - Nothing
  */
 function PandoraPunishmentSentence(Minutes) {
-	if (!InfiltrationMissionState) return;
 	const minutes = typeof Minutes === "string" ? CommonParseInt(Minutes) : CommonIsNonNegativeInteger(Minutes) ? Minutes : null;
 	if (minutes === null) return;
 	Player.Infiltration.Punishment = {
 		Minutes: minutes,
 		Background: PandoraBackground,
-		Difficulty: InfiltrationMissionState.Difficulty,
+		// Because this might be a punishment from being brought to Pandora by losing a kidnap game
+		Difficulty: InfiltrationMissionState?.Difficulty ?? 0,
 	};
 }
 
 /**
  * Starts the single-player punishment
- * @returns {void} - Nothing
+ * @returns {SafePromise<void>} - Nothing
  */
-function PandoraPunishmentStart() {
+async function PandoraPunishmentStart() {
 	if (!Player.Infiltration.Punishment) return;
 	PandoraWillpower = 0;
 	Player.Infiltration.Punishment.Timer = CurrentTime + (Player.Infiltration.Punishment.Minutes * MS_PER_MIN);
 	ServerSend("AccountUpdate", { Infiltration: Player.Infiltration });
 	DialogLeave();
-	CommonSetScreen("Room", "PandoraPrison");
+	await CommonSetScreen("Room", "PandoraPrison");
 }
 
 /**
