@@ -374,7 +374,9 @@ function InformationSheetSecondScreenRun() {
 		let pos = 0;
 		for (let R = 0; R < C.Reputation.length; R++)
 			if (C.Reputation[R].Value != 0) {
-				DrawText(TextGet("Reputation" + C.Reputation[R].Type + ((C.Reputation[R].Value > 0) ? "Positive" : "Negative")) + " " + Math.abs(C.Reputation[R].Value).toString(), 1000, 200 + pos * lineHeight, "Black", "Gray");
+				const label = ReputationLabel(C.Reputation[R].Type, C.Reputation[R].Value);
+				if (!label) continue;
+				DrawText(`${label}: ${Math.abs(C.Reputation[R].Value)}`, 1000, 200 + pos * lineHeight, "Black", "Gray");
 				pos++;
 			}
 		if (pos == 0) DrawText(TextGet("ReputationNone"), 1000, 200, "Black", "Gray");
