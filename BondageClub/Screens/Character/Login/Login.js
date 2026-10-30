@@ -1280,8 +1280,6 @@ function LoginDone() {
  * @returns {void} Nothing
  */
 function LoginResponse(C) {
-	LoginCheckES2020();
-
 	if (typeof C === "string") {
 		LoginSetStatus(C, true);
 		return;
@@ -1318,24 +1316,6 @@ function LoginResponse(C) {
 	ServerIsLoggedIn_ = true;
 
 	LoginDone();
-}
-
-/** Check if the player's browser has ES2020 support */
-function LoginCheckES2020() {
-	try {
-		// eslint-disable-next-line no-eval
-		eval("({})?.foo");
-		// eslint-disable-next-line no-eval
-		eval("null ?? null");
-		// eslint-disable-next-line no-eval
-		eval("let a = null; a ??= 1;");
-		if (Array.prototype.flatMap === undefined) {
-			throw new Error("Array.prototype.flatMap is undefined");
-		}
-	} catch (error) {
-		console.error(error);
-		throw new Error(`Outdated browser error: If you see this message, it means that your browser lacks ES2020 support and will not be working in Bondage Club`);
-	}
 }
 
 /**
