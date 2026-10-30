@@ -5591,7 +5591,7 @@ function ChatRoomRefreshChatSettings() {
 function DialogViewProfile() {
 	if (CurrentCharacter != null) {
 		const C = CurrentCharacter;
-		DialogLeave();
+		DialogLeave({ reload: false });
 		InformationSheetLoadCharacter(C);
 	}
 }

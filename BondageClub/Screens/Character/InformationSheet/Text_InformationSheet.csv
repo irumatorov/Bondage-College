@@ -86,3 +86,9 @@ AllowedInteraction2,"Owner, Lovers, whitelist & Dominants"
 AllowedInteraction3,"Owner, Lovers and whitelist only"
 AllowedInteraction4,Owner and Lovers only
 AllowedInteraction5,Owner only
+MenuExit,Exit
+MenuTitle,Title & Nickname
+MenuPreference,Preferences
+MenuFriendList,Friend List
+MenuProfile,Profile
+MenuOwnersNotes,Owner's Notes

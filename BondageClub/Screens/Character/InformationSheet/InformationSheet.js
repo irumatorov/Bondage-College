@@ -10,6 +10,16 @@ var InformationSheetSelection = null;
 /** @type {ScreenSpecifier | null} */
 var InformationSheetReturnScreen = null;
 
+const InformationSheetIDs = Object.freeze({
+	screen: "information-sheet-screen",
+	exit: "information-sheet-exit",
+	title: "information-sheet-title",
+	preference: "information-sheet-preference",
+	friendList: "information-sheet-friend-list",
+	profile: "information-sheet-profile",
+	ownersNotes: "information-sheet-owners-notes",
+});
+
 /**
  * Loads the Information Sheet, cache the sub screens
  * @type {ScreenLoadHandler}
@@ -24,6 +34,15 @@ async function InformationSheetLoad() {
 	]);
 
 	const C = InformationSheetSelection;
+
+	ElementDOMScreen.getTemplate(InformationSheetIDs.screen, {
+		menubarButtons: InformationSheetMenuButtons(C),
+		parent: document.body,
+	});
+
+	const menu = ElementWrap(`${InformationSheetIDs.screen}-menu`);
+	menu?.setAttribute("aria-orientation", "vertical");
+	menu?.setAttribute("data-direction", "ltr");
 
 	if (!C.IsPlayer()) return;
 
@@ -89,11 +108,13 @@ function InformationSheetClick() {}
 function InformationSheetResize() {
 	if (!InformationSheetSelection) return;
 	const C = InformationSheetSelection;
-	if (C.IsPlayer()) {
-		ElementSetPosition("AllowedInteractions-dropdown-container", 550, 800);
-		ElementSetSize("AllowedInteractions-dropdown", 600);
-		ElementSetFontSize("AllowedInteractions-dropdown-container", "auto");
-	}
+	ElementPositionFixed(InformationSheetIDs.screen, 50, 70, 1900, 870);
+
+	if (!C.IsPlayer()) return;
+
+	ElementSetPosition("AllowedInteractions-dropdown-container", 550, 800);
+	ElementSetSize("AllowedInteractions-dropdown", 600);
+	ElementSetFontSize("AllowedInteractions-dropdown-container", "auto");
 }
 
 /**
@@ -108,6 +129,7 @@ function InformationSheetExit() {
 }
 
 function InformationSheetUnload() {
+	ElementRemove(InformationSheetIDs.screen);
 	ElementRemove("AllowedInteractions-dropdown-container");
 }
 
@@ -122,4 +144,83 @@ function InformationSheetLoadCharacter(C) {
 		InformationSheetReturnScreen = CommonGetScreen();
 	}
 	CommonSetScreen("Character", "InformationSheet");
+}
+
+/**
+ * Icon buttons for the screen menu. The column runs downward from the exit button.
+ * Profile and owner notes share one row, with notes to the left.
+ * @param {Character} C
+ * @returns {HTMLElement[]}
+ */
+function InformationSheetMenuButtons(C) {
+	/** @type {HTMLElement[]} */
+	const buttons = [
+		InformationSheetMenuButton(InformationSheetIDs.exit, InformationSheetExit, "Icons/Exit.png", TextGet("MenuExit")),
+	];
+
+	if (!C.IsPlayer() && !C.IsOnline()) {
+		return buttons;
+	}
+
+	if (C.IsPlayer()) {
+		if (!TitleIsForced(TitleGet(C))) {
+			buttons.push(InformationSheetMenuButton(
+				InformationSheetIDs.title,
+				() => { CommonSetScreen("Character", "Title"); },
+				"Icons/Title.png",
+				TextGet("MenuTitle"),
+			));
+		}
+		buttons.push(
+			InformationSheetMenuButton(
+				InformationSheetIDs.preference,
+				() => { CommonSetScreen("Character", "Preference"); },
+				"Icons/Preference.png",
+				TextGet("MenuPreference"),
+			),
+			InformationSheetMenuButton(
+				InformationSheetIDs.friendList,
+				() => { CommonSetScreen("Character", "FriendList"); },
+				"Icons/FriendList.png",
+				TextGet("MenuFriendList"),
+			),
+		);
+	}
+
+	const showNotes = C.HasOwnerNotes() || C.IsFullyOwnedByPlayer();
+	buttons.push(
+		InformationSheetMenuButton(
+			InformationSheetIDs.profile,
+			() => OnlineProfileStart("description"),
+			"Icons/Introduction.png",
+			TextGet("MenuProfile"),
+		),
+		...(showNotes ? [InformationSheetMenuButton(
+			InformationSheetIDs.ownersNotes,
+			() => OnlineProfileStart("ownersNotes"),
+			"Icons/Management.png",
+			TextGet("MenuOwnersNotes"),
+		)] : []),
+	);
+
+	return buttons;
+}
+
+/**
+ * @param {string} id
+ * @param {(this: HTMLButtonElement, ev: PointerEvent) => void} onClick
+ * @param {string} image
+ * @param {string} tooltip
+ * @param {readonly string[]} [classList]
+ * @returns {HTMLButtonElement}
+ */
+function InformationSheetMenuButton(id, onClick, image, tooltip, classList) {
+	return ElementButton.Create(id, onClick, {
+		image,
+		tooltip,
+		tooltipPosition: "left",
+		role: "menuitem",
+	}, {
+		button: { classList: classList ? [...classList] : [] },
+	});
 }

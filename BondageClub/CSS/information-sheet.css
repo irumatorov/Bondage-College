@@ -1,0 +1,23 @@
+#information-sheet-screen,
+#information-sheet-screen * {
+	pointer-events: none;
+}
+
+#information-sheet-screen .screen-header [role="menuitem"] {
+	pointer-events: auto;
+}
+
+#information-sheet-screen {
+	grid-template:
+		"main header" minmax(0, 1fr)
+		/ minmax(0, 1fr) min-content;
+}
+
+#information-sheet-screen > .screen-hgroup {
+	display: none;
+}
+
+#information-sheet-screen .screen-header [role="menubar"] {
+	grid-auto-flow: row;
+	direction: ltr;
+}
