@@ -462,12 +462,12 @@ function MagicSchoolFindsAroundKitsuneQuestUpdate() {
  * @returns {void} - Nothing
  */
 function MagicSchoolFindsAroundMagicBattleStart() {
-	MagicBattleStart(MagicSchoolFindsAroundKitsune, 9, MagicSchoolLaboratoryBackground, "MagicSchoolFindsAroundKitsuneMagicBattleEnd");
+	MagicBattleStart(MagicSchoolFindsAroundKitsune, 9, MagicSchoolLaboratoryBackground, () => { MagicSchoolFindsAroundKitsuneMagicBattleEnd(); });
 }
 
 /**
  * When the magic battle practice ends
- * @returns {Promise<void>} - Nothing
+ * @returns {SafePromise<void>} - Nothing
  */
 async function MagicSchoolFindsAroundKitsuneMagicBattleEnd() {
 	await CommonSetScreen("Room", "MagicSchoolFindsAround");
