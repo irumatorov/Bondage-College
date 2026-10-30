@@ -456,10 +456,10 @@ function KidnapDrawMove(C, Header, X, Side) {
 		let Color = KidnapMoveEffective(C, card.Move) ? "White" : "Silver";
 		let Value = KidnapMoveEffective(C, card.Move) ? card.Value : Math.round(card.Value / 2);
 		let Text = TextGet(KidnapMoveType[card.Move]);
-		if (Value != null) Text = Text + " - " + Value.toString();
+		if (Value !== 0) Text = Text + " - " + Value.toString();
 		DrawButton(X - 240, (index * 100) + 100, 480, 80, "", Color);
 		DrawText(Text, X + ((Value != null) ? ((Side == "Left") ? -60 : 60) : 0), (index * 100) + 140, "Black", "Silver");
-		if (Value != null) DrawImage("Screens/MiniGame/Kidnap/" + Side + KidnapRPS[card.Move] + ".png", X + ((Side == "Left") ? 115 : -220), (index * 100) + 100);
+		if (Value !== 0) DrawImage("Screens/MiniGame/Kidnap/" + Side + KidnapRPS[card.Move] + ".png", X + ((Side == "Left") ? 115 : -220), (index * 100) + 100);
 	}
 }
 
