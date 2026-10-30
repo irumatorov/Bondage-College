@@ -37,7 +37,7 @@ async function MiniGameStart(GameType, Difficulty, ReturnFunction) {
 	MiniGameDifficultyMode = "";
 
 	if (CommonIsNumeric(Difficulty))
-		MiniGameDifficulty = parseInt(Difficulty, 10);
+		MiniGameDifficulty = Difficulty;
 	else
 		MiniGameDifficultyMode = Difficulty;
 	MiniGameDifficultyRatio = 1;

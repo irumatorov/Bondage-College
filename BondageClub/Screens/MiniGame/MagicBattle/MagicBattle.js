@@ -28,8 +28,7 @@ function MagicBattleStart(Opponent, Difficulty, Background, FunctionName) {
 	MagicBattleOpponent = Opponent;
 	MagicBattleBackground = Background;
 	MagicBattleReturnFunction = FunctionName;
-	MagicBattleDifficulty = parseInt(Difficulty);
-	if (isNaN(MagicBattleDifficulty)) MagicBattleDifficulty = 0;
+	MagicBattleDifficulty = Difficulty;
 	MagicBattleVictory = false;
 	MagicBattleAvailSpell = MagicBattleGetAvailSpells(MagicBattleOpponent);
 	DialogLeave();

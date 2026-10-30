@@ -636,12 +636,12 @@ function MaidQuartersOnlineDrinkStart() {
 /**
  * On online player picks a drink from the plyers tray. She only gets credited, if it was a new customer
  * @param {number} MemberNumber - The member ID of the customer
- * @param {number|string} DrinkValue - The value of the picked drink
+ * @param {number} DrinkValue - The value of the picked drink
  */
 function MaidQuartersOnlineDrinkPick(MemberNumber, DrinkValue) {
-	if ((MaidQuartersOnlineDrinkCount < 5) && (MaidQuartersOnlineDrinkCustomer.indexOf(MemberNumber) < 0)) {
+	if (MaidQuartersOnlineDrinkCount < 5 && !MaidQuartersOnlineDrinkCustomer.includes(MemberNumber)) {
 		MaidQuartersOnlineDrinkCount++;
-		MaidQuartersOnlineDrinkValue = MaidQuartersOnlineDrinkValue + parseInt(DrinkValue);
+		MaidQuartersOnlineDrinkValue = MaidQuartersOnlineDrinkValue + DrinkValue;
 		MaidQuartersOnlineDrinkCustomer.push(MemberNumber);
 		if (MaidQuartersOnlineDrinkCount >= 5) {
 			InventoryWear(Player, "WoodenMaidTray", "ItemMisc");

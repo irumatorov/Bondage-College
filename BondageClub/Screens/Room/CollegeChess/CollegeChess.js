@@ -56,7 +56,7 @@ function CollegeChessClick() {
  * @returns {void} - Nothing
  */
 function CollegeChessGameStart(Difficulty, Bet) {
-	CollegeChessDifficulty = parseInt(Difficulty);
+	CollegeChessDifficulty = Difficulty;
 	CollegeChessBet = Bet;
 	if (Bet == "Money") CharacterChangeMoney(Player, CollegeChessDifficulty * -10);
 	const playerStarts = Math.random() < 0.5;

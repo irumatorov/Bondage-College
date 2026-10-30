@@ -3978,7 +3978,7 @@ function KDAddAppearance(C, Group, ItemAsset, NewColor, DifficultyFactor, ItemMe
 	if (ItemAsset != null) {
 		const NA = AppearanceItem.fromAsset(ItemAsset, {
 			color: data.color,
-			difficulty: (ItemAsset.Difficulty ?? 0) + parseInt(DifficultyFactor),
+			difficulty: (ItemAsset.Difficulty ?? 0) + DifficultyFactor,
 		});
 		C.Appearance.push(NA);
 		return NA;

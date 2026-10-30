@@ -385,13 +385,11 @@ function PandoraPrisonPlayerSqueal(Minutes) {
 
 /**
  * When the player gets tickled, she reacts and loses some willpower
- * @param {string|number} Damage - The health damage done by the tickle
+ * @param {number} Damage - The health damage done by the tickle
  * @returns {void} - Nothing
  */
 function PandoraPrisonPlayerTickle(Damage) {
-	Damage = parseInt(Damage);
-	PandoraWillpower = PandoraWillpower - Damage;
-	if (PandoraWillpower < 0) PandoraWillpower = 0;
+	PandoraWillpower = CommonClamp(PandoraWillpower - Damage, 0, Infinity);
 	PandoraWillpowerTimer = PandoraWillpowerTimer + ((InfiltrationPerksActive("Recovery")) ? 20000 : 30000);
 	CharacterSetFacialExpression(Player, "Blush", "Medium", 10);
 	CharacterSetFacialExpression(Player, "Eyes", "Surprised", 10);

@@ -553,7 +553,7 @@ function SarahTransferSophieToRoom(Love) {
 
 /**
  * When we need to set Sophie intro
- * @param {string | number} DomRep
+ * @param {number} DomRep
  */
 function SarahSophieSetPunishmentIntro(DomRep) {
 	SarahSophiePunishEvent("", DomRep);
@@ -606,10 +606,9 @@ function SarahSophieStartBuzz(C, Intensity) {
 /**
  * Sets the Sophie punishment for the player
  * @param {string} EventType
- * @param {string|number} DomRep
+ * @param {number} DomRep
  */
 function SarahSophiePunishEvent(EventType, DomRep) {
-	DomRep = parseInt(DomRep);
 	if (DomRep != 0) ReputationChange("Dominant", DomRep);
 	if (DomRep > 0) SophieUpsetCount = SophieUpsetCount + DomRep;
 	if ((EventType == "RestrainOther") && (Amanda != null) && AmandaInside) SarahSophiePreparePunishCharacter(Amanda);
@@ -843,14 +842,11 @@ function SarahGiveFourthSlaveItem(C) {
 
 /**
  * Build the orgasm meter for the slaves
- * @param {string|number} Pleasure
- * @param {string|number} Bonus
- * @param {string|number} Intensity
+ * @param {number} Pleasure
+ * @param {number} Bonus
+ * @param {number} Intensity
  */
 function SarahSlaveOrgasmBuild(Pleasure, Bonus, Intensity) {
-	Pleasure = parseInt(Pleasure);
-	Bonus = parseInt(Bonus);
-	Intensity = parseInt(Intensity);
 	if (!CurrentCharacter) return;
 	CurrentCharacter.OrgasmMeter ??= 0;
 	CurrentCharacter.OrgasmMeter = CurrentCharacter.OrgasmMeter + Pleasure + Bonus;

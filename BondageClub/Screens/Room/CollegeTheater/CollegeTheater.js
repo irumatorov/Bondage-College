@@ -17,7 +17,7 @@ function CollegeTheaterCanInviteToPrivateRoom() { return PrivateHasEmptySlot(); 
  * @param {number} LoveLevel - The love level threshold to check for.
  * @returns {boolean} - Returns TRUE if the current love level of Julia is at or above the given level
  */
-function CollegeTheaterJuliaLoveIs(LoveLevel) { return (CollegeTheaterJuliaLove >= parseInt(LoveLevel)); }
+function CollegeTheaterJuliaLoveIs(LoveLevel) { return CollegeTheaterJuliaLove >= LoveLevel; }
 /**
  * Checks if the player can pick their role. The player can pick their role when they are a switch (not too submissive or dominant)
  * @returns {boolean} - Returns TRUE if the player can choose her role.
@@ -161,9 +161,9 @@ function CollegeTheaterUnderwear(C) {
  * @returns {void} - Nothing
  */
 function CollegeTheaterJuliaLoveChange(LoveChange, Event) {
-	if (LoveChange != null) CollegeTheaterJuliaLove = CollegeTheaterJuliaLove + parseInt(LoveChange);
-	if ((LoveChange != null) && (parseInt(LoveChange) <= 0)) CharacterSetFacialExpression(CollegeTheaterJulia, "Eyes", "Dazed", 2);
-	if ((LoveChange != null) && (parseInt(LoveChange) >= 2)) CharacterSetFacialExpression(CollegeTheaterJulia, "Blush", "Low", 2);
+	CollegeTheaterJuliaLove = CollegeTheaterJuliaLove + LoveChange;
+	if (LoveChange <= 0) CharacterSetFacialExpression(CollegeTheaterJulia, "Eyes", "Dazed", 2);
+	if (LoveChange >= 2) CharacterSetFacialExpression(CollegeTheaterJulia, "Blush", "Low", 2);
 	if (Event == "PlayerWitch") CollegeTheaterPlayClothes(Player, CollegeTheaterJulia);
 	if (Event == "JuliaWitch") CollegeTheaterPlayClothes(CollegeTheaterJulia, Player);
 	if (Event == "PlayerUnderwear") CollegeTheaterUnderwear(Player);

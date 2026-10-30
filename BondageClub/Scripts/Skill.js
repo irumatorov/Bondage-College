@@ -39,8 +39,6 @@ function SkillChange(C, SkillType, SkillLevel, Progress, Push=true) {
 	if (!C.IsPlayer()) return;
 
 	// Make sure the progress and level are valid
-	Progress = parseInt(Progress) || 0;
-	SkillLevel = parseInt(SkillLevel) || 0;
 	if ((Progress < 0) || (Progress >= 1000)) Progress = 0;
 	if ((SkillLevel < 0) || (SkillLevel > 10)) SkillLevel = 0;
 

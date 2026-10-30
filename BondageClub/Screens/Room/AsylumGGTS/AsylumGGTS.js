@@ -1272,7 +1272,7 @@ function AsylumGGTSActivity(S, C, A, Z, Count) {
  * @returns {void} - Nothing
  */
 function AsylumGGTSPunishmentTime(Minute) {
-	let Time = Math.round(CurrentTime + parseInt(Minute) * MS_PER_MIN);
+	let Time = Math.round(CurrentTime + Minute * MS_PER_MIN);
 	const isolationTime = LogValue("Isolated", "Asylum") ?? 0;
 	if (isolationTime >= CurrentTime) Time = Time + Math.round(isolationTime - CurrentTime);
 	LogAdd("Isolated", "Asylum", Time);
