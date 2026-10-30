@@ -1397,10 +1397,6 @@ HatFlowerCrownMainFlowers,Main Flowers
 HatFlowerCrownPetals,Petals
 HatGatTop,Top
 HatGatBeads,Beads
-HatLatexHabitBase,Shawl
-HatLatexHabitCape,Shoulders
-HatLatexHabitCollar,Collar
-HatLatexHabitCowl,Cowl
 HatMaidLatexHairbandDetail,Detail
 HatMaidLatexHairbandMain,Main
 HatNPCBalloonArrow,Arrow
@@ -2519,6 +2515,32 @@ ItemHeadStuddedBlindfold,Blindfold
 ItemHeadStuddedBlindfoldLock,Lock
 ItemHoodBalloonHead,Rubber balloon
 ItemHoodBalloonShine,Balloon shine
+ItemHoodLeatherHoodSealed,Hood
+ItemHoodLeatherHoodSealedLock,Lock
+ItemHoodPolishedSteelHood,Hood
+ItemHoodPolishedSteelHoodLock,Lock
+ItemHoodInflatedBallHood,Hood
+ItemHoodInflatedBallHoodLock,Lock
+ItemHoodLeatherHoodSensDep,Hood
+ItemHoodLeatherHoodSensDepLock,Lock
+ItemHoodLeatherHoodOpenEyes,Hood
+ItemHoodLeatherHoodOpenEyesLock,Lock
+ItemHoodGasMask,Mask
+ItemHoodGasMaskLock,Lock
+ItemHoodDogHood,Mask
+ItemHoodDogHoodLock,Lock
+ItemHoodLeatherHoodOpenMouth,Hood
+ItemHoodLeatherHoodOpenMouthLock,Lock
+ItemHoodOpenFaceHood,Hood
+ItemHoodOpenFaceHoodLock,Lock
+ItemHoodGwenHoodOriginal,Hood
+ItemHoodGwenHoodLock,Lock
+ItemHoodZipperHood,Hood
+ItemHoodZipperHoodLock,Lock
+ItemHoodLatexDogHoodThick,Hood
+ItemHoodLatexDogHoodLock,Lock
+ItemHoodLatexHood,Hood
+ItemHoodLatexHoodLock,Lock
 ItemHoodBalloonRope,Neck rope
 ItemHoodBigMouthHoodCollar,Collar
 ItemHoodBigMouthHoodDetail,Detail
@@ -2528,12 +2550,14 @@ ItemHoodBigMouthHoodMouth,Mouth
 ItemHoodBigMouthHoodLock,Lock
 ItemHoodCanvasHoodHood,Canvas
 ItemHoodCanvasHoodText,Text
+ItemHoodCanvasHoodLock,Lock
 ItemHoodCollarHoodCollar,Collar
 ItemHoodCollarHoodHood,Hood
 ItemHoodCollarHoodLock,Lock
 ItemHoodCorsetHoodLace,Lacing
 ItemHoodCorsetHoodLatex,Latex
 ItemHoodCorsetHoodLines,Outline
+ItemHoodCorsetHoodLock,Lock
 ItemHoodCowHoodBase,Hood
 ItemHoodCowHoodSpots,Spots
 ItemHoodCreepyIronMaskMain,Mask
@@ -2547,6 +2571,7 @@ ItemHoodCustomBallHoodPumpkin,Pattern
 ItemHoodCustomBallHoodPumpkinShine,Pattern Shine
 ItemHoodCustomBallHoodPumpkin2,Pattern 2
 ItemHoodCustomBallHoodPumpkinShine2,Pattern 2 Shine
+ItemHoodCustomBallHoodLock,Lock
 ItemHoodCustomLatexHoodFillRoundEye,Eye Fill Panels
 ItemHoodCustomLatexHoodFillRoundMouth,Mouth Fill Panel
 ItemHoodCustomLatexHoodHairUnder,Hair Inside Hood
@@ -2563,6 +2588,7 @@ ItemHoodDobermanMaskEdges,Edges
 ItemHoodDobermanMaskMask,Mask
 ItemHoodDobermanMaskMetal,Rivets
 ItemHoodDobermanMaskShine,Shine
+ItemHoodDobermanMaskLock,Lock
 ItemHoodDroneMaskBarcode,Pattern
 ItemHoodDroneMaskBase,Mask
 ItemHoodDroneMaskEyeRegular,Eyes
@@ -2578,6 +2604,7 @@ ItemHoodFoxHoodFace,Face
 ItemHoodFoxHoodInnerEar,Ear Canal
 ItemHoodFoxHoodLens,Lenses
 ItemHoodFoxHoodOuterEar,Ear
+ItemHoodFoxHoodLock,Lock
 ItemHoodFoxyMaskLower,Lower
 ItemHoodFoxyMaskUpper,Upper
 ItemHoodFuturisticHelmetBase,Base
@@ -2596,6 +2623,7 @@ ItemHoodGP9GasMaskEdges,Edges
 ItemHoodGP9GasMaskLens,Lens
 ItemHoodGP9GasMaskMask,Mask
 ItemHoodGP9GasMaskMouth,Mouthpiece
+ItemHoodGP9GasMaskLock,Lock
 ItemHoodHalloIIIMask,Mask
 ItemHoodHalloIIIDetail1,Mask 1st detail
 ItemHoodHalloIIIDetail2,Mask 2nd detail
@@ -2608,11 +2636,14 @@ ItemHoodHalloIIILock,Padlocks
 ItemHoodHarnessCatMaskBase,Harness
 ItemHoodHarnessCatMaskEarsUnder,Ears
 ItemHoodHarnessCatMaskMetal,Metal
+ItemHoodHarnessCatMaskLock,Lock
 ItemHoodHeadboxSeethroughFrame,Outside
 ItemHoodHeadboxSeethroughGlassInside,Inside
+ItemHoodHeadboxSeethroughLock,Lock
 ItemHoodInflatableGagMaskBase,Hood
 ItemHoodInflatableGagMaskLens,Lenses
 ItemHoodInflatableGagMaskMetal,Metal
+ItemHoodInflatableGagMaskLock,Lock
 ItemHoodKigu2HoodMain,Face
 ItemHoodKigu2HoodLenses,Lenses
 ItemHoodKigu2HoodHair,Hair
@@ -2639,6 +2670,7 @@ ItemHoodLatexBunnyInnerEar,Inner Ear
 ItemHoodLatexBunnyMouth,Mouth
 ItemHoodLatexBunnyNose,Nose
 ItemHoodLatexBunnyOuterEar,Outer Ear
+ItemHoodLatexBunnyLock,Lock
 ItemHoodLatexDogMaskBase,Hood
 ItemHoodLatexDogMaskCollarBand,Collar Band
 ItemHoodLatexDogMaskCollarMetal,Collar Link
@@ -2647,18 +2679,23 @@ ItemHoodLatexDogMaskLenses,Lenses
 ItemHoodLatexDogMaskLining,Lining
 ItemHoodLatexDogMaskMouthHole,Holes
 ItemHoodLatexDogMaskMuzzleBase,Muzzle
+ItemHoodLatexDogMaskLock,Lock
 ItemHoodLatexHabitBase,Shawl
 ItemHoodLatexHabitCape,Shoulders
 ItemHoodLatexHabitCollar,Collar
 ItemHoodLatexHabitCowl,Cowl
+ItemHoodLatexHabitLock,Lock
 ItemHoodLatexHoodOpenHairHair,Hair
 ItemHoodLatexHoodOpenHairHood,Hood
+ItemHoodLatexHoodOpenHairLock,Lock
 ItemHoodLeatherHoodCollar,Collar
 ItemHoodLeatherHoodHood,Hood
 ItemHoodLeatherHoodSnaps,Snaps
+ItemHoodLeatherHoodLock,Lock
 ItemHoodOldGasMaskLenses,Blinding Lenses
 ItemHoodOldGasMaskMask,Mask
 ItemHoodOldGasMaskTubeA,Breathing Attachment
+ItemHoodOldGasMaskLock,Lock
 ItemHoodCybertechMaskbase,Base
 ItemHoodCybertechMasknose,Nose
 ItemHoodCybertechMaskstraps,Straps
@@ -2678,6 +2715,7 @@ ItemHoodCybertechMaskCTlogo,Logo
 ItemHoodOpenMouthPlugHoodHood,Hood
 ItemHoodOpenMouthPlugHoodLenses,Lenses
 ItemHoodOpenMouthPlugHoodPlug,Plug
+ItemHoodOpenMouthPlugHoodLock,Lock
 ItemHoodPantyHoodBase,Pantyhose
 ItemHoodPantyHoodHairUnder,Hair
 ItemHoodPumpkinHeadBack,Back
@@ -2701,6 +2739,7 @@ ItemHoodRubberMaskEarplug,Earplug
 ItemHoodSensoryDeprivationHoodBase,Latex
 ItemHoodSensoryDeprivationHoodEarCover,Silencer
 ItemHoodSensoryDeprivationHoodLips,Lips
+ItemHoodSensoryDeprivationHoodLock,Lock
 ItemHoodSlimeOne,Color 1
 ItemHoodSlimeTwo,Color 2
 ItemHoodSpaceMaskOneDetail,Details
@@ -2716,19 +2755,13 @@ ItemHoodTransparentLatexHoodMain,Hood
 ItemHoodTransparentLatexHoodHDetail,Hole detail
 ItemHoodTransparentLatexHoodHair,Hair
 ItemHoodVacHoodBase,Hood
-ItemHoodVacHoodBase,Hood
-ItemHoodVacHoodClipHose,Clipped Hose
 ItemHoodVacHoodClipHose,Clipped Hose
 ItemHoodVacHoodHandPump,Pump
-ItemHoodVacHoodHandPump,Pump
-ItemHoodVacHoodLenses,Lens
 ItemHoodVacHoodLenses,Lenses
 ItemHoodVacHoodPlasticClip,Clip
-ItemHoodVacHoodPlasticClip,Clip
-ItemHoodVacHoodRebreather,Rebreather Bag
 ItemHoodVacHoodRebreather,Rebreather Bag
 ItemHoodVacHoodTube,Breathing Tube
-ItemHoodVacHoodTube,Breathing Tube
+ItemHoodVacHoodLock,Lock
 ItemHoodAccentHood,Hood
 ItemHoodAccentHoodLock,Lock
 ItemLegsFrogtieMetalCuffsChain,Chain
