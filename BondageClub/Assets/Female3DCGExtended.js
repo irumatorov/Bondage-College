@@ -25533,7 +25533,7 @@ var AssetFemale3DCGExtended = {
 					Options: [
 						{
 							// In hands
-							DrawOptions: { PoseMapping: { ...AssetPoseMapping.ItemHandheld } },
+							PoseMapping: { ...AssetPoseMapping.ItemHandheld },
 						},
 						{
 							// On head, also when the arms are tied
@@ -25541,12 +25541,10 @@ var AssetFemale3DCGExtended = {
 								OverridePriority: 57,
 								DrawingTop: { [AssetOverride]: -315 },
 							},
-							DrawOptions: {
-								PoseMapping: {
-									AllFours: PoseType.HIDE,
-									Hogtied: PoseType.HIDE,
-									Suspension: PoseType.HIDE,
-								},
+							PoseMapping: {
+								AllFours: PoseType.HIDE,
+								Hogtied: PoseType.HIDE,
+								Suspension: PoseType.HIDE,
 							},
 						},
 						{
@@ -25570,10 +25568,8 @@ var AssetFemale3DCGExtended = {
 									Zannah: 746,
 								},
 							},
-							DrawOptions: {
-								PoseMapping: { Suspension: PoseType.HIDE },
-								FixedPosition: true,
-							},
+							PoseMapping: { Suspension: PoseType.HIDE },
+							FixedPosition: true,
 						},
 					],
 				},

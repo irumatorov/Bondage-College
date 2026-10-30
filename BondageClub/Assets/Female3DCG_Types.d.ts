@@ -1078,13 +1078,13 @@ interface ExtendedItemOptionConfig {
 	PrerequisiteBuyGroup?: string;
 	/** If the option has an archetype, sets the config to use */
 	ArchetypeConfig?: null | AssetArchetypeConfig;
+	/** Replaces the pose mapping of the item's layers while this option is selected */
+	PoseMapping?: AssetPoseMapping;
+	/** Draws the item's layers at the same place whatever the character's height, see {@link AssetLayer.FixedPosition} */
+	FixedPosition?: boolean;
 	DrawOptions?: {
 		Mirror?: boolean;
 		Invert?: boolean;
-		/** Replaces the pose mapping of the item's layers while this option is selected */
-		PoseMapping?: AssetPoseMapping;
-		/** Draws the item's layers at the same place whatever the character's height, see {@link AssetLayer.FixedPosition} */
-		FixedPosition?: boolean;
 	}
 }
 

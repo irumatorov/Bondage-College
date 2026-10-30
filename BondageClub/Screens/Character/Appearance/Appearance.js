@@ -430,9 +430,10 @@ function CharacterAppearanceAllowForTypes(allowTypes, typeRecord) {
  * @param {AssetLayer} layer - The layer to check visibility for
  * @param {Asset} asset - The asset that the layer belongs to
  * @param {null | TypeRecord} [typeRecord] - The item's type, if it has one
+ * @param {null | Pick<ExtendedItemOptionConfig, "PoseMapping">} [layout] - The item's layout options, from {@link ExtendedItemGetLayoutOptions}
  * @returns {boolean} - TRUE if the layer should be visible, FALSE otherwise
  */
-function CharacterAppearanceIsLayerVisible(C, layer, asset, typeRecord=null) {
+function CharacterAppearanceIsLayerVisible(C, layer, asset, typeRecord=null, layout=null) {
 	if (layer.AllowTypes && !CharacterAppearanceAllowForTypes(layer.AllowTypes, typeRecord)) {
 		return false;
 	}
@@ -441,9 +442,10 @@ function CharacterAppearanceIsLayerVisible(C, layer, asset, typeRecord=null) {
 	if (layer.HideAs && !CharacterAppearanceVisible(C, layer.HideAs.Asset, layer.HideAs.Group))
 		return false;
 
-	// Hide the layer if it should be hidden for the current pose
-	const pose = CommonDrawResolveAssetPose(C, layer);
-	if (pose && layer.PoseMapping[pose] === PoseType.HIDE)
+	// Hide the layer if it should be hidden for the current pose, as mapped by the item's selected options if they replace the layer's mapping
+	const poseLayer = layout?.PoseMapping ? { ...layer, PoseMapping: layout.PoseMapping } : layer;
+	const pose = CommonDrawResolveAssetPose(C, poseLayer);
+	if (pose && poseLayer.PoseMapping[pose] === PoseType.HIDE)
 		return false;
 
 	// Hide the layer if the character has any matching attribute
@@ -455,21 +457,6 @@ function CharacterAppearanceIsLayerVisible(C, layer, asset, typeRecord=null) {
 		return false;
 
 	return true;
-}
-
-/**
- * Gets the layer as the item draws it, with the pose mapping and fixed position of the item's selected options
- * @param {AssetLayer} layer - The layer
- * @param {ExtendedItemOptionConfig["DrawOptions"]} drawOptions - The item's draw options, from {@link ExtendedItemGetDrawingOptions}
- * @returns {AssetLayer} - The layer, or a copy of it changed by the draw options
- */
-function CharacterAppearanceGetItemLayer(layer, drawOptions) {
-	if (!drawOptions?.PoseMapping && !drawOptions?.FixedPosition) return layer;
-	return {
-		...layer,
-		PoseMapping: drawOptions.PoseMapping ?? layer.PoseMapping,
-		FixedPosition: layer.FixedPosition || !!drawOptions.FixedPosition,
-	};
 }
 
 /**
@@ -487,13 +474,15 @@ function CharacterAppearanceSortLayers(C) {
 		if (asset.Visible && CharacterAppearanceVisible(C, asset.Name, asset.Group.Name) && InventoryChatRoomAllow(asset.Category ?? [])) {
 			// Check if we need to draw a different variation (from type property)
 			const typeRecord = item.Property && item.Property.TypeRecord;
-			const drawOptions = asset.Extended ? ExtendedItemGetDrawingOptions(item) : undefined;
+			const layout = ExtendedItemGetLayoutOptions(item);
 			const layersToDraw = asset.Layer
-				.map(layer => CharacterAppearanceGetItemLayer(layer, drawOptions))
-				.filter(layer => CharacterAppearanceIsLayerVisible(C, layer, asset, typeRecord) && !layer.TextureMask)
+				.filter(layer => CharacterAppearanceIsLayerVisible(C, layer, asset, typeRecord, layout) && !layer.TextureMask)
 				.map(layer => {
 					/** @type {Mutable<AssetLayer>} */
 					const drawLayer = { ...layer };
+					// Apply the pose mapping and fixed position of the item's selected options
+					if (layout.PoseMapping) drawLayer.PoseMapping = layout.PoseMapping;
+					if (layout.FixedPosition) drawLayer.FixedPosition = true;
 					// Store any group-level alpha mask definitions
 					drawLayer.Alpha.forEach(alpha => {
 						if (alpha.Group && (!alpha.AllowTypes || !CharacterAppearanceAllowForTypes(alpha.AllowTypes, typeRecord))) {
@@ -621,8 +610,7 @@ function CharacterAppearanceVisible(C, AssetName, GroupName, Recursive = true) {
  * @returns {boolean} - TRUE if the item's options hide it in the current pose
  */
 function CharacterAppearanceIsHiddenByOptionPose(C, item) {
-	if (!item.Asset.Extended) return false;
-	const poseMapping = ExtendedItemGetDrawingOptions(item)?.PoseMapping;
+	const poseMapping = ExtendedItemGetLayoutOptions(item).PoseMapping;
 	return !!poseMapping && C.Pose.some(p => poseMapping[p] === PoseType.HIDE);
 }
 
