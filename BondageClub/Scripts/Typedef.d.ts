@@ -3493,12 +3493,6 @@ interface ItemPropertiesBase {
 
 	/** Rotation is in degrees from -180 to 180 */
 	Rotation?: number;
-
-	/** Replaces the pose mapping of all the item's layers, for example to keep a held item visible when the arms are tied */
-	OverridePoseMapping?: AssetPoseMapping;
-
-	/** Draws the item at the same place whatever the character's height, see {@link Asset.FixedPosition} */
-	FixedPosition?: boolean;
 }
 
 /**

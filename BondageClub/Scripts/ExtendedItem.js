@@ -1628,6 +1628,10 @@ function ExtendedItemGetDrawingOptions(item) {
 			stack.Invert = !stack.Invert;
 		if (value.DrawOptions?.Mirror)
 			stack.Mirror = !stack.Mirror;
+		if (value.DrawOptions?.PoseMapping)
+			stack.PoseMapping = { ...stack.PoseMapping, ...value.DrawOptions.PoseMapping };
+		if (value.DrawOptions?.FixedPosition)
+			stack.FixedPosition = true;
 		return stack;
 	}, init);
 }

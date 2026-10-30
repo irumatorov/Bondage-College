@@ -458,14 +458,18 @@ function CharacterAppearanceIsLayerVisible(C, layer, asset, typeRecord=null) {
 }
 
 /**
- * Gets the layer as the item draws it, using the item's {@link ItemProperties.OverridePoseMapping} if it has one
- * @param {Item} item - The item the layer belongs to
+ * Gets the layer as the item draws it, with the pose mapping and fixed position of the item's selected options
  * @param {AssetLayer} layer - The layer
- * @returns {AssetLayer} - The layer, or a copy of it with the item's pose mapping
+ * @param {ExtendedItemOptionConfig["DrawOptions"]} drawOptions - The item's draw options, from {@link ExtendedItemGetDrawingOptions}
+ * @returns {AssetLayer} - The layer, or a copy of it changed by the draw options
  */
-function CharacterAppearanceGetItemLayer(item, layer) {
-	const poseMapping = item.Property?.OverridePoseMapping;
-	return poseMapping ? { ...layer, PoseMapping: poseMapping } : layer;
+function CharacterAppearanceGetItemLayer(layer, drawOptions) {
+	if (!drawOptions?.PoseMapping && !drawOptions?.FixedPosition) return layer;
+	return {
+		...layer,
+		PoseMapping: drawOptions.PoseMapping ?? layer.PoseMapping,
+		FixedPosition: layer.FixedPosition || !!drawOptions.FixedPosition,
+	};
 }
 
 /**
@@ -483,8 +487,9 @@ function CharacterAppearanceSortLayers(C) {
 		if (asset.Visible && CharacterAppearanceVisible(C, asset.Name, asset.Group.Name) && InventoryChatRoomAllow(asset.Category ?? [])) {
 			// Check if we need to draw a different variation (from type property)
 			const typeRecord = item.Property && item.Property.TypeRecord;
+			const drawOptions = asset.Extended ? ExtendedItemGetDrawingOptions(item) : undefined;
 			const layersToDraw = asset.Layer
-				.map(layer => CharacterAppearanceGetItemLayer(item, layer))
+				.map(layer => CharacterAppearanceGetItemLayer(layer, drawOptions))
 				.filter(layer => CharacterAppearanceIsLayerVisible(C, layer, asset, typeRecord) && !layer.TextureMask)
 				.map(layer => {
 					/** @type {Mutable<AssetLayer>} */
@@ -583,9 +588,7 @@ function CharacterAppearanceVisible(C, AssetName, GroupName, Recursive = true) {
 		return true;
 	}
 
-	const wornItem = InventoryGet(C, GroupName);
-	const poseMapping = assetToCheck && wornItem?.Asset === assetToCheck ? wornItem.Property?.OverridePoseMapping : undefined;
-	if (C.Pose.some(p => assetToCheck && assetToCheck.Layer.every(l => (poseMapping ?? l.PoseMapping)[p] === PoseType.HIDE))) return false;
+	if (C.Pose.some(p => assetToCheck && assetToCheck.Layer.every(l => l.PoseMapping[p] === PoseType.HIDE))) return false;
 
 	for (const item of C.DrawAppearance) {
 		if (CharacterAppearanceItemIsHidden(item.Asset.Name, item.Asset.Group.Name)) continue;
@@ -601,7 +604,7 @@ function CharacterAppearanceVisible(C, AssetName, GroupName, Recursive = true) {
 		else if ((item.Property != null) && (item.Property.HideItem != null) && (item.Property.HideItem.indexOf(GroupName + AssetName) >= 0)) HidingItem = true;
 		if (HidingItem) {
 			if (Recursive) {
-				if (CharacterAppearanceVisible(C, item.Asset.Name, item.Asset.Group.Name, false)) {
+				if (CharacterAppearanceVisible(C, item.Asset.Name, item.Asset.Group.Name, false) && !CharacterAppearanceIsHiddenByOptionPose(C, item)) {
 					return false;
 				}
 			}
@@ -609,6 +612,18 @@ function CharacterAppearanceVisible(C, AssetName, GroupName, Recursive = true) {
 		}
 	}
 	return true;
+}
+
+/**
+ * Determines whether the pose mapping of an item's selected options hides the item in the character's current pose
+ * @param {Character} C - The character wearing the item
+ * @param {Item} item - The item to check
+ * @returns {boolean} - TRUE if the item's options hide it in the current pose
+ */
+function CharacterAppearanceIsHiddenByOptionPose(C, item) {
+	if (!item.Asset.Extended) return false;
+	const poseMapping = ExtendedItemGetDrawingOptions(item)?.PoseMapping;
+	return !!poseMapping && C.Pose.some(p => poseMapping[p] === PoseType.HIDE);
 }
 
 /**

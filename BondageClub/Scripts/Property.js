@@ -1017,7 +1017,6 @@ var PropertyData = {
 	EnableRandomInput: undefined,
 	Expression: undefined,
 	Fetish: undefined,
-	FixedPosition: undefined,
 	HeartRate: PropertyDataEntry.copyFrom("BlinkState", "HeartRate"),
 	HeightModifier: undefined,
 	Hide: PropertyDataEntry.copyFrom("Block", "Hide"),
@@ -1089,7 +1088,6 @@ var PropertyData = {
 	OrgasmCount: undefined,
 	OriginalSetting: undefined,
 	OverrideHeight: undefined,
-	OverridePoseMapping: undefined,
 	OverridePriority: new PropertyDataEntry("OverridePriority",
 		{ min: -99, max: 99 },
 		{

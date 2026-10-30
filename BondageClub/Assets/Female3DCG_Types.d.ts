@@ -1081,6 +1081,10 @@ interface ExtendedItemOptionConfig {
 	DrawOptions?: {
 		Mirror?: boolean;
 		Invert?: boolean;
+		/** Replaces the pose mapping of the item's layers while this option is selected */
+		PoseMapping?: AssetPoseMapping;
+		/** Draws the item's layers at the same place whatever the character's height, see {@link AssetLayer.FixedPosition} */
+		FixedPosition?: boolean;
 	}
 }
 

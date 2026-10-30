@@ -52629,6 +52629,8 @@ var AssetFemale3DCG = [
 				ActivityAudio: ["Squeak"],
 				BuyGroup: "Plushie",
 				HideItem: ["ItemMiscPlushie"],
+				// The Position options choose the poses that hide it
+				PoseMapping: {},
 				Layer: [
 					{
 						Name: "Sin",

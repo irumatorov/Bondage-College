@@ -25531,17 +25531,22 @@ var AssetFemale3DCGExtended = {
 					Name: "Position",
 					Key: "Position",
 					Options: [
-						{}, // In hands
+						{
+							// In hands
+							DrawOptions: { PoseMapping: { ...AssetPoseMapping.ItemHandheld } },
+						},
 						{
 							// On head, also when the arms are tied
 							Property: {
 								OverridePriority: 57,
-								OverridePoseMapping: {
+								DrawingTop: { [AssetOverride]: -315 },
+							},
+							DrawOptions: {
+								PoseMapping: {
 									AllFours: PoseType.HIDE,
 									Hogtied: PoseType.HIDE,
 									Suspension: PoseType.HIDE,
 								},
-								DrawingTop: { [AssetOverride]: -315 },
 							},
 						},
 						{
@@ -25549,8 +25554,6 @@ var AssetFemale3DCGExtended = {
 							// The ground line is at 962; plushies whose art does not end 193 px down their frame get their own top
 							Property: {
 								OverridePriority: 57,
-								OverridePoseMapping: { Suspension: PoseType.HIDE },
-								FixedPosition: true,
 								DrawingLeft: { [AssetOverride]: 6 },
 								DrawingTop: {
 									[AssetOverride]: 549,
@@ -25566,6 +25569,10 @@ var AssetFemale3DCGExtended = {
 									VoidPsyker: 753,
 									Zannah: 746,
 								},
+							},
+							DrawOptions: {
+								PoseMapping: { Suspension: PoseType.HIDE },
+								FixedPosition: true,
 							},
 						},
 					],
