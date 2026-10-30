@@ -207,6 +207,8 @@ var MapManager = (function () {
 					}
 					if (typeof config.Color === "string" && CommonIsColor(config.Color, { allowAlpha: true })) pad.Color = config.Color;
 					ret[index] = pad;
+				} else if (config?.Type === "Tether") {
+					ret[index] = { Type: "Tether" };
 				}
 			}
 			return ret;
@@ -1417,6 +1419,8 @@ var MapManager = (function () {
 					return false;
 				case "Teleporter":
 					return cell?.DefaultObjectConfig?.Type === "Teleporter";
+				case "Tether":
+					return !!cell?.CanBeTetherPoint;
 			}
 		}
 
@@ -2151,6 +2155,11 @@ var MapManager = (function () {
 							this.setObjectConfig(index, undefined);
 						}
 						break;
+					case "Tether":
+						if (!object || !this.isValidObjectConfig(index, "Tether")) {
+							this.setObjectConfig(index, undefined);
+						}
+						break;
 				}
 				// The pad whose menu is open is gone: its menu goes too
 				if (index === ChatRoomMapViewTeleportPadIndex && this.getObjectConfig(index)?.Type !== "Teleporter") ChatRoomMapViewHideDialogMenu();
@@ -2288,7 +2297,8 @@ const ChatRoomMapViewObjectDefaultValues = {
 		}
 	},
 	"WallDecoration": { CanPlaceOnWalls: true, CanPlaceOnFloors: false },
-	"Banners": { CanPlaceOnWalls: true, CanPlaceOnFloors: false }
+	"Banners": { CanPlaceOnWalls: true, CanPlaceOnFloors: false },
+	"FloorObstacle": { CanBeTetherPoint: true, OnClick: (x, y) => ChatRoomMapViewOnClickTetherPoint(x, y) },
 };
 
 
@@ -2526,6 +2536,27 @@ function MapIndexToCoordinates(index) {
 		throw new Error(`invalid map index value: ${String(index)}`);
 	}
 	return { X: index % ChatRoomMapViewWidth, Y: Math.floor(index / ChatRoomMapViewWidth) };
+}
+
+/**
+ * Gets the distance between two map positions, in tiles; a diagonal step counts as one
+ * @param {ChatRoomMapPos} pos1
+ * @param {ChatRoomMapPos} pos2
+ * @returns {number}
+ */
+function MapGetDistance(pos1, pos2) {
+	return Math.max(Math.abs(pos1.X - pos2.X), Math.abs(pos1.Y - pos2.Y));
+}
+
+/**
+ * Checks if a value is a position within the map
+ * @param {unknown} pos
+ * @returns {pos is ChatRoomMapPos}
+ */
+function MapIsPosition(pos) {
+	return CommonIsObject(pos)
+		&& "X" in pos && CommonIsInteger(pos.X, 0, ChatRoomMapViewWidth - 1)
+		&& "Y" in pos && CommonIsInteger(pos.Y, 0, ChatRoomMapViewHeight - 1);
 }
 
 /**

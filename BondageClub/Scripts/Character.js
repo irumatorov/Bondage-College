@@ -2762,6 +2762,7 @@ function CharacterRefreshLeash(C) {
 		if (ChatRoomLeashPlayer !== null) {
 			ChatRoomLeashPlayer = null;
 		}
+		if (Player.MapData?.Tether) ChatRoomMapViewSetTether(null);
 		return;
 	}
 
@@ -2770,6 +2771,10 @@ function CharacterRefreshLeash(C) {
 	if (ChatRoomLeashPlayer !== null && !ChatRoomCanBeLeashedBy(ChatRoomLeashPlayer, Player)) {
 		ChatRoomLeashPlayer = null;
 	}
+	if (Player.MapData?.Tether && !ChatRoomCanBeLeashedBy(Player.MapData.Tether.MemberNumber, Player)) {
+		ChatRoomMapViewSetTether(null);
+		return;
+	}
 
 	// Check for a dynamic leash and update its state
 	const dynamicLeash = leashes.find(i => i.Asset.AllowEffect && i.Asset.AllowEffect.includes("IsLeashed"));
@@ -2777,7 +2782,7 @@ function CharacterRefreshLeash(C) {
 		if (!dynamicLeash.Property) dynamicLeash.Property = {};
 		if (!Array.isArray(dynamicLeash.Property.Effect)) dynamicLeash.Property.Effect = [];
 
-		if (ChatRoomLeashPlayer !== null) {
+		if (ChatRoomLeashPlayer !== null || Player.MapData?.Tether) {
 			dynamicLeash.Property.Effect.push("IsLeashed");
 		} else if (ChatRoomLeashPlayer === null) {
 			dynamicLeash.Property.Effect = dynamicLeash.Property.Effect.filter(e => e !== "IsLeashed");

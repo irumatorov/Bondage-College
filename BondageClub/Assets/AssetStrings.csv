@@ -7040,6 +7040,9 @@ MaidDrinkPickRoundShooters,"SourceCharacter buys a round of shooters for everyon
 MaidDrinkPickSexOnTheBeachJug,"SourceCharacter buys a jug of Sex on the Beach for everyone, from TargetCharacter."
 MaidDrinkPickVirginMojito,SourceCharacter buys a Virgin Mojito from DestinationCharacter tray.
 MaidDrinkPickWhiskey,SourceCharacter buys a glass of Whiskey from TargetCharacter.
+MapViewTetherSlip,"DestinationCharacter leash slips off the post, with nobody left to keep it there."
+MapViewTetherTie,SourceCharacter ties DestinationCharacter leash to the post.
+MapViewTetherUntie,SourceCharacter unties DestinationCharacter leash from the post.
 MaskDroneMaskModuleEyes,Eyes
 MaskDroneMaskModuleGlow,Glow
 MaskDroneMaskModuleHelmet,Coverage

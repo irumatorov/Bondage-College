@@ -1787,6 +1787,12 @@ var ServerAccountDataSyncedValidate = {
 				Pos: ServerAccountDataSyncedValidate.MapData.Pos(arg?.Pos, C),
 				PrivateState: ServerAccountDataSyncedValidate.MapData.PrivateState(arg?.PrivateState, C),
 			};
+			const tether = ServerAccountDataSyncedValidate.MapData.Tether?.(arg?.Tether, C);
+			if (tether) {
+				data.Tether = tether;
+			} else {
+				delete data.Tether;
+			}
 			return data;
 		},
 		{
@@ -1811,7 +1817,12 @@ var ServerAccountDataSyncedValidate = {
 			/** @type {(arg: ChatRoomMapData["PrivateState"] | undefined, C: Character) => ChatRoomMapData["PrivateState"]} */
 			PrivateState: (arg, C) => {
 				return CommonIsObject(arg) ? arg : {};
-			}
+			},
+			/** @type {(arg: Partial<ChatRoomMapTether> | undefined, C: Character) => ChatRoomMapTether | undefined} */
+			Tether: (arg, C) => {
+				if (!CommonIsObject(arg) || !MapIsPosition(arg.Position) || !CommonIsInteger(arg.MemberNumber, 1)) return undefined;
+				return { Position: { X: arg.Position.X, Y: arg.Position.Y }, MemberNumber: arg.MemberNumber };
+			},
 		}
 	),
 	/**

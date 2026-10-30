@@ -225,7 +225,8 @@ textarea.chat-room-map-view-dialog-content-text {
 	width: 100%;
 }
 
-.chat-room-map-view-dialog-teleport-pad {
+.chat-room-map-view-dialog-teleport-pad,
+.chat-room-map-view-dialog-tether-point {
 	display: flex;
 	flex-direction: column;
 	gap: 0.4em;

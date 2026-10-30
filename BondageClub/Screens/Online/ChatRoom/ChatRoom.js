@@ -3133,6 +3133,10 @@ function ChatRoomCanLeave() {
 			return false;
 		} else ChatRoomLeashPlayer = null;
 	}
+	if (Player.MapData?.Tether) { // Cannot leave if tied to a tether point that holds
+		if (ChatRoomMapViewTetherHolds()) return false;
+		ChatRoomMapViewTetherRelease();
+	}
 	if (!Player.CanWalk()) return false; // Cannot leave if cannot walk
 	// Cannot leave if locked down in Pandora Penitentiary
 	if (ChatRoomData.Game == "Prison" && PandoraPenitentiaryIsInmate(Player)) return false;
@@ -4166,6 +4170,9 @@ function ChatRoomMessageProcessHidden(data, SenderCharacter) {
 			break;
 		case "ChatRoomMapViewChangeKey":
 			ChatRoomMapViewChangeKeyHiddenMessage(SenderCharacter, data);
+			break;
+		case "ChatRoomMapViewTether":
+			ChatRoomMapViewTetherHiddenMessage(SenderCharacter, data);
 			break;
 		case "ChatRoomFriendRequestAdd":
 			ChatRoomFriendMessage(SenderCharacter, data);
@@ -5670,6 +5677,7 @@ function ChatRoomDoHoldLeash(SenderCharacter) {
 		}
 		// Set the character as our new leasher
 		ChatRoomLeashPlayer = SenderCharacter.MemberNumber;
+		if (Player.MapData?.Tether) ChatRoomMapViewSetTether(null);
 	} else {
 		ServerSend("ChatRoomChat", { Content: "RemoveLeash", Type: "Hidden", Target: SenderCharacter.MemberNumber });
 	}

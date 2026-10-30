@@ -8,6 +8,7 @@ type CharacterGameParameters = unknown;
 type CharacterOnlineSharedSettings = unknown;
 type ChatRoomMapData = unknown;
 type ChatRoomMapPos = unknown;
+type ChatRoomMapTether = unknown;
 type ChatSettingsType = unknown;
 type ControllerSettingsType = unknown;
 type CraftingItem = unknown;
