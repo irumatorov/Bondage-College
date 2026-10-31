@@ -3,7 +3,9 @@
 	pointer-events: none;
 }
 
-#information-sheet-screen .screen-header [role="menuitem"] {
+#information-sheet-screen .screen-header [role="menuitem"],
+#information-sheet-screen .information-sheet-body,
+#information-sheet-screen .information-sheet-body * {
 	pointer-events: auto;
 }
 
@@ -20,4 +22,125 @@
 #information-sheet-screen .screen-header [role="menubar"] {
 	grid-auto-flow: row;
 	direction: ltr;
+}
+
+#information-sheet-screen .screen-main {
+	height: 100%;
+	overflow: hidden;
+	padding: 0;
+}
+
+.information-sheet {
+	box-sizing: border-box;
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	grid-template-rows: minmax(0, 1fr);
+	column-gap: 0.4em;
+	height: 100%;
+	padding: 0.35em;
+}
+
+#information-sheet-portrait {
+	width: initial;
+	aspect-ratio: 1 / 2;
+	height: 100%;
+	position: relative;
+}
+
+.information-sheet-body {
+	box-sizing: border-box;
+	font-size: 0.6em;
+	line-height: 1.35;
+	overscroll-behavior: contain;
+}
+
+.information-sheet-identity-slot {
+	gap: 0.45em;
+	font-size: 1.15em;
+}
+
+.information-sheet-note,
+.information-sheet-since {
+	margin: 0;
+}
+
+.information-sheet-identity {
+	display: flex;
+	flex-direction: column;
+	gap: 0.28em;
+	padding: 0.45em var(--scrollbar-gutter) 0.55em;
+	overflow-wrap: break-word;
+}
+
+.information-sheet-facts {
+	display: grid;
+	grid-template-columns: max-content minmax(0, 1fr);
+	column-gap: 0.7em;
+	row-gap: 0.16em;
+	margin: 0;
+}
+
+.information-sheet-facts dt,
+.information-sheet-since,
+.information-sheet-note {
+	color: #3a2c22;
+	font-weight: 500;
+}
+
+.information-sheet-facts dd {
+	margin: 0;
+	font-weight: 600;
+}
+
+.information-sheet-note,
+.information-sheet-since {
+	font-size: 0.86em;
+	line-height: 1.3;
+	overflow-wrap: break-word;
+}
+
+.information-sheet-title-forced {
+	color: red;
+}
+
+.information-sheet-title-earned {
+	color: #0000bf;
+}
+
+.information-sheet-birthday {
+	color: blue;
+}
+
+.information-sheet-copy {
+	user-select: none;
+	cursor: copy;
+	background-color: transparent;
+	transition: background-color 0.3s ease-out;
+}
+
+.information-sheet-copy:active {
+	background-color: #35ddf5;
+	transition: none;
+}
+
+.information-sheet-hover {
+	cursor: help;
+	text-decoration: underline dotted;
+	text-underline-offset: 0.15em;
+}
+
+#information-sheet-tooltip {
+	display: block;
+	position: fixed;
+	z-index: 5;
+	margin: 0;
+	max-width: 28em;
+	font-size: 0.58em;
+	line-height: 1.3;
+	padding: 0.3em 0.55em;
+	background: #ffff88;
+	color: black;
+	border: var(--border-width) solid black;
+	box-shadow: 0.15em 0.15em 0.4em rgb(0 0 0 / 45%);
+	text-align: center;
 }
