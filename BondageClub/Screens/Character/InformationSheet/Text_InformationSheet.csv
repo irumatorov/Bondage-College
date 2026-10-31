@@ -4,9 +4,10 @@ Title,Title:
 Pronouns,Pronouns:
 MemberNumber,Member Number:
 NoMemberNumber,-
-Relationships,- Relationships -
+Relationships,Significant others
+YourRelations,Your relations
 Lover,Lover:
-Owner,Owner:
+Owner,Owner
 None,None
 Unowned,Unowned
 OwnerGGTS,GGTS
@@ -23,7 +24,7 @@ EngagedWith,Engaged to
 MarriedWith,Married to
 Days,day(s)
 Unknown,Unknown
-Reputation,- Reputation -
+Reputation,Reputation
 ReputationNone,None
 ReputationGamingPositive,Dungeoneer:
 ReputationDominantPositive,Dominant:
@@ -45,7 +46,7 @@ DifficultyLevel0,Roleplay
 DifficultyLevel1,Regular
 DifficultyLevel2,Hardcore
 DifficultyLevel3,Extreme
-Skill,- Skills -
+Skill,Skills
 SkillNone,None
 SkillBondage,Bondage:
 SkillSelfBondage,Self-bondage:
@@ -55,7 +56,7 @@ SkillWillpower,Willpower:
 SkillInfiltration,Infiltration:
 SkillDressage,Dressage:
 SkillModifier,ABSVAL for DURATION
-Trait,- Traits -
+Trait,Traits
 TraitUnknown,Spend more time with her to know her traits
 TraitDominant,Dominant:
 TraitSubmissive,Submissive:

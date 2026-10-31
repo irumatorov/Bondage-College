@@ -26,6 +26,13 @@ let InformationSheetTooltip = null;
 
 /** @type {HTMLCanvasElement | null} */
 let InformationSheetPortrait = null;
+
+/** @type {Readonly<Record<0 | 1 | 2, "Dating" | "Engaged" | "Married">>} */
+const InformationSheetLoverStages = {
+	0: "Dating",
+	1: "Engaged",
+	2: "Married",
+};
 /**
  * Loads the Information Sheet, cache the sub screens
  * @type {ScreenLoadHandler}
@@ -119,7 +126,7 @@ function InformationSheetRun() {
 	const ctx = InformationSheetPortrait.getContext("2d");
 	if (!ctx) return;
 	ctx.clearRect(0, 0, InformationSheetPortrait.width, InformationSheetPortrait.height);
-	DrawCharacter(C, 0, 0, 0.9, undefined, ctx);
+	DrawCharacter(C, 0, 0, 1, true, ctx);
 }
 
 /**
@@ -251,7 +258,7 @@ function InformationSheetMenuButton(id, onClick, image, tooltip, classList) {
 }
 
 /**
- * Sheet body. The portrait column is left empty so the canvas character shows through.
+ * Portrait on the left. Identity, owner, and relationships fill the sheet.
  * @param {Character} C
  * @returns {HTMLDivElement}
  */
@@ -273,6 +280,14 @@ function InformationSheetContent(C) {
 						tag: "div",
 						classList: ["information-sheet-identity-slot"],
 						children: [InformationSheetIdentity(C)],
+					},
+					{
+						tag: "div",
+						classList: ["information-sheet-relations-slot"],
+						children: [
+							InformationSheetColumn("Owner", [InformationSheetOwnership(C)], "Unowned", undefined, false),
+							InformationSheetRelationshipColumn(C),
+						],
 					},
 				],
 			},
@@ -482,4 +497,229 @@ function InformationSheetHideTooltip() {
 	if (!tip) return;
 	tip.textContent = "";
 	tip.setAttribute("hidden", true);
+}
+
+/**
+ * @param {Character} C
+ * @returns {HTMLElement}
+ */
+function InformationSheetOwnership(C) {
+	if (!C.IsOwned()) {
+		return ElementCreate({
+			tag: "p",
+			classList: ["information-sheet-owner"],
+			children: [TextGet("Unowned")],
+		});
+	}
+
+	const stageText = C.IsFullyOwned() ? "Collared" : "Trial";
+	const ownerNumber = C.OwnerNumber();
+	const since = C.OwnedSinceMs();
+	return ElementCreate({
+		tag: "div",
+		classList: ["information-sheet-ownership"],
+		children: [
+			{
+				tag: "p",
+				classList: ["information-sheet-owner"],
+				children: [
+					`${TextGet(`${stageText}By`)} `,
+					InformationSheetCopy(C.OwnerName()),
+					ownerNumber !== -1 ? " (" : null,
+					ownerNumber !== -1 ? InformationSheetCopy(ownerNumber.toString()) : null,
+					ownerNumber !== -1 ? ")" : null,
+				],
+			},
+			since > 0 ? InformationSheetDuration(since) : null,
+		],
+	});
+}
+
+/**
+ * @param {string} titleKey
+ * @param {readonly HTMLElement[]} entries
+ * @param {string} [emptyKey]
+ * @param {string} [area]
+ * @param {boolean} [scroll]
+ * @returns {HTMLElement}
+ */
+function InformationSheetColumn(titleKey, entries, emptyKey = "None", area, scroll = true) {
+	return ElementCreate({
+		tag: "section",
+		classList: [
+			"information-sheet-column",
+			"information-sheet-panel",
+			scroll ? "scroll-box" : null,
+			area ? `information-sheet-area-${area}` : null,
+		],
+		eventListeners: scroll ? {
+			scroll: InformationSheetHideTooltip,
+		} : {},
+		children: [
+			{ tag: "h3", children: [TextGet(titleKey)] },
+			...(entries.length ? entries : [/** @type {HTMLOptions<"p">} */({
+				tag: "p",
+				classList: ["information-sheet-empty"],
+				children: [TextGet(emptyKey)],
+			})]),
+		],
+	});
+}
+
+/**
+ * @param {Character} C
+ * @returns {HTMLElement}
+ */
+function InformationSheetRelationshipColumn(C) {
+	/** @type {HTMLElement[]} */
+	const entries = [];
+
+	if (C.IsNpc()) {
+		entries.push(InformationSheetAffection(C.Love ?? 0));
+		const playerLove = C.GetLovership().find((lover) => lover.MemberNumber === Player.MemberNumber);
+		if (playerLove) {
+			entries.push(InformationSheetLoverEntry(C.LoverName() || playerLove.Name, playerLove.Stage, playerLove.Start ?? 0));
+		} else if (!C.LoverName()) {
+			entries.push(ElementCreate({
+				tag: "p",
+				classList: ["information-sheet-empty"],
+				children: [`${TextGet("Lover")} ${TextGet("None")}`],
+			}));
+		}
+	} else {
+		for (const lover of C.GetLovership()) {
+			entries.push(InformationSheetLoverEntry(lover.Name, lover.Stage, lover.Start ?? 0, lover.MemberNumber));
+		}
+	}
+
+	const titleKey = C.IsNpc() ?  "YourRelations" : "Relationships";
+
+	return InformationSheetColumn(titleKey, entries);
+}
+
+/**
+ * @param {string} name
+ * @param {0 | 1 | 2 | undefined} stage
+ * @param {number} start
+ * @param {number} [memberNumber]
+ * @returns {HTMLElement}
+ */
+function InformationSheetLoverEntry(name, stage, start, memberNumber) {
+	const stageKey = InformationSheetLoverStages[stage ?? 0];
+	return ElementCreate({
+		tag: "article",
+		classList: ["information-sheet-entry"],
+		children: [
+			{
+				tag: "p",
+				classList: ["information-sheet-entry-title"],
+				children: [
+					`${TextGet(`${stageKey}With`)} `,
+					InformationSheetCopy(name),
+					memberNumber != null ? " (" : null,
+					memberNumber != null ? InformationSheetCopy(memberNumber.toString()) : null,
+					memberNumber != null ? ")" : null,
+				],
+			},
+			start > 0 ? InformationSheetDuration(start) : null,
+		],
+	});
+}
+
+/**
+ * @param {number} love
+ * @returns {string}
+ */
+function InformationSheetLoveQualifier(love) {
+	if (love >= 100) return "RelationshipPerfect";
+	if (love >= 75) return "RelationshipGreat";
+	if (love >= 50) return "RelationshipGood";
+	if (love >= 25) return "RelationshipFair";
+	if (love > -25) return "RelationshipNeutral";
+	if (love > -50) return "RelationshipPoor";
+	if (love > -75) return "RelationshipBad";
+	if (love > -100) return "RelationshipHorrible";
+	return "RelationshipAtrocious";
+}
+
+/**
+ * @param {number} love
+ * @returns {HTMLDivElement}
+ */
+function InformationSheetAffection(love) {
+	return InformationSheetTextStat(
+		"",
+		`${love} ${TextGet(InformationSheetLoveQualifier(love))}`,
+		[InformationSheetBimeter(love, 100)],
+		["information-sheet-entry"],
+	);
+}
+
+/**
+ * Zero sits on the center line. Negative values grow left, positive values grow right.
+ * @param {number} value
+ * @param {number} max
+ * @param {readonly string[]} [classList]
+ * @returns {HTMLDivElement}
+ */
+function InformationSheetBimeter(value, max, classList) {
+	const magnitude = Math.min(max, Math.abs(value));
+	const pct = max > 0 ? magnitude / max * 50 : 0;
+	return ElementCreate({
+		tag: "div",
+		classList: ["information-sheet-bimeter", ...(classList ?? [])],
+		attributes: { "aria-hidden": true },
+		children: [
+			{
+				tag: "span",
+				classList: ["information-sheet-bimeter-fill"],
+				dataAttributes: { sign: value < 0 ? "negative" : "positive" },
+				style: { width: `${pct}%` },
+			},
+			{ tag: "span", classList: ["information-sheet-bimeter-axis"] },
+		],
+	});
+}
+
+/**
+ * @param {number} start
+ * @returns {HTMLParagraphElement}
+ */
+function InformationSheetDuration(start) {
+	const formatted = CommonFormatDurationRange(CurrentTime, start, {
+		showFull: true,
+		includeYears: true,
+		includeMonths: true,
+		includeDays: true,
+	});
+	const line = ElementCreate({
+		tag: "p",
+		classList: ["information-sheet-duration"],
+		children: [`${TextGet("For")} ${formatted}`],
+	});
+	InformationSheetHover(line, InformationSheetTimestampTooltip(start));
+	return line;
+}
+
+/**
+ * Label and value on one row. Further nodes, such as a meter, sit under that row.
+ * Pass an element for `value` when the value is not plain text.
+ * @param {string} label
+ * @param {string | HTMLElement} value
+ * @param {readonly HTMLElement[]} [extra]
+ * @param {readonly string[]} [classList]
+ * @returns {HTMLDivElement}
+ */
+function InformationSheetTextStat(label, value, extra, classList) {
+	return ElementCreate({
+		tag: "div",
+		classList: ["information-sheet-stat", ...(classList ?? [])],
+		children: [
+			{ tag: "span", classList: ["information-sheet-stat-label"], children: [label] },
+			typeof value === "string"
+				? { tag: "span", classList: ["information-sheet-stat-value"], children: [value] }
+				: value,
+			...(extra ?? []),
+		],
+	});
 }
