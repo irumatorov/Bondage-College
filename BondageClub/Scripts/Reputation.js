@@ -1,19 +1,20 @@
 "use strict";
 
-/** @type {Record<ReputationType, { negative?: true }>} */
+/** @type {Record<ReputationType, { negative?: true, color: string }>} */
 var ReputationConfig = {
-	ABDL: {},
-	Asylum: { negative: true },
-	Dominant: { negative: true },
-	Gambling: {},
-	Gaming: {},
-	Kidnap: {},
-	LARP: {},
-	Maid: {},
-	HouseAmplector: {},
-	HouseCorporis: {},
-	HouseMaiestas: {},
-	HouseVincula: {},
+	ABDL: { color: "#e07aaa" },
+	Asylum: { negative: true, color: "#2f8f8a" },
+	Dominant: { negative: true, color: "#8a3a62" },
+	Gambling: { color: "#1f6b45" },
+	Gaming: { color: "#7a5a28" },
+	Kidnap: { color: "#3c4a78" },
+	LARP: { color: "#a34b32" },
+	Maid: { color: "#7a4ea8" },
+	// House colors match the magic school robes.
+	HouseAmplector: { color: "#4477AA" },
+	HouseCorporis: { color: "#EE6022" },
+	HouseMaiestas: { color: "#DFAC13" },
+	HouseVincula: { color: "#447744" },
 };
 
 /** @type {ReputationType[]} */

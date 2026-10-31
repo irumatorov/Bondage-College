@@ -276,7 +276,8 @@ function InformationSheetMenuButton(id, onClick, image, tooltip, classList) {
 }
 
 /**
- * Portrait on the left. Identity and skills stack on one side, owner and significant others on the other.
+ * Portrait on the left. Identity and skills stack on one side, with reputation beside the skills.
+ * Owner and significant others stay on the right.
  * @param {Character} C
  * @returns {HTMLDivElement}
  */
@@ -298,6 +299,7 @@ function InformationSheetContent(C) {
 		}),
 	];
 	if (C.IsPlayer()) sections.push(InformationSheetSkillColumn(C));
+	if (C.IsPlayer() || C.IsOnline()) sections.push(InformationSheetReputationColumn(C));
 
 	return ElementCreate({
 		tag: "div",
@@ -694,9 +696,10 @@ function InformationSheetAffection(love) {
  * @param {number} value
  * @param {number} max
  * @param {readonly string[]} [classList]
+ * @param {string} [color]
  * @returns {HTMLDivElement}
  */
-function InformationSheetBimeter(value, max, classList) {
+function InformationSheetBimeter(value, max, classList, color) {
 	const magnitude = Math.min(max, Math.abs(value));
 	const pct = max > 0 ? magnitude / max * 50 : 0;
 	return ElementCreate({
@@ -708,7 +711,7 @@ function InformationSheetBimeter(value, max, classList) {
 				tag: "span",
 				classList: ["information-sheet-bimeter-fill"],
 				dataAttributes: { sign: value < 0 ? "negative" : "positive" },
-				style: { width: `${pct}%` },
+				style: { width: `${pct}%`, "background-color": color },
 			},
 			{ tag: "span", classList: ["information-sheet-bimeter-axis"] },
 		],
@@ -901,6 +904,99 @@ function InformationSheetRefreshSkills(C) {
 		watch.modifier.classList.toggle("information-sheet-positive", modifier > 0);
 		watch.modifier.classList.toggle("information-sheet-negative", modifier < 0);
 	}
+}
+
+/**
+ * @param {Character} C
+ * @returns {HTMLElement}
+ */
+function InformationSheetReputationColumn(C) {
+	/** @type {HTMLElement[]} */
+	const entries = [InformationSheetDualReputation(C, "Dominant", ReputationGet(C, "Dominant"))];
+	const rest = C.Reputation
+		.filter((reputation) => reputation.Type !== "Dominant" && reputation.Value !== 0)
+		.sort((a, b) => InformationSheetCompareText(
+			ReputationLabel(a.Type, a.Value) ?? "",
+			ReputationLabel(b.Type, b.Value) ?? "",
+		));
+
+	for (const reputation of rest) {
+		if (ReputationConfig[reputation.Type]?.negative === true) {
+			entries.push(InformationSheetDualReputation(C, reputation.Type, reputation.Value));
+		} else {
+			const magnitude = Math.abs(reputation.Value);
+			entries.push(InformationSheetMeterStat(
+				ReputationLabel(reputation.Type, reputation.Value) ?? "",
+				magnitude.toString(),
+				magnitude,
+				100,
+				ReputationConfig[reputation.Type].color,
+			));
+		}
+	}
+	return InformationSheetColumn("Reputation", entries, "ReputationNone", "reputation");
+}
+
+/**
+ * @param {Character} C
+ * @param {ReputationType} type
+ * @param {number} value
+ * @returns {HTMLDivElement}
+ */
+function InformationSheetDualReputation(C, type, value) {
+	return InformationSheetTextStat(
+		ReputationLabel(type, value) ?? "",
+		Math.abs(value).toString(),
+		[InformationSheetBimeter(value, 100, ["information-sheet-reputation-bimeter"], ReputationConfig[type].color)],
+	);
+}
+
+/** @type {Record<ServerChatRoomLanguage | "TW", string>} */
+const InformationSheetSortLocale = {
+	EN: "en",
+	DE: "de",
+	FR: "fr",
+	ES: "es",
+	RU: "ru",
+	CN: "zh-CN",
+	TW: "zh-TW",
+	UA: "uk",
+};
+
+/**
+ * @param {string} a
+ * @param {string} b
+ * @returns {number}
+ */
+function InformationSheetCompareText(a, b) {
+	const locale = InformationSheetSortLocale[TranslationLanguage] ?? "en";
+	return a.localeCompare(b, locale, { sensitivity: "base" });
+}
+
+/**
+ * @param {string} label
+ * @param {string} value
+ * @param {number} amount
+ * @param {number} max
+ * @param {string} color
+ * @returns {HTMLDivElement}
+ */
+function InformationSheetMeterStat(label, value, amount, max, color) {
+	const pct = max > 0 ? Math.max(0, Math.min(100, amount / max * 100)) : 0;
+	return InformationSheetTextStat(label, value, [
+		ElementCreate({
+			tag: "div",
+			classList: ["information-sheet-meter"],
+			attributes: { "aria-hidden": true },
+			children: [
+				{
+					tag: "span",
+					classList: ["information-sheet-meter-fill"],
+					style: { width: `${pct}%`, "background-color": color },
+				},
+			],
+		}),
+	]);
 }
 
 /**

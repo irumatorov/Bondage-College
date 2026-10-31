@@ -50,7 +50,7 @@
 .information-sheet-body {
 	box-sizing: border-box;
 	display: grid;
-	grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+	grid-template-columns: minmax(0, 0.625fr) minmax(0, 0.625fr) minmax(0, 0.55fr);
 	grid-template-rows: auto minmax(0, 1fr);
 	gap: 0.55em;
 	height: 100%;
@@ -59,18 +59,23 @@
 	overscroll-behavior: contain;
 }
 
-.information-sheet-body[data-layout="player"],
+.information-sheet-body[data-layout="player"] {
+	grid-template-areas:
+		"identity identity relationships"
+		"skills reputation relationships";
+}
+
 .information-sheet-body[data-layout="online"] {
 	grid-template-areas:
-		"identity relationships"
-		"skills relationships";
+		"identity identity relationships"
+		"reputation reputation relationships";
 }
 
 .information-sheet-body[data-layout="npc"],
 .information-sheet-body[data-layout="basic"] {
 	grid-template-areas:
-		"identity relationships"
-		"identity relationships";
+		"identity identity relationships"
+		"identity identity relationships";
 }
 
 .information-sheet-identity-slot {
@@ -81,6 +86,9 @@
 
 .information-sheet-area-skills {
 	grid-area: skills;
+}
+.information-sheet-area-reputation {
+	grid-area: reputation;
 }
 
 .information-sheet-note,
@@ -339,3 +347,19 @@
 .information-sheet-pip-hatch {
 	background-color: gray;
 }
+
+.information-sheet-meter {
+	grid-column: 1 / -1;
+	height: 0.4em;
+	background: rgb(0 0 0 / 10%);
+	border: var(--border-width) solid rgb(0 0 0 / 32%);
+	box-sizing: border-box;
+}
+
+.information-sheet-meter-fill {
+	display: block;
+	height: 100%;
+	max-width: 100%;
+	background: #3a342c;
+}
+
