@@ -857,14 +857,15 @@ function PandoraCharacterFight() {
 	PandoraFightCharacter = /** @type {NPCCharacter} */ (CurrentCharacter);
 	let Difficulty = (InfiltrationMissionState.Difficulty * 2) + Math.floor(Math.random() * 3);
 	if (CurrentCharacter.AccountName.indexOf("RandomMistress") >= 0) Difficulty = InfiltrationMissionState.Difficulty + 6;
-	KidnapStart(CurrentCharacter, PandoraBackground, Difficulty, "PandoraCharacterFightEnd()");
+	KidnapStart(CurrentCharacter, PandoraBackground, Difficulty, (victory) => CommonPromiseCatch(PandoraCharacterFightEnd(victory)));
 }
 
 /**
  * Resolves the fight between the player and the current character
- * @returns {void} - Nothing
+ * @param {boolean} victory - Wether the player won or not
+ * @returns {SafePromise<void>} - Nothing
  */
-function PandoraCharacterFightEnd() {
+async function PandoraCharacterFightEnd(victory) {
 	if (!PandoraFightCharacter) return;
 	CharacterSetCurrent(PandoraFightCharacter);
 	if (!CurrentCharacter) return;
@@ -875,12 +876,12 @@ function PandoraCharacterFightEnd() {
 		if (PandoraWillpower > PandoraMaxWillpower) PandoraWillpower = PandoraMaxWillpower;
 	}
 	CurrentCharacter.Stage = (KidnapVictory) ? "100" : "200";
-	CharacterRelease(KidnapVictory ? Player : CurrentCharacter);
-	CurrentCharacter.AllowItem = KidnapVictory;
-	if (KidnapVictory) CurrentCharacter.AllowMove = true;
-	if (KidnapVictory && (PandoraClothes != "Random") && (PandoraClothes != "CatBurglar") && (PandoraClothes != "Cosplay")) PandoraDress(Player, PandoraClothes);
-	CommonSetScreen("Room", "Pandora");
-	CurrentCharacter.CurrentDialog = DialogFind(CurrentCharacter, (KidnapVictory) ? "FightVictory" : "FightDefeat");
+	CharacterRelease(victory ? Player : CurrentCharacter);
+	CurrentCharacter.AllowItem = victory;
+	if (victory) CurrentCharacter.AllowMove = true;
+	if (victory && (PandoraClothes != "Random") && (PandoraClothes != "CatBurglar") && (PandoraClothes != "Cosplay")) PandoraDress(Player, PandoraClothes);
+	await CommonSetScreen("Room", "Pandora");
+	CurrentCharacter.CurrentDialog = DialogFind(CurrentCharacter, victory ? "FightVictory" : "FightDefeat");
 }
 
 /**

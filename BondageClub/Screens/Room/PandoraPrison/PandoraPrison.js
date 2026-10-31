@@ -239,14 +239,14 @@ function PandoraPrisonStartFight() {
 	if (!CurrentCharacter) return;
 	PoseSetActive(Player, null);
 	let Difficulty = ((InfiltrationMissionState?.Difficulty ?? 0) * 2) + 2;
-	KidnapStart(CurrentCharacter, PandoraPrisonBackground, Difficulty, "PandoraPrisonFightEnd()");
+	KidnapStart(CurrentCharacter, PandoraPrisonBackground, Difficulty, () => { PandoraPrisonFightEnd(); });
 }
 
 /**
  * When the fight with the NPC ends
- * @returns {void} - Nothing
+ * @returns {SafePromise<void>} - Nothing
  */
-function PandoraPrisonFightEnd() {
+async function PandoraPrisonFightEnd() {
 	CharacterSetCurrent(PandoraPrisonGuard);
 	if (!CurrentCharacter) return;
 	SkillProgress(Player, "Willpower", KidnapSuccessWillpowerProgress(CurrentCharacter));
@@ -255,7 +255,7 @@ function PandoraPrisonFightEnd() {
 	CharacterRelease(KidnapVictory ? Player : CurrentCharacter);
 	CurrentCharacter.AllowItem = KidnapVictory;
 	PandoraPrisonEscaped = KidnapVictory;
-	CommonSetScreen("Room", "PandoraPrison");
+	await CommonSetScreen("Room", "PandoraPrison");
 	CurrentCharacter.CurrentDialog = DialogFind(CurrentCharacter, (KidnapVictory) ? "FightVictory" : "FightDefeat");
 	if (!KidnapVictory) {
 		if (Player.Infiltration.Punishment) {

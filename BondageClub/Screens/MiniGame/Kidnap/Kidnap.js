@@ -1,8 +1,10 @@
 "use strict";
 var KidnapVictory = false;
+var KidnapSurrendered = false;
 var KidnapDifficulty = 0;
 var KidnapBackground = "KidnapLeague";
-var KidnapReturnFunction = "";
+/** @type {null | ((victory: boolean, surrender: boolean) => void)} */
+var KidnapReturnCallback = null;
 /** @type {null | Character} */
 var KidnapOpponent = null;
 /** @type {null | Item} */
@@ -49,7 +51,7 @@ var KidnapRPS = ["Rock", "Scissors", "Paper"];
  * @returns {void} - Nothing
  */
 function KidnapLoadStats(C, Bonus) {
-	let Pandora = (KidnapReturnFunction.indexOf("Pandora") == 0);
+	let Pandora = C.CharacterID.includes("Pandora");
 	if (C.IsPlayer())
 		C.KidnapStat = [
 			6 + CharacterGetBonus(C, "Kidnap" + KidnapMoveType[0]) + ((Pandora && InfiltrationPerksActive("Strength")) ? 2 : 0),
@@ -399,6 +401,7 @@ function KidnapSelectMoveUpperHand(PlayerMove) {
  */
 function KidnapSurrender() {
 	Player.KidnapWillpower = 0;
+	KidnapSurrendered = true;
 	KidnapSetMode("SelectMove");
 }
 
@@ -407,13 +410,14 @@ function KidnapSurrender() {
  * @param {Character} Opponent - The NPC that will be the opponent for the fight
  * @param {string} Background - The background for the fight, changes depending on which room the battle is happening
  * @param {number} Difficulty - Difficulty modifier for the fight, higher is harder
- * @param {string} ReturnFunction - The callback to execute through CommonDynamicFunction
+ * @param {(victory: boolean, surrender: boolean) => void} callback - The callback to execute when the minigame completes
  * @returns {void} - Nothing
  */
-function KidnapStart(Opponent, Background, Difficulty, ReturnFunction) {
+function KidnapStart(Opponent, Background, Difficulty, callback) {
 	KidnapDifficulty = (Difficulty == null) ? 0 : Difficulty;
 	KidnapVictory = false;
-	KidnapReturnFunction = ReturnFunction;
+	KidnapSurrendered = false;
+	KidnapReturnCallback = callback;
 	KidnapPlayerCloth = InventoryGet(Player, "Cloth");
 	KidnapPlayerClothAccessory = InventoryGet(Player, "ClothAccessory");
 	KidnapPlayerClothLower = InventoryGet(Player, "ClothLower");
@@ -424,7 +428,7 @@ function KidnapStart(Opponent, Background, Difficulty, ReturnFunction) {
 	KidnapBackground = Background;
 	MiniGameCheatAvailable = (CheatFactor("MiniGameBonus", 0) == 0);
 	DialogLeave();
-	if (KidnapReturnFunction.indexOf("Pandora") == 0) {
+	if (Opponent.CharacterID.includes("Pandora")) {
 		Player.KidnapMaxWillpower = PandoraMaxWillpower;
 		Player.KidnapWillpower = PandoraWillpower;
 	} else {
@@ -554,7 +558,11 @@ function KidnapRun() {
 	// If the time is over, we go to the next step
 	if (CommonTime() >= KidnapTimer && Player.KidnapCard) {
 		if (KidnapMode == "SelectMove") { KidnapSelectMove(Player.KidnapCard.length - 1); return; }
-		if (KidnapMode == "End") { CommonDynamicFunction(KidnapReturnFunction); return; }
+		if (KidnapMode == "End") {
+			KidnapReturnCallback?.(KidnapVictory, KidnapSurrendered);
+			KidnapReturnCallback = null;
+			return;
+		}
 		if ((KidnapMode == "Intro") || (KidnapMode == "SuddenDeath") || (KidnapMode == "ShowMove") || (KidnapMode == "UpperHand") || (KidnapMode == "SelectItem")) KidnapSetMode("SelectMove");
 	} else KidnapShowTimer();
 
@@ -569,7 +577,8 @@ function KidnapClick() {
 
 	// If we must end the fight
 	if (KidnapMode == "End") {
-		CommonDynamicFunction(KidnapReturnFunction);
+		KidnapReturnCallback?.(KidnapVictory, KidnapSurrendered);
+		KidnapReturnCallback = null;
 		return;
 	}
 
