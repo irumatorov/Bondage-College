@@ -60,9 +60,11 @@
 }
 
 .information-sheet-body[data-layout="player"] {
+	grid-template-rows: auto minmax(0, 1fr) auto;
 	grid-template-areas:
 		"identity identity relationships"
-		"skills reputation relationships";
+		"skills reputation relationships"
+		"permissions permissions relationships";
 }
 
 .information-sheet-body[data-layout="online"] {
@@ -373,4 +375,20 @@
 
 .information-sheet-trait-bimeter .information-sheet-bimeter-fill {
 	background: #3a342c;
+}
+
+#information-sheet-screen .information-sheet-permissions {
+	grid-area: permissions;
+	font-size: 1.15em;
+	grid-template-columns: max-content minmax(8em, 1fr);
+	align-items: center;
+	padding-inline: var(--scrollbar-gutter);
+}
+
+#information-sheet-screen .information-sheet-permissions .custom-select {
+	padding: 0.15em 0.3em;
+}
+
+#information-sheet-screen .information-sheet-permissions .dropdown-label {
+	color: #3a2c22;
 }

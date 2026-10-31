@@ -19,6 +19,7 @@ const InformationSheetIDs = Object.freeze({
 	profile: "information-sheet-profile",
 	ownersNotes: "information-sheet-owners-notes",
 	tooltip: "information-sheet-tooltip",
+	allowedInteractions: "information-sheet-allowed-interactions",
 });
 
 /** @type {HTMLDivElement | null} */
@@ -76,53 +77,6 @@ async function InformationSheetLoad() {
 	});
 	InformationSheetPortrait = /** @type {HTMLCanvasElement} */ (ElementWrap("information-sheet-portrait"));
 	InformationSheetSkillRefreshAt = CurrentTime + 1000;
-
-	if (!C.IsPlayer()) return;
-
-	const dropdownOptions = Object.values(AllowedInteractions)
-		.map((e) => /** @type {Omit<HTMLOptions<"option">, "tag">} */({
-			attributes: {
-				value: e.toString(),
-				label: TextGet("AllowedInteraction" + e.toString()),
-				selected: e === Player.AllowedInteractions
-			}
-		}));
-
-	ElementCreate({
-		tag: "label",
-		attributes: {
-			id: "AllowedInteractions-dropdown-container",
-			for: "AllowedInteractions-dropdown"
-		},
-		style: {
-			display: "grid",
-			"grid-template-rows": "max-content max-content",
-			"grid-template-columns": "auto",
-			"gap": "var(--gap)"
-		},
-		children: [
-			{
-				tag: "span",
-				attributes: { id: "AllowedInteractions-dropdown-label" },
-				children: [TextGet("AllowedInteractions")],
-				style: { "user-select": "none" }
-			},
-			ElementDropdown.Create("AllowedInteractions-dropdown", dropdownOptions, function (ev) {
-				ev.preventDefault();
-				if (this.value in Object.values(AllowedInteractions) === false) return;
-				Player.AllowedInteractions = /** @type {AllowedInteractions} */ (CommonParseInt(this.value));
-				if (Player.GetDifficulty() >= Difficulty.EXTREME) LoginExtremeItemSettings(Player.AllowedInteractions === AllowedInteractions.Everyone);
-
-				const P = {
-					ItemPermission: Player.AllowedInteractions,
-					AllowedInteractions: Player.AllowedInteractions,
-					...ServerPackItemPermissions(Player.PermissionItems),
-				};
-				ServerAccountUpdate.QueueData(P);
-			})
-		],
-		parent: document.body
-	});
 }
 
 /**
@@ -156,12 +110,6 @@ function InformationSheetResize() {
 	if (!InformationSheetSelection || !ElementWrap(InformationSheetIDs.screen)) return;
 	InformationSheetHideTooltip();
 	ElementPositionFixed(InformationSheetIDs.screen, 50, 70, 1900, 870);
-
-	if (!InformationSheetSelection.IsPlayer()) return;
-
-	ElementSetPosition("AllowedInteractions-dropdown-container", 550, 800);
-	ElementSetSize("AllowedInteractions-dropdown", 600);
-	ElementSetFontSize("AllowedInteractions-dropdown-container", "auto");
 }
 
 /**
@@ -180,7 +128,6 @@ function InformationSheetUnload() {
 	InformationSheetTooltip = null;
 	InformationSheetSkillWatches = [];
 	ElementRemove(InformationSheetIDs.screen);
-	ElementRemove("AllowedInteractions-dropdown-container");
 }
 
 /**
@@ -298,7 +245,7 @@ function InformationSheetContent(C) {
 			],
 		}),
 	];
-	if (C.IsPlayer()) sections.push(InformationSheetSkillColumn(C));
+	if (C.IsPlayer()) sections.push(InformationSheetSkillColumn(C), InformationSheetPermissions());
 	if (C.IsPlayer() || C.IsOnline()) sections.push(InformationSheetReputationColumn(C));
 	if (C.IsNpc()) sections.push(InformationSheetTraitColumn(C));
 
@@ -1052,4 +999,41 @@ function InformationSheetTextStat(label, value, extra, classList) {
 			...(extra ?? []),
 		],
 	});
+}
+
+/**
+ * @returns {HTMLLabelElement}
+ */
+function InformationSheetPermissions() {
+	const dropdownOptions = Object.values(AllowedInteractions)
+		.map((interaction) => /** @type {Omit<HTMLOptions<"option">, "tag">} */({
+			attributes: {
+				value: interaction.toString(),
+				label: TextGet("AllowedInteraction" + interaction.toString()),
+				selected: interaction === Player.AllowedInteractions,
+			},
+		}));
+
+	return ElementDropdown.CreateLabelled(
+		InformationSheetIDs.allowedInteractions,
+		dropdownOptions,
+		TextGet("AllowedInteractions"),
+		function (ev) {
+			ev.preventDefault();
+			if (this.value in Object.values(AllowedInteractions) === false) return;
+			Player.AllowedInteractions = /** @type {AllowedInteractions} */ (CommonParseInt(this.value));
+			if (Player.GetDifficulty() >= Difficulty.EXTREME) {
+				LoginExtremeItemSettings(Player.AllowedInteractions === AllowedInteractions.Everyone);
+			}
+
+			const packed = {
+				ItemPermission: Player.AllowedInteractions,
+				AllowedInteractions: Player.AllowedInteractions,
+				...ServerPackItemPermissions(Player.PermissionItems),
+			};
+			ServerAccountUpdate.QueueData(packed);
+		},
+		null,
+		{ container: { classList: ["information-sheet-permissions"] } },
+	);
 }
