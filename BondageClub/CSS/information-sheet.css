@@ -71,7 +71,12 @@
 		"reputation reputation relationships";
 }
 
-.information-sheet-body[data-layout="npc"],
+.information-sheet-body[data-layout="npc"] {
+	grid-template-areas:
+		"identity identity relationships"
+		"traits traits relationships";
+}
+
 .information-sheet-body[data-layout="basic"] {
 	grid-template-areas:
 		"identity identity relationships"
@@ -89,6 +94,9 @@
 }
 .information-sheet-area-reputation {
 	grid-area: reputation;
+}
+.information-sheet-area-traits {
+	grid-area: traits;
 }
 
 .information-sheet-note,
@@ -363,3 +371,6 @@
 	background: #3a342c;
 }
 
+.information-sheet-trait-bimeter .information-sheet-bimeter-fill {
+	background: #3a342c;
+}

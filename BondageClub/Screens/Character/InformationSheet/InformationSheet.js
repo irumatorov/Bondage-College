@@ -300,6 +300,7 @@ function InformationSheetContent(C) {
 	];
 	if (C.IsPlayer()) sections.push(InformationSheetSkillColumn(C));
 	if (C.IsPlayer() || C.IsOnline()) sections.push(InformationSheetReputationColumn(C));
+	if (C.IsNpc()) sections.push(InformationSheetTraitColumn(C));
 
 	return ElementCreate({
 		tag: "div",
@@ -997,6 +998,37 @@ function InformationSheetMeterStat(label, value, amount, max, color) {
 			],
 		}),
 	]);
+}
+
+/**
+ * Hidden for the first week after meeting her, then names only, then the values.
+ * @param {NPCCharacter} C
+ * @returns {HTMLElement}
+ */
+function InformationSheetTraitColumn(C) {
+	const metAt = NPCEventGet(C, "PrivateRoomEntry") * CheatFactor("AutoShowTraits", 0);
+	if (CurrentTime < metAt + MS_PER_WEEK) return InformationSheetColumn("Trait", [], "TraitUnknown", "traits");
+
+	const levelsKnown = CurrentTime >= metAt + 2 * MS_PER_WEEK;
+	/** @type {HTMLElement[]} */
+	const entries = [];
+	for (const trait of C.Trait ?? []) {
+		const traitName = trait.Value > 0 ? trait.Name : NPCTraitReverse(trait.Name);
+		const label = TextGet("Trait" + traitName);
+		if (!levelsKnown) {
+			entries.push(InformationSheetTextStat(label, "??"));
+		} else {
+			// The first name of the pair is the positive pole, matching NPCTraitGet and Dominant reputation.
+			const pair = NPCTrait.find(([positive, negative]) => positive === trait.Name || negative === trait.Name);
+			const signed = pair ? NPCTraitGet(C, pair[0]) : trait.Value;
+			entries.push(InformationSheetTextStat(
+				label,
+				Math.abs(signed).toString(),
+				[InformationSheetBimeter(signed, 100, ["information-sheet-trait-bimeter"])],
+			));
+		}
+	}
+	return InformationSheetColumn("Trait", entries, "None", "traits");
 }
 
 /**
