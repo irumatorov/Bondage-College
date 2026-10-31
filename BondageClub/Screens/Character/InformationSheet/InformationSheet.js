@@ -33,6 +33,15 @@ const InformationSheetLoverStages = {
 	1: "Engaged",
 	2: "Married",
 };
+
+/**
+ * Skill rows whose modifier can expire while the sheet is open.
+ * @type {{ type: SkillType, value: HTMLElement, modifier: HTMLElement }[]}
+ */
+let InformationSheetSkillWatches = [];
+/** @type {number} */
+let InformationSheetSkillRefreshAt = 0;
+
 /**
  * Loads the Information Sheet, cache the sub screens
  * @type {ScreenLoadHandler}
@@ -47,6 +56,8 @@ async function InformationSheetLoad() {
 	]);
 
 	const C = InformationSheetSelection;
+
+	InformationSheetSkillWatches = [];
 
 	const screen = ElementDOMScreen.getTemplate(InformationSheetIDs.screen, {
 		menubarButtons: InformationSheetMenuButtons(C),
@@ -64,6 +75,7 @@ async function InformationSheetLoad() {
 		parent: screen,
 	});
 	InformationSheetPortrait = /** @type {HTMLCanvasElement} */ (ElementWrap("information-sheet-portrait"));
+	InformationSheetSkillRefreshAt = CurrentTime + 1000;
 
 	if (!C.IsPlayer()) return;
 
@@ -127,6 +139,11 @@ function InformationSheetRun() {
 	if (!ctx) return;
 	ctx.clearRect(0, 0, InformationSheetPortrait.width, InformationSheetPortrait.height);
 	DrawCharacter(C, 0, 0, 1, true, ctx);
+
+	if (!C.IsPlayer() || InformationSheetSkillWatches.length === 0) return;
+	if (CurrentTime < InformationSheetSkillRefreshAt) return;
+	InformationSheetSkillRefreshAt = CurrentTime + 1000;
+	InformationSheetRefreshSkills(C);
 }
 
 /**
@@ -161,6 +178,7 @@ function InformationSheetExit() {
 function InformationSheetUnload() {
 	InformationSheetHideTooltip();
 	InformationSheetTooltip = null;
+	InformationSheetSkillWatches = [];
 	ElementRemove(InformationSheetIDs.screen);
 	ElementRemove("AllowedInteractions-dropdown-container");
 }
@@ -258,11 +276,29 @@ function InformationSheetMenuButton(id, onClick, image, tooltip, classList) {
 }
 
 /**
- * Portrait on the left. Identity, owner, and relationships fill the sheet.
+ * Portrait on the left. Identity and skills stack on one side, owner and significant others on the other.
  * @param {Character} C
  * @returns {HTMLDivElement}
  */
 function InformationSheetContent(C) {
+	/** @type {HTMLElement[]} */
+	const sections = [
+		ElementCreate({
+			tag: "div",
+			classList: ["information-sheet-identity-slot"],
+			children: [InformationSheetIdentity(C)],
+		}),
+		ElementCreate({
+			tag: "div",
+			classList: ["information-sheet-relations-slot"],
+			children: [
+				InformationSheetColumn("Owner", [InformationSheetOwnership(C)], "Unowned", undefined, false),
+				InformationSheetRelationshipColumn(C),
+			],
+		}),
+	];
+	if (C.IsPlayer()) sections.push(InformationSheetSkillColumn(C));
+
 	return ElementCreate({
 		tag: "div",
 		classList: ["information-sheet"],
@@ -275,24 +311,22 @@ function InformationSheetContent(C) {
 			{
 				tag: "div",
 				classList: ["information-sheet-body"],
-				children: [
-					{
-						tag: "div",
-						classList: ["information-sheet-identity-slot"],
-						children: [InformationSheetIdentity(C)],
-					},
-					{
-						tag: "div",
-						classList: ["information-sheet-relations-slot"],
-						children: [
-							InformationSheetColumn("Owner", [InformationSheetOwnership(C)], "Unowned", undefined, false),
-							InformationSheetRelationshipColumn(C),
-						],
-					},
-				],
+				dataAttributes: { layout: InformationSheetLayout(C) },
+				children: sections,
 			},
 		],
 	});
+}
+
+/**
+ * @param {Character} C
+ * @returns {"player" | "online" | "npc" | "basic"}
+ */
+function InformationSheetLayout(C) {
+	if (C.IsNpc()) return "npc";
+	if (C.IsPlayer()) return "player";
+	if (C.IsOnline()) return "online";
+	return "basic";
 }
 
 /**
@@ -699,6 +733,174 @@ function InformationSheetDuration(start) {
 	});
 	InformationSheetHover(line, InformationSheetTimestampTooltip(start));
 	return line;
+}
+
+/**
+ * @param {PlayerCharacter} C
+ * @returns {HTMLElement}
+ */
+function InformationSheetSkillColumn(C) {
+	/** @type {HTMLElement[]} */
+	const entries = [];
+	for (const type of SkillValidSkills) {
+		if (SkillGetLevelReal(C, type) === 0 && SkillGetProgress(C, type) === 0) continue;
+		entries.push(InformationSheetSkill(C, type));
+	}
+	return InformationSheetColumn("Skill", entries, "SkillNone", "skills");
+}
+
+/**
+ * @param {PlayerCharacter} C
+ * @param {SkillType} type
+ * @returns {HTMLDivElement}
+ */
+function InformationSheetSkill(C, type) {
+	const real = SkillGetLevelReal(C, type);
+	const progress = SkillGetProgress(C, type);
+	const ratio = SkillGetRatio(C, type);
+	const modifier = SkillGetModifier(C, type);
+	const value = ElementCreate({
+		tag: "span",
+		classList: ["information-sheet-stat-value"],
+		children: [InformationSheetSkillValue(C, type)],
+	});
+
+	/** @type {HTMLElement | null} */
+	let modifierEl = null;
+	if (modifier) {
+		modifierEl = ElementCreate({
+			tag: "span",
+			classList: [
+				"information-sheet-modifier",
+				modifier > 0 ? "information-sheet-positive" : "information-sheet-negative",
+			],
+			children: [InformationSheetModifierText(modifier, SkillGetModifierDuration(C, type))],
+		});
+		InformationSheetSkillWatches.push({ type, value, modifier: modifierEl });
+	}
+
+	const skill = ElementCreate({
+		tag: "div",
+		classList: ["information-sheet-skill"],
+		children: [
+			InformationSheetTextStat(
+				TextGet(`Skill${type}`),
+				ElementCreate({
+					tag: "span",
+					classList: ["information-sheet-skill-figures"],
+					children: [modifierEl, value],
+				}),
+				[InformationSheetSkillPips(real, progress, ratio)],
+			),
+		],
+	});
+	if (ratio !== 1) InformationSheetHover(skill, InformationSheetSkillRatioText(type, ratio));
+	return skill;
+}
+
+/**
+ * One pip per level. Levels already reached are full, and the current level is filled by its progress.
+ * A ratio below 1 hatches the difference between the skill in use and the skill earned.
+ * @param {number} level
+ * @param {number} progress
+ * @param {number} ratio
+ * @returns {HTMLDivElement}
+ */
+function InformationSheetSkillPips(level, progress, ratio) {
+	const earned = level + progress / SkillProgressMax;
+	const used = earned * ratio;
+	/** @type {HTMLOptionsUnion[]} */
+	const pips = [];
+	for (let i = 0; i < SkillLevelMaximum; i++) {
+		const solid = Math.max(0, Math.min(i + 1, used) - i);
+		const hatch = Math.max(0, Math.min(i + 1, earned) - Math.max(i, used));
+		/** @type {HTMLOptionsUnion[]} */
+		const segments = [];
+		if (solid > 0) {
+			segments.push({
+				tag: "span",
+				classList: ["information-sheet-pip-fill"],
+				style: { width: `${solid * 100}%` },
+			});
+		}
+		if (hatch > 0) {
+			segments.push({
+				tag: "span",
+				classList: ["information-sheet-pip-hatch"],
+				style: { width: `${hatch * 100}%` },
+			});
+		}
+		pips.push({
+			tag: "span",
+			classList: ["information-sheet-pip"],
+			children: segments,
+		});
+	}
+	return ElementCreate({
+		tag: "div",
+		classList: ["information-sheet-pips"],
+		attributes: { "aria-hidden": true },
+		style: { "--information-sheet-pips": String(SkillLevelMaximum) },
+		children: pips,
+	});
+}
+
+/**
+ * @param {PlayerCharacter} C
+ * @param {SkillType} type
+ * @returns {string}
+ */
+function InformationSheetSkillValue(C, type) {
+	const level = SkillGetLevel(C, type);
+	const progress = SkillGetProgress(C, type);
+	const parens = level === SkillLevelMaximum ? TextGet("SkillLevelMaximum") : `${(progress / 10).toFixed(0)}%`;
+	return `${level.toString().padStart(2, " ")} (${parens.padStart(3, " ")})`;
+}
+
+/**
+ * Why a lowered ratio hatches part of the skill bar. Bondage and evasion are the skills a player can turn down.
+ * @param {SkillType} type
+ * @param {number} ratio
+ * @returns {string}
+ */
+function InformationSheetSkillRatioText(type, ratio) {
+	const key = type === "Bondage" || type === "Evasion" ? `SkillRatio${type}` : "SkillRatio";
+	return TextSubstitute(key, {
+		RATIO: Math.round(ratio * 100).toString(),
+	}).join("");
+}
+
+/**
+ * @param {number} modifier
+ * @param {number} duration
+ * @returns {string}
+ */
+function InformationSheetModifierText(modifier, duration) {
+	/** @type {CommonSubtituteSubstitution[]} */
+	const subst = [
+		["ABS", modifier > 0 ? "+" : "-"],
+		["VAL", Math.abs(modifier).toString()],
+		["DURATION", TimermsToTime(duration)],
+	];
+	return CommonStringSubstitute(TextGet("SkillModifier"), subst);
+}
+
+/**
+ * @param {PlayerCharacter} C
+ */
+function InformationSheetRefreshSkills(C) {
+	for (const watch of InformationSheetSkillWatches) {
+		const modifier = SkillGetModifier(C, watch.type);
+		watch.value.textContent = InformationSheetSkillValue(C, watch.type);
+		if (!modifier) {
+			watch.modifier.hidden = true;
+			continue;
+		}
+		watch.modifier.hidden = false;
+		watch.modifier.textContent = InformationSheetModifierText(modifier, SkillGetModifierDuration(C, watch.type));
+		watch.modifier.classList.toggle("information-sheet-positive", modifier > 0);
+		watch.modifier.classList.toggle("information-sheet-negative", modifier < 0);
+	}
 }
 
 /**

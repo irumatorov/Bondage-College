@@ -51,7 +51,7 @@
 	box-sizing: border-box;
 	display: grid;
 	grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
-	grid-template-rows: minmax(0, 1fr);
+	grid-template-rows: auto minmax(0, 1fr);
 	gap: 0.55em;
 	height: 100%;
 	font-size: 0.6em;
@@ -59,9 +59,28 @@
 	overscroll-behavior: contain;
 }
 
+.information-sheet-body[data-layout="player"],
+.information-sheet-body[data-layout="online"] {
+	grid-template-areas:
+		"identity relationships"
+		"skills relationships";
+}
+
+.information-sheet-body[data-layout="npc"],
+.information-sheet-body[data-layout="basic"] {
+	grid-template-areas:
+		"identity relationships"
+		"identity relationships";
+}
+
 .information-sheet-identity-slot {
+	grid-area: identity;
 	gap: 0.45em;
 	font-size: 1.15em;
+}
+
+.information-sheet-area-skills {
+	grid-area: skills;
 }
 
 .information-sheet-note,
@@ -159,6 +178,7 @@
 }
 
 .information-sheet-relations-slot {
+	grid-area: relationships;
 	display: flex;
 	flex-direction: column;
 }
@@ -227,6 +247,13 @@
 	font-weight: 700;
 }
 
+.information-sheet-skill-figures {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 0.4em;
+	white-space: nowrap;
+}
+
 .information-sheet-bimeter {
 	position: relative;
 	grid-column: 1 / -1;
@@ -261,4 +288,54 @@
 .information-sheet-bimeter-fill[data-sign="negative"] {
 	right: 50%;
 	background: red;
+}
+
+.information-sheet-skill {
+	display: flex;
+	flex-direction: column;
+	gap: 0.1em;
+	text-decoration: none;
+}
+
+.information-sheet-modifier {
+	font-size: 0.86em;
+}
+
+.information-sheet-negative {
+	color: red;
+}
+
+.information-sheet-positive {
+	color: green;
+}
+
+.information-sheet-pips {
+	grid-column: 1 / -1;
+	display: grid;
+	grid-template-columns: repeat(var(--information-sheet-pips, 10), minmax(0, 1fr));
+	gap: 0.14em;
+	height: 0.4em;
+}
+
+.information-sheet-pip {
+	display: flex;
+	background: rgb(0 0 0 / 12%);
+	border: var(--border-width) solid rgb(0 0 0 / 40%);
+	box-sizing: border-box;
+	overflow: hidden;
+}
+
+.information-sheet-pip-fill,
+.information-sheet-pip-hatch {
+	display: block;
+	height: 100%;
+	max-width: 100%;
+}
+
+.information-sheet-pip-fill {
+	background-color: #e6b325;
+}
+
+.information-sheet-pip-hatch {
+	background-color: gray;
 }

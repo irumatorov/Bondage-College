@@ -55,7 +55,11 @@ SkillEvasion,Evasion:
 SkillWillpower,Willpower:
 SkillInfiltration,Infiltration:
 SkillDressage,Dressage:
+SkillLevelMaximum,Max
 SkillModifier,ABSVAL for DURATION
+SkillRatioBondage,"Using RATIO% of your bondage skill, so restraints you apply are easier to escape."
+SkillRatioEvasion,"Using RATIO% of your evasion skill, so struggling free is harder."
+SkillRatio,Using RATIO% of this skill.
 Trait,Traits
 TraitUnknown,Spend more time with her to know her traits
 TraitDominant,Dominant:
