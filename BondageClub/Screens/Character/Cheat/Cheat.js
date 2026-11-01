@@ -16,8 +16,8 @@ var CheatBrowserTime = 0;
  * @returns {void} - Nothing
  */
 function CheatValidate() {
-	var BI = CommonGetBrowser();
-	var Time = CommonTime();
+	const BI = CommonGetBrowser();
+	const Time = CommonTime();
 	CheatAllow = (CheatAllow && (BI.Name == CheatBrowserName) && (BI.Version == CheatBrowserVersion) && (Time >= CheatBrowserTime) && (Time <= CheatBrowserTime + 864000000));
 }
 
@@ -51,12 +51,12 @@ function CheatFactor(CheatName, Factor) {
 function CheatImport() {
 	if (MainCanvas == null) {
 		CheatAllow = true;
-		var BI = CommonGetBrowser();
+		const BI = CommonGetBrowser();
 		CheatBrowserName = BI.Name;
 		CheatBrowserVersion = BI.Version;
 		CheatBrowserTime = CommonTime();
 		for (const cheat of CheatList) {
-			var AC = localStorage.getItem("BondageClubCheat" + cheat);
+			const AC = localStorage.getItem("BondageClubCheat" + cheat);
 			if ((AC != null) && (AC.toUpperCase() == "TRUE")) CheatActivated.push(cheat);
 		}
 	}

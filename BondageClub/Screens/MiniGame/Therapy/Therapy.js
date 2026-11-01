@@ -137,7 +137,7 @@ function TherapyMouseDown() {
 	if (MiniGameRunning() && (MouseX >= 1000) && (MiniGameProgress != -1)) {
 
 		// Gets the move type and sends it
-		var MoveType = -1;
+		let MoveType = -1;
 		for (const M of TherapyMoves.keys()) {
 			const moveX = (M % 3) * 250;
 			const moveY = Math.floor(M / 3) * 300;

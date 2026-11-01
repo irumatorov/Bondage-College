@@ -613,7 +613,7 @@ function MaidQuartersFreeSarah() {
  */
 function MaidQuartersGetDusterGag() {
 	/** @type {ItemBundle[]} */
-	var ItemsToEarn = [];
+	const ItemsToEarn = [];
 	ItemsToEarn.push({Name: "DusterGag", Group: "ItemMouth"});
 	ItemsToEarn.push({Name: "DusterGag", Group: "ItemMouth2"});
 	ItemsToEarn.push({Name: "DusterGag", Group: "ItemMouth3"});
@@ -679,6 +679,6 @@ function MaidQuartersNotFromOwner() {
  * @param {number} minutes
  */
 function MaidQuartersSetMaidsDisabled(minutes) {
-	var millis = minutes * MS_PER_MIN;
+	const millis = minutes * MS_PER_MIN;
 	LogAdd("MaidsDisabled", "Maid", CurrentTime + millis);
 }

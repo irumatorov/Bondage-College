@@ -124,7 +124,7 @@ function CollegeTheaterPlayClothes(C1, C2) {
  * @returns {void} - Nothing
  */
 function CollegeTheaterRandomRope(C) {
-	var Color = CommonRandomItemFromList(null, CollegeTheaterRandomColors);
+	const Color = CommonRandomItemFromList(null, CollegeTheaterRandomColors);
 	InventoryWear(C, "HempRope", "ItemArms", Color);
 	InventoryWear(C, "HempRope", "ItemLegs", Color);
 	InventoryWear(C, "HempRope", "ItemFeet", Color);
@@ -136,7 +136,7 @@ function CollegeTheaterRandomRope(C) {
  * @returns {void} - Nothing
  */
 function CollegeTheaterRandomBelt(C) {
-	var Color = CommonRandomItemFromList(null, CollegeTheaterRandomColors);
+	const Color = CommonRandomItemFromList(null, CollegeTheaterRandomColors);
 	InventoryWear(C, "SturdyLeatherBelts", "ItemArms", Color);
 	InventoryWear(C, "SturdyLeatherBelts", "ItemLegs", Color);
 	InventoryWear(C, "SturdyLeatherBelts", "ItemFeet", Color);
@@ -202,7 +202,7 @@ function CollegeTheaterInviteToPrivateRoom(Role) {
 	CollegeTheaterDressBack();
 	if (Role == "Witch") {
 		/** @type {ItemBundle[]} */
-		let ItemsToEarn = [];
+		const ItemsToEarn = [];
 		ItemsToEarn.push({Name: "WitchHat1", Group: "Hat"});
 		ItemsToEarn.push({Name: "BondageDress2", Group: "Cloth"});
 		InventoryAddMany(Player, ItemsToEarn);

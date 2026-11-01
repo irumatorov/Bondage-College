@@ -71,7 +71,7 @@ function AssetGroupAdd(Family, GroupDef) {
 	const ColorSchema = (GroupDef.Color == null) ? ["Default"] : GroupDef.Color;
 
 	/** @type {AssetGroup} */
-	var A = {
+	const A = {
 		Family: Family,
 		Name: AssetParseName(GroupDef.Group, `Group name "${GroupDef.Group}"`),
 		Description: GroupDef.Group,
@@ -225,7 +225,7 @@ function AssetAdd(Group, AssetDef, ExtendedConfig, GroupDef) {
 	const difficulty = AssetDef.Difficulty ?? 0;
 
 	/** @type {Mutable<Asset>} */
-	var A = {
+	const A = {
 		Name: AssetParseName(AssetDef.Name, `Asset name "${Group.Name}/${AssetDef.Name}"`),
 		Description: AssetDef.Name,
 		Group: Group,
@@ -885,14 +885,14 @@ function AssetParseLayerAlpha(Layer, NewAsset, I) {
  * @returns {void} - Nothing
  */
 function AssetAssignColorIndices(A) {
-	var colorIndex = 0;
+	let colorIndex = 0;
 	/** @type {Record<string, number>} */
-	var colorMap = {};
+	const colorMap = {};
 	A.Layer.forEach(Layer => {
 		// If the layer can't be colored, we don't need to set a color index
 		if (!Layer.AllowColorize) return;
 
-		var LayerKey = Layer.CopyLayerColor || Layer.Name;
+		let LayerKey = Layer.CopyLayerColor || Layer.Name;
 		if (LayerKey === undefined)
 			LayerKey = "undefined";
 		if (LayerKey === null)

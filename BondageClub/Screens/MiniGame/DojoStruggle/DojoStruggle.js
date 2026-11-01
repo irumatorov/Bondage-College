@@ -55,9 +55,9 @@ function DojoStruggleRun() {
 			if (DojoStrugglePosition > 975) DojoStrugglePosition = 975;
 
 			// Draw the obstacles
-			var C = 25;
+			let C = 25;
 			for (let P = 0; P < 25; P++) {
-				var X = 1000 + (P * 500) - (MiniGameTimer / 5);
+				const X = 1000 + (P * 500) - (MiniGameTimer / 5);
 				if (X < 150) C--;
 				if ((X > 0) && (X < 1200) && (DojoStruggleRope[P] > 150)) DrawImageZoomCanvas("Screens/MiniGame/DojoStruggle/RopeVertical.png", MainCanvas, 0, 0, 50, DojoStruggleRope[P] - 150, X, 0, 50, DojoStruggleRope[P] - 150);
 				if ((X > 0) && (X < 1200) && (DojoStruggleRope[P] < 850)) DrawImageZoomCanvas("Screens/MiniGame/DojoStruggle/RopeVertical.png", MainCanvas, 0, 0, 50, 900, X, DojoStruggleRope[P] + 150, 50, 900);

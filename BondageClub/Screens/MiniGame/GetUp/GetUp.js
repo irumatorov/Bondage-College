@@ -43,7 +43,7 @@ async function GetUpLoad() {
  * @param {number} delta
  */
 function GetUpPhysics(delta) {
-	var timeElapsed = 3 + (GetUpGameDuration +  CommonTime() - MiniGameTimer) / 2000;
+	const timeElapsed = 3 + (GetUpGameDuration +  CommonTime() - MiniGameTimer) / 2000;
 
 	if (CommonTime() > GetUpNextTick) {
 		GetUpNextTick = CommonTime() + 400;
@@ -68,7 +68,7 @@ function GetUpRun() {
 	DrawRect(0, 0, 1000, 1000, "Black");
 
 	// The game ends if the time runs out
-	var Time = CommonTime();
+	const Time = CommonTime();
 	if (MiniGameRunning()) {
 		if (Math.abs(GetUpPosition) > GetUpMaxPosition) {
 			GetUpEnd(false);

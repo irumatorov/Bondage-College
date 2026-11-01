@@ -15,7 +15,7 @@ function InventoryAdd(C, NewItemName, NewItemGroup, Push=true) {
 	}
 
 	// Create the new item for current character's asset family, group name and item name
-	var NewItem = InventoryItemCreate(C, NewItemGroup, NewItemName);
+	const NewItem = InventoryItemCreate(C, NewItemGroup, NewItemName);
 
 	// Only add the item if we found the asset
 	if (NewItem) {
@@ -39,14 +39,14 @@ function InventoryAddMany(C, NewItems, Push=true) {
 	// Return if data is invalid
 	if (C == null || !Array.isArray(NewItems)) return;
 
-	var ShouldSync = false;
+	let ShouldSync = false;
 
 	// Add each items
 	for (let NI = 0; NI < NewItems.length; NI++) {
 		// First, we check if the item already exists in the inventory, continue if it's the case
 		if (!InventoryAvailable(C, NewItems[NI].Name, NewItems[NI].Group)) {
 			// Create the new item for current character's asset family, group name and item name
-			var NewItem = InventoryItemCreate(C, NewItems[NI].Group, NewItems[NI].Name);
+			const NewItem = InventoryItemCreate(C, NewItems[NI].Group, NewItems[NI].Name);
 
 			// Only add the item if we found the asset
 			if (NewItem) {
@@ -952,14 +952,14 @@ function InventoryRandomExtend(C, GroupName, C_Source=undefined, push=undefined,
  */
 function InventoryGetRandom(C, GroupName, AllowedAssets, IgnorePrerequisites = false) {
 	/** @type {{ Asset: Asset, Rank: number }[]} */
-	var List = [];
-	var AssetList = AllowedAssets || Asset;
-	var RandomOnly = (AllowedAssets == null);
+	const List = [];
+	const AssetList = AllowedAssets || Asset;
+	const RandomOnly = (AllowedAssets == null);
 
-	var MinRank = Math.pow(2, 10);
-	var BlockedRank = Math.pow(2, 2);
-	var HiddenRank = Math.pow(2, 1);
-	var LimitedRank = Math.pow(2, 0);
+	let MinRank = Math.pow(2, 10);
+	const BlockedRank = Math.pow(2, 2);
+	const HiddenRank = Math.pow(2, 1);
+	const LimitedRank = Math.pow(2, 0);
 
 	for (let A = 0; A < AssetList.length; A++)
 		if (((AssetList[A].Group.Name == GroupName && AssetList[A].Wear) || !GroupName)

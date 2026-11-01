@@ -147,7 +147,7 @@ function MiniGameChessStart(Depth, PlayerColor) {
 		}
 		// Calculate the best move
 		moveInProgress = true;
-		var move = (await calcBestMove(skill, game, game.turn()))[1];
+		const move = (await calcBestMove(skill, game, game.turn()))[1];
 		moveInProgress = false;
 		// Make the calculated move
 		game.move(move);

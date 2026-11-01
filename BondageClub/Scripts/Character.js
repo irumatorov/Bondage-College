@@ -1952,7 +1952,7 @@ function CharacterRandomUnderwear(C) {
 
 	// Generate random undies at a random color
 	/** @type {"" | BCColor} */
-	var Color = "";
+	let Color = "";
 	for (const G of AssetGroup)
 		if ((G.Category == "Appearance") && G.Underwear && (G.IsDefault || (Math.random() < 0.2))) {
 			if (Color == "") Color = CommonRandomItemFromList("Default", G.ColorSchema);
@@ -2058,7 +2058,7 @@ function CharacterReleaseTotal(C, refresh=true) {
  * @returns {number} - Active bonus amount for the bonus type
  */
 function CharacterGetBonus(C, BonusType) {
-	var Bonus = 0;
+	let Bonus = 0;
 	for (let I = 0; I < C.Inventory.length; I++)
 		if ((C.Inventory[I].Asset != null) && (C.Inventory[I].Asset.Bonus != null) && (C.Inventory[I].Asset.Bonus == BonusType))
 			Bonus++;
@@ -2074,8 +2074,8 @@ function CharacterGetBonus(C, BonusType) {
 function CharacterFullRandomRestrain(C, Ratio, Refresh) {
 
 	// Sets the ratio depending on the parameter
-	var RatioRare = 0.75;
-	var RatioNormal = 0.25;
+	let RatioRare = 0.75;
+	let RatioNormal = 0.25;
 	if (Ratio != null) {
 		if (Ratio.trim().toUpperCase() == "FEW") { RatioRare = 1; RatioNormal = 0.5; }
 		if (Ratio.trim().toUpperCase() == "LOT") { RatioRare = 0.5; RatioNormal = 0; }
@@ -2223,7 +2223,7 @@ function CharacterGetCurrent() {
  */
 function CharacterCompressWardrobe(Wardrobe) {
 	if (CommonIsArray(Wardrobe) && (Wardrobe.length > 0)) {
-		var CompressedWardrobe = [];
+		const CompressedWardrobe = [];
 		for (const outfit of Wardrobe) {
 			/** @type {WardrobeItemBundle[]} */
 			const Arr = [];
@@ -2464,7 +2464,7 @@ function CharacterGetClumsiness(C) {
  * @returns {boolean} - If a hook was applied or removed
  */
 function CharacterCheckHooks(C, IgnoreHooks) {
-	var refresh = false;
+	let refresh = false;
 	if (C && C.DrawAppearance) {
 		if (!IgnoreHooks && Player.Effect.includes("VRAvatars") && C.Effect.includes("HideRestraints")) {
 			// Then when that character enters the virtual world, register a hook to strip out restraint layers (if needed):

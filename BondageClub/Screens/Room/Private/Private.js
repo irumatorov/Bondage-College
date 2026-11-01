@@ -970,7 +970,7 @@ function PrivateNewCloth(C) {
 function PrivateDrawCharacter() {
 
 	// Defines the character position in the private screen
-	var X = 1000 - ((PrivateCharacter.length - PrivateCharacterOffset) * 250);
+	let X = 1000 - ((PrivateCharacter.length - PrivateCharacterOffset) * 250);
 	if (X < 0) X = 0;
 
 	// For each character to draw (maximum 4 at a time)
@@ -1112,7 +1112,7 @@ function PrivateRun() {
 function PrivateClickCharacterButton() {
 
 	// Defines the character position in the private screen
-	var X = 1000 - ((PrivateCharacter.length - PrivateCharacterOffset) * 250);
+	let X = 1000 - ((PrivateCharacter.length - PrivateCharacterOffset) * 250);
 	if (X < 0) X = 0;
 
 	// For each character, we check if the player clicked on the cage or information button
@@ -1141,7 +1141,7 @@ function PrivateClickCharacterButton() {
 		// Can switch girls position in the private room if there's more than one friend
 		if ((C > 0) && (C < PrivateCharacter.length - 1))
 			if (MouseIn(ButtonX + 325, 900, 90, 90)) {
-				var P = PrivateCharacter[C];
+				const P = PrivateCharacter[C];
 				PrivateCharacter[C] = PrivateCharacter[C + 1];
 				PrivateCharacter[C + 1] = P;
 				ServerPrivateCharacterSync();
@@ -1188,7 +1188,7 @@ function PrivateClickCharacter() {
 			if ((char.IsPlayer()) && MouseIn(ButtonX + 50, 200, 100, 415) && char.ArousalZoom)
 				if ((Player.ArousalSettings != null) && (Player.ArousalSettings.Active != null) && (Player.ArousalSettings.Progress != null)) {
 					if ((Player.ArousalSettings.Active == "Manual") || (Player.ArousalSettings.Active == "Hybrid")) {
-						var Arousal = Math.round((625 - MouseY) / 4);
+						const Arousal = Math.round((625 - MouseY) / 4);
 						ActivitySetArousal(Player, Arousal);
 						ActivityExpression(Player, Player.ArousalSettings.Progress);
 						if (Player.ArousalSettings.Progress == 100) ActivityOrgasmPrepare(Player);
@@ -1711,9 +1711,9 @@ function PrivateActivityRun(LoveFactor) {
 	if (LoveFactor <= -3) {
 
 		// Each factor is randomized and added to a stat, punishment is increased if the another activity was refused in the last 5 minutes
-		var Force = Math.random() * 150 + NPCTraitGet(CurrentCharacter, "Violent");
-		var Punish = Math.random() * 150 + NPCTraitGet(CurrentCharacter, "Serious");
-		var Stop = Math.random() * 150 + NPCTraitGet(CurrentCharacter, "Wise");
+		const Force = Math.random() * 150 + NPCTraitGet(CurrentCharacter, "Violent");
+		let Punish = Math.random() * 150 + NPCTraitGet(CurrentCharacter, "Serious");
+		let Stop = Math.random() * 150 + NPCTraitGet(CurrentCharacter, "Wise");
 		if (NPCEventGet(CurrentCharacter, "RefusedActivity") >= CurrentTime - 300000) Punish = Punish + 50;
 		if (!Player.IsOwned()) Stop = Stop + 50;
 		NPCEventAdd(CurrentCharacter, "RefusedActivity", CurrentTime);
@@ -1832,7 +1832,7 @@ function PrivateActivityRun(LoveFactor) {
 function PrivateCanRestrainOther() {
 	if (!CurrentCharacter) return false;
 	PrivateActivityTarget = null;
-	var List = [];
+	const List = [];
 	for (let C = 0; C < PrivateCharacter.length; C++)
 		if (!PrivateCharacter[C].IsPlayer() && (PrivateCharacter[C].ID != CurrentCharacter.ID) && (NPCTraitGet(CurrentCharacter, "Dominant") > NPCTraitGet(PrivateCharacter[C], "Dominant")) && (InventoryGet(PrivateCharacter[C], "ItemArms") == null))
 			List.push(PrivateCharacter[C]);

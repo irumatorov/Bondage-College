@@ -720,7 +720,7 @@ function ExtendedItemOffsetKey() {
 	if (!DialogFocusItem) {
 		throw new Error("called without a focused extended item");
 	}
-	var Asset = DialogFocusItem.Asset;
+	const Asset = DialogFocusItem.Asset;
 	return Asset.Group.Name + "/" + Asset.Name;
 }
 

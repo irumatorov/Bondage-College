@@ -71,10 +71,10 @@ function ColorPickerDraw(X, Y, Width, Height, Src, Callback) {
  */
 function ColorPickerCSSToHSV(Color, DefaultHSV) {
 	Color = Color || "#FFFFFF";
-	var M = Color.match(/^#(([0-9a-f]{3})|([0-9a-f]{6})|([0-9a-f]{8}))$/i);
-	var [R, G, B] = [NaN, NaN, NaN];
+	const M = Color.match(/^#(([0-9a-f]{3})|([0-9a-f]{6})|([0-9a-f]{8}))$/i);
+	let [R, G, B] = [NaN, NaN, NaN];
 	if (M) {
-		var GRP = M[1];
+		const GRP = M[1];
 		if (GRP.length == 3) {
 			R = Number.parseInt(GRP[0] + GRP[0], 16) / 255;
 			G = Number.parseInt(GRP[1] + GRP[1], 16) / 255;
@@ -90,12 +90,12 @@ function ColorPickerCSSToHSV(Color, DefaultHSV) {
 		return DefaultHSV ? DefaultHSV : { H: 0, S: 0, V: 1 };
 	}
 
-	var Max = Math.max(R, G, B);
-	var Min = Math.min(R, G, B);
-	var D = Max - Min;
-	var H = 0;
-	var S = (Max == 0) ? 0 : D / Max;
-	var V = Max;
+	const Max = Math.max(R, G, B);
+	const Min = Math.min(R, G, B);
+	const D = Max - Min;
+	let H = 0;
+	const S = (Max == 0) ? 0 : D / Max;
+	const V = Max;
 
 	if (D == 0) {
 		H = 0;
@@ -119,13 +119,13 @@ function ColorPickerCSSToHSV(Color, DefaultHSV) {
  * @returns {HexColor} - Hex color code corresponding to the given HSV
  */
 function ColorPickerHSVToCSS(HSV) {
-	var [R, G, B] = [NaN, NaN, NaN];
-	var H = HSV.H, S = HSV.S, V = HSV.V;
-	var I = Math.floor(H * 6);
-	var F = H * 6 - I;
-	var P = V * (1 - S);
-	var Q = V * (1 - F * S);
-	var T = V * (1 - (1 - F) * S);
+	let [R, G, B] = [NaN, NaN, NaN];
+	const H = HSV.H, S = HSV.S, V = HSV.V;
+	const I = Math.floor(H * 6);
+	const F = H * 6 - I;
+	const P = V * (1 - S);
+	const Q = V * (1 - F * S);
+	const T = V * (1 - (1 - F) * S);
 
 	switch (I % 6) {
 		case 0: R = V; G = T; B = P; break;
@@ -136,9 +136,9 @@ function ColorPickerHSVToCSS(HSV) {
 		case 5: R = V; G = P; B = Q; break;
 	}
 
-	var RS = Math.floor(R * 255).toString(16).toUpperCase().padStart(2, "0");
-	var GS = Math.floor(G * 255).toString(16).toUpperCase().padStart(2, "0");
-	var BS = Math.floor(B * 255).toString(16).toUpperCase().padStart(2, "0");
+	const RS = Math.floor(R * 255).toString(16).toUpperCase().padStart(2, "0");
+	const GS = Math.floor(G * 255).toString(16).toUpperCase().padStart(2, "0");
+	const BS = Math.floor(B * 255).toString(16).toUpperCase().padStart(2, "0");
 	return `#${RS}${GS}${BS}`;
 }
 
@@ -202,7 +202,7 @@ function GetDefaultSavedColors() {
 		}
 	}
 
-	var SavedColors = [];
+	const SavedColors = [];
 	for (let i = 0; i < ColorPickerNumSaved; i++) {
 		SavedColors[i] = { ...DefaultSavedColors[i]};
 	}

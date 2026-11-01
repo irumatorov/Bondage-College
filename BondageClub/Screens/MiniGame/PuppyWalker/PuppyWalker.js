@@ -57,7 +57,7 @@ function PuppyWalkerRun() {
 	if (!MiniGameEnded) {
 
 		// Draws the progress bar based on the timer
-		var Progress = 100;
+		let Progress = 100;
 		if (MiniGameStarted) Progress = (60 - (MiniGameTimer / 1000)) * 100 / 60;
 		DrawProgressBar(0, 950, 2000, 50, Progress);
 

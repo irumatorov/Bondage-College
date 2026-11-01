@@ -574,7 +574,7 @@ function AsylumEntranceEscapedPatientLeave() {
  */
 function AsylumEntranceGiveNurseUniform() {
 	/** @type {ItemBundle[]} */
-	var ItemsToEarn = [];
+	const ItemsToEarn = [];
 	ItemsToEarn.push({Name: "NurseUniform", Group: "Cloth"});
 	ItemsToEarn.push({Name: "NurseCap", Group: "Hat"});
 	InventoryAddMany(Player, ItemsToEarn);

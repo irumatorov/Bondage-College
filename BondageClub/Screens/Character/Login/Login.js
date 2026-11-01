@@ -147,7 +147,7 @@ function LoginDrawCredits() {
 	for (const [i, credit] of LoginCredits.entries()) {
 
 		// Sets the Y position (it scrolls from bottom to top)
-		var Y = 800 - Math.floor(LoginCreditsPosition * 2) + (i * 50);
+		const Y = 800 - Math.floor(LoginCreditsPosition * 2) + (i * 50);
 
 		// Draw the text if it's in drawing range
 		if ((Y > 0) && (Y <= 999)) {
@@ -1196,7 +1196,7 @@ function LoginSetupPlayer(C) {
 	SarahSetStatus();
 
 	// Fixes a few items
-	var InventoryBeforeFixes = InventoryStringify(Player);
+	const InventoryBeforeFixes = InventoryStringify(Player);
 	LoginFixOwner();
 	LoginValidCollar();
 	LoginMistressItems();

@@ -688,7 +688,7 @@ function AssetsItemPelvisFuturisticTrainingBeltScriptStateMachine(data, drawData
 
 /** @type {ExtendedItemScriptHookCallbacks.ScriptDraw<VibratingItemData, FuturisticTrainingBeltPersistentData>} */
 function AssetsItemPelvisFuturisticTrainingBeltScriptDrawHook(data, originalFunction, drawData) {
-	var persistentData = drawData.PersistentData();
+	const persistentData = drawData.PersistentData();
 	/** @type {ItemProperties} */
 	const property = (drawData.Item.Property = drawData.Item.Property || {});
 	if (typeof persistentData.UpdateTime !== "number") persistentData.UpdateTime = CommonTime() + 4000;
@@ -714,7 +714,7 @@ function AssetsItemPelvisFuturisticTrainingBeltScriptDrawHook(data, originalFunc
 			persistentData.LastMessageLen = (ChatRoomLastMessage) ? ChatRoomLastMessage.length : 0;
 		}
 
-		var timeToNextRefresh = 950;
+		const timeToNextRefresh = 950;
 		persistentData.UpdateTime = CommonTime() + timeToNextRefresh;
 		AnimationRequestRefreshRate(drawData.C, 5000 - timeToNextRefresh);
 		AnimationRequestDraw(drawData.C);

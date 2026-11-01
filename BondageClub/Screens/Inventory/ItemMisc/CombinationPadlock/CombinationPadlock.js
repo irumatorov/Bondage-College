@@ -182,7 +182,7 @@ function InventoryItemMiscCombinationPadlockClickHook(data, originalFunction) {
 	else if (MouseIn(1600, 851, 350, 64)) {
 		// Succeeds to change
 		if (ElementValue("CombinationNumber") == DialogFocusSourceItem?.Property?.CombinationNumber) {
-			var NewCode = ElementValue("NewCombinationNumber");
+			const NewCode = ElementValue("NewCombinationNumber");
 			// We only accept code made of digits and of 4 numbers
 			if (ValidationCombinationNumberRegex.test(NewCode)) {
 				DialogFocusSourceItem.Property.CombinationNumber = NewCode;

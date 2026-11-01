@@ -202,7 +202,7 @@ function InventoryItemFuturisticValidate(C, Item = DialogFocusItem, changeWhenLo
 		&& !changeWhenLocked
 		&& (!CraftingPreview || C.ID !== CraftingPreview.ID)
 	) {
-		var collar = InventoryGet(C, "ItemNeck");
+		const collar = InventoryGet(C, "ItemNeck");
 		if (!collar || (!collar.Property ||
 			(FuturisticAccessCollarGroups.includes(Item.Asset.Group.Name) && collar.Property.OpenPermission != true) ||
 			(FuturisticAccessArmGroups.includes(Item.Asset.Group.Name) && collar.Property.OpenPermissionArm != true) ||

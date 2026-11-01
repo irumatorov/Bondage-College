@@ -440,16 +440,16 @@ function VibratorModeSetAssetProperties(data) {
  * @param {DynamicScriptCallbackData<VibratorModePersistentData>} drawData
  */
 function VibratorModeScriptDraw(data, drawData) {
-	var C = drawData.C;
+	const C = drawData.C;
 	// Only run vibrator updates on the player and NPCs
 	if (!C.IsPlayer() && C.MemberNumber !== null) return;
 
-	var Item = drawData.Item;
+	const Item = drawData.Item;
 	// No need to update the vibrator if it has no mode
 	if (!Item.Property || !Item.Property.Mode) return;
 
-	var PersistentData = drawData.PersistentData();
-	var ModeChanged = Item.Property.Mode !== PersistentData.Mode;
+	const PersistentData = drawData.PersistentData();
+	const ModeChanged = Item.Property.Mode !== PersistentData.Mode;
 	if (ModeChanged || typeof PersistentData.ChangeTime !== "number") PersistentData.ChangeTime = CommonTime() + MS_PER_MIN;
 	if (ModeChanged || typeof PersistentData.LastChange !== "number") PersistentData.LastChange = CommonTime();
 	if (ModeChanged) PersistentData.Mode = Item.Property.Mode;
@@ -475,10 +475,10 @@ function VibratorModeScriptDraw(data, drawData) {
  */
 function VibratorModeUpdateStateBased(data, C, item, persistentData, transitionsFromDefault) {
 	item.Property ??= {};
-	var Arousal = C.ArousalSettings.Progress;
-	var TimeSinceLastChange = CommonTime() - (persistentData.LastChange ?? 0);
-	var OldState = item.Property.State ?? VibratorModeState.DEFAULT;
-	var OldIntensity = item.Property.Intensity ?? -1;
+	const Arousal = C.ArousalSettings.Progress;
+	const TimeSinceLastChange = CommonTime() - (persistentData.LastChange ?? 0);
+	const OldState = item.Property.State ?? VibratorModeState.DEFAULT;
+	const OldIntensity = item.Property.Intensity ?? -1;
 
 	const NewStateAndIntensity = VibratorModeStateUpdate[OldState](
 		C,
@@ -488,14 +488,14 @@ function VibratorModeUpdateStateBased(data, C, item, persistentData, transitions
 		transitionsFromDefault,
 	);
 
-	var State = NewStateAndIntensity.State;
-	var Intensity = NewStateAndIntensity.Intensity;
+	let State = NewStateAndIntensity.State;
+	let Intensity = NewStateAndIntensity.Intensity;
 
 	if (!State) State = VibratorModeState.DEFAULT;
 	if (typeof Intensity !== "number" || Intensity < -1 || Intensity > 3) Intensity = OldIntensity;
 
 	/** @type {EffectName[]} */
-	var Effect = ["Egged"];
+	const Effect = ["Egged"];
 	if (State === VibratorModeState.DENY || item.Property.Mode === VibratorMode.DENY) Effect.push("Edged");
 	if (Intensity !== -1) Effect.push("Vibrating");
 

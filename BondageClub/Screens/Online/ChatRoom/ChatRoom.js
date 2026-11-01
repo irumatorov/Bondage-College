@@ -339,7 +339,7 @@ let ChatRoomResizeManager = {
 
 	// Triggered by ChatRoomResizeManager.timer at the end of a chain of resize events
 	ChatRoomResizeEventsEnd : function(){
-		var TextAreaChatLog = document.getElementById("TextAreaChatLog");
+		const TextAreaChatLog = document.getElementById("TextAreaChatLog");
 
 		if (TextAreaChatLog != null) {
 			// Scrolls to the position held before the resize events.
@@ -941,9 +941,9 @@ function ChatRoomCanBeLeashed(C) {
 function ChatRoomCanBeLeashedBy(sourceMemberNumber, C) {
 	if ((ChatRoomData && ChatRoomData.BlockCategory && ChatRoomData.BlockCategory.indexOf("Leashing") < 0) || !ChatRoomData) {
 		// Have to not be tethered, and need a leash
-		var canLeash = false;
-		var isTrapped = false;
-		var neckLock = null;
+		let canLeash = false;
+		let isTrapped = false;
+		let neckLock = null;
 		for (const A of C.Appearance)
 			if (A.Asset?.Group?.Family == C.AssetFamily) {
 				if (InventoryItemHasEffect(A, "Leash", true)) {
@@ -1981,7 +1981,7 @@ function ChatRoomStimulationMessage(Action) {
 		CharacterSetFacialExpression(Player, "Blush", "VeryHigh", Math.ceil(duration / 250));
 	}
 
-	var index = Math.floor(Math.random() * 3);
+	const index = Math.floor(Math.random() * 3);
 	const Dictionary = [
 		{ Tag: "AssetGroup", Text: group.Description.toLowerCase() },
 		{ Tag: "AssetName", Text: (event.item.Asset.DynamicDescription ? event.item.Asset.DynamicDescription(Player) : event.item.Asset.Description).toLowerCase() },
@@ -5825,7 +5825,7 @@ function ChatRoomAdminAction(ActionType, Publish=true) {
  */
 function ChatRoomAdminChatAction(ActionType, Argument) {
 	if (ChatRoomPlayerIsAdmin()) {
-		var C = parseInt(Argument);
+		const C = parseInt(Argument);
 		if (!isNaN(C) && (C > 0) && (C != Player.MemberNumber))
 			ServerSend("ChatRoomAdmin", { MemberNumber: C, Action: ActionType });
 	}
@@ -5836,7 +5836,7 @@ function ChatRoomAdminChatAction(ActionType, Argument) {
  * @returns {string} - The player's current local time as a string.
  */
 function ChatRoomCurrentTime() {
-	var D = new Date();
+	const D = new Date();
 	return `${D.getHours().toString().padStart(2, "0")}:${D.getMinutes().toString().padStart(2, "0")}`;
 }
 
@@ -6620,7 +6620,7 @@ function ChatRoomSafewordChatCommand() {
 		ChatRoomSafewordRevert();
 	else if (ServerPlayerIsInChatRoom()) {
 		/** @type {ServerChatRoomMessage} */
-		var msg = {Sender: Player.MemberNumber, Content: "SafewordDisabled", Type: "Action"};
+		const msg = {Sender: Player.MemberNumber, Content: "SafewordDisabled", Type: "Action"};
 		ChatRoomMessage(msg);
 	}
 }

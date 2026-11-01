@@ -87,8 +87,8 @@ function TennisRun() {
 			DrawText(TextGet("Intro2"), 1000, 500, "black");
 			DrawText(TextGet("Start"), 1000, 600, "black");
 		} else {
-			var FpsAdjustment = 0.05 * 0.06 * TimerRunInterval;
-			var RacketAdjustment = MiniGameDifficultyRatio * FpsAdjustment;
+			const FpsAdjustment = 0.05 * 0.06 * TimerRunInterval;
+			const RacketAdjustment = MiniGameDifficultyRatio * FpsAdjustment;
 
 			// Moves the ball
 			TennisBallX += Math.cos(TennisBallAngle) * TennisBallSpeed * FpsAdjustment;

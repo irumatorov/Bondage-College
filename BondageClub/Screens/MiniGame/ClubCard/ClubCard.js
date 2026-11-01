@@ -7175,7 +7175,7 @@ function ClubCardRenderCard(Card, X, Y, W, Sleeve = null, Source = null, isIgnor
 		let GroupText = ClubCardGetGroupText(Card.Group ?? []);
 		if (GroupText != "") {
 			if (Card.RewardMemberNumber && GroupText.includes(ClubCardTextGet("GroupPlayer"))) {
-				var playerText = ClubCardTextGet("GroupPlayer");
+				const playerText = ClubCardTextGet("GroupPlayer");
 				GroupText = GroupText.replace(playerText, `${playerText} #${Card.RewardMemberNumber}`);
 			}
 			MainCanvas.font = "bold " + Math.round(W / 16) + "px arial";

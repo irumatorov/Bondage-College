@@ -218,7 +218,7 @@ function ManagementWontOwnPlayer() { return (!Player.IsOwned() && (ReputationGet
  * Checks if the player has at least one lover who is a NPC from bondage college.
  * @returns {boolean} - TRUE if the player has at least one lover who is a NPC from bondage college.
  */
-function ManagementLoverFromBondageCollege() { var L = Player.GetLoversNumbers(); return ((L.indexOf("NPC-Sidney") >= 0) || (L.indexOf("NPC-Amanda") >= 0) || (L.indexOf("NPC-Jennifer") >= 0)); }
+function ManagementLoverFromBondageCollege() { const L = Player.GetLoversNumbers(); return ((L.includes("NPC-Sidney")) || (L.includes("NPC-Amanda")) || (L.includes("NPC-Jennifer"))); }
 /**
  * Checks if the player can stop dating the given online lover (1 to 5)
  * @param {number} L - Index of the potential lover
@@ -668,7 +668,7 @@ function ManagementClubSlaveRandomIntro() {
 	ManagementRandomGirl.Stage = ManagementRandomActivityCategory + "Intro";
 
 	// 1 out of 7 girls will be a maid
-	var Intro = (Math.floor(Math.random() * 7)).toString();
+	const Intro = (Math.floor(Math.random() * 7)).toString();
 	if (Intro == "0") {
 		CharacterArchetypeClothes(ManagementRandomGirl, "Maid");
 		ManagementRandomGirlArchetype = "Maid";
@@ -702,7 +702,7 @@ function ManagementFindClubSlaveRandomIntro() {
 	ManagementVisitRoom = ((Math.random() >= 0.67) && ManagementCanTransferToRoom());
 
 	// At 0, the club slave player meets another slave.  At 1, 2 & 3, the club slave isn't restrained.  At 4 and more, the club slave is restrained.
-	var Intro = (Math.floor(Math.random() * 7) + 1).toString();
+	let Intro = (Math.floor(Math.random() * 7) + 1).toString();
 	if (ManagementIsClubSlave()) Intro = "0";
 	ManagementRandomGirl.Stage = "ClubSlaveIntro" + Intro;
 	if (Intro == "4") CharacterFullRandomRestrain(ManagementRandomGirl, "FEW");
@@ -760,7 +760,7 @@ function ManagementClubSlaveRandomActivityLaunch() {
 	while (true) {
 
 		// Picks an activity at random
-		var A = CommonRandomItemFromList(ManagementRandomActivity, ManagementRandomActivityList);
+		const A = CommonRandomItemFromList(ManagementRandomActivity, ManagementRandomActivityList);
 
 		// Add or remove an item
 		if ((A == "AddArms") && (InventoryGet(Player, "ItemArms") == null)) { InventoryWearRandom(Player, "ItemArms", 3); ManagementRandomActivityStart(A); return; }
@@ -889,7 +889,7 @@ function ManagementActivityStruggleStart() {
  * @returns {void} - Nothing.
  */
 function ManagementStartQuiz() {
-	var Q = (Math.floor(Math.random() * 20)).toString();
+	const Q = (Math.floor(Math.random() * 20)).toString();
 	const char = CurrentCharacter;
 	if (!char) return;
 	char.Stage = "QuizAnswer" + Q;

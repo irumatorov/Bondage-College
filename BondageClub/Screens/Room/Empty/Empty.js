@@ -166,7 +166,7 @@ function EmptySlaveMarketTrainingProgress(Intensity) {
  * @returns {SafePromise<void>}
  */
 async function EmptySlaveMarketTrainingEnd(Status) {
-	var Money = (CurrentCharacter?.TrainingCountPerfect ?? 0) * 3;
+	const Money = (CurrentCharacter?.TrainingCountPerfect ?? 0) * 3;
 	DialogLeave();
 	if (Status != "Success") DialogChangeReputation("Dominant", -1);
 	else {

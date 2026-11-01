@@ -524,7 +524,7 @@ var AudioActions = [
 function AudioPlayInstantSound(src, volume) {
 	const vol = volume != null ? volume : Player.AudioSettings.Volume;
 	if (vol > 0) {
-		var audio = new Audio();
+		const audio = new Audio();
 		audio.src = src;
 		audio.volume = Math.min(vol, 1);
 		CommonPromiseCatch(audio.play());
@@ -763,7 +763,7 @@ function AudioVibratorSounds(data, metadata) {
 	/** @type {AudioEffectName | undefined} */
 	let Sound;
 
-	var Level = parseInt(data.Content.substring(data.Content.length - 1));
+	let Level = parseInt(data.Content.substring(data.Content.length - 1));
 	if (isNaN(Level)) Level = 0;
 
 	// FIXME: what is going on in here? Assets not an array, and AssetName being an Asset and not a string?

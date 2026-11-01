@@ -533,7 +533,7 @@ function InfiltrationDressMaid(Rep) {
  */
 
 function InfiltrationPandoraPrisonerBrainwash() {
-	var C = InfiltrationPandoraPrisoner;
+	const C = InfiltrationPandoraPrisoner;
 	if (!C) return;
 	//Hide character for 1 day
 	NPCEventAdd(C, "NPCBrainwashing", CurrentTime + MS_PER_DAY);
@@ -552,8 +552,8 @@ function InfiltrationPandoraPrisonerBrainwash() {
 	InventoryWear(C,"WoodenRack","ItemDevices");
 	ExtendedItemSetOptionByRecord(C, "ItemDevices", { f: 1, t: 4, b: 4 }, { push: true });
 	//Move towards submission by a random amount between 0-10 + Infiltration skill adjustment between 50-100
-	var S = Math.floor(Math.random()*10) + (SkillGetLevel(Player, "Infiltration") * 10) + (Math.round(SkillGetProgress(Player, "Infiltration") / 100));
-	var T = NPCTraitGet(C, "Dominant") - S;
+	const S = Math.floor(Math.random()*10) + (SkillGetLevel(Player, "Infiltration") * 10) + (Math.round(SkillGetProgress(Player, "Infiltration") / 100));
+	let T = NPCTraitGet(C, "Dominant") - S;
 	if (T < -100) { T = -100; }
 	NPCTraitSet(C, "Dominant", T);
 	//Neutralize relation, will further decay over time to represent resentment from sending to interrogation
@@ -568,7 +568,7 @@ function InfiltrationPandoraPrisonerBrainwash() {
  * @returns {void} - Nothing
  */
 function InfiltrationSetPandoraPrisoner() {
-	var candidates = PrivateCharacter.filter(c => c.FromPandora);
+	const candidates = PrivateCharacter.filter(c => c.FromPandora);
 	if (candidates.length === 0) {
 		InfiltrationPandoraPrisoner = null;
 	} else if (candidates.length === 1) {
@@ -604,7 +604,7 @@ async function InfiltrationClubCardEnd() {
  * @returns {boolean} - TRUE if the role matches the parameter
  */
 function InfiltrationPenitentiaryRoleIs(Role) {
-	let CurrentRole = PandoraPenitentiaryIsGuard(Player) ? "G" : "I";
+	const CurrentRole = PandoraPenitentiaryIsGuard(Player) ? "G" : "I";
 	return (CurrentRole === Role);
 }
 

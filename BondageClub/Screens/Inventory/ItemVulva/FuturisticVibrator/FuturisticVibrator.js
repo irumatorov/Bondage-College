@@ -244,7 +244,7 @@ function InventoryItemVulvaFuturisticVibratorHandleChat(data, C, Item, LastTime)
 		if (Item.Property?.AccessMode === ItemVulvaFuturisticVibratorAccessMode.PROHIBIT_SELF && logEntry.SenderMemberNumber === C.MemberNumber) continue;
 		if (Item.Property?.AccessMode === ItemVulvaFuturisticVibratorAccessMode.LOCK_MEMBER_ONLY && logEntry.SenderMemberNumber !== Item.Property.LockMemberNumber) continue;
 
-		var msg = InventoryItemVulvaFuturisticVibratorDetectMsg(logEntry.Original.toUpperCase(), TriggerValues);
+		const msg = InventoryItemVulvaFuturisticVibratorDetectMsg(logEntry.Original.toUpperCase(), TriggerValues);
 
 		if (msg.length > 0) {
 			/** @type {undefined | VibratingItemOption} */
@@ -283,9 +283,9 @@ function InventoryItemVulvaFuturisticVibratorHandleChat(data, C, Item, LastTime)
 
 /** @type {ExtendedItemScriptHookCallbacks.ScriptDraw<VibratingItemData, FuturisticVibratorPersistentData>} */
 function AssetsItemVulvaFuturisticVibratorScriptDrawHook(data, originalFunction, drawData) {
-	var PersistentData = drawData.PersistentData();
-	var C = drawData.C;
-	var Item = drawData.Item;
+	const PersistentData = drawData.PersistentData();
+	const C = drawData.C;
+	const Item = drawData.Item;
 	// Only run updates on the player and NPCs
 	if (!C.IsPlayer() && C.MemberNumber !== null) return;
 

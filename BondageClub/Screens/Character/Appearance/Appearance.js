@@ -133,7 +133,7 @@ function CharacterAppearanceBuildAssets(C) {}
  */
 function CharacterAppearanceValidate(C) {
 
-	var Refresh = false;
+	let Refresh = false;
 	// We iterate over a copy because we're gonna remove, possibly layered things, and the index cannot be stable
 	const appCopy = [...C.Appearance];
 	for (const A of appCopy) {
@@ -276,7 +276,7 @@ function CharacterAppearanceFullRandom(C, ClothOnly=false, refresh=true) {
 
 			// Picks a random item and color and add it
 			if (R.length > 0) {
-				var SelectedAsset = InventoryGetRandom(C, group.Name, R);
+				const SelectedAsset = InventoryGetRandom(C, group.Name, R);
 				// If we found no asset, just move to next group
 				if (!SelectedAsset)
 					continue;
@@ -346,9 +346,9 @@ function CharacterAppearanceNaked(C) {
  * @returns {void} - Nothing
  */
 function CharacterAppearanceStripLayer(C) {
-	var HasClothes = false;
-	var HasUnderwear = false;
-	var HasBodyCosplay = false;
+	let HasClothes = false;
+	let HasUnderwear = false;
+	let HasBodyCosplay = false;
 
 	// Find out what the top layer currently is
 	for (const A of C.Appearance) {
@@ -1193,7 +1193,7 @@ function CharacterAppearanceNextItem(C, Group, Forward=true) {
 	if (CAA.length == 0) return null;
 	if (Current) {
 		// If we found the item we move forward or backward if possible
-		var I = CAA.findIndex(a => a.Name == Current);
+		const I = CAA.findIndex(a => a.Name == Current);
 		if (I >= 0) {
 			if (Forward == null || Forward) {
 				if (I + 1 < CAA.length) {
@@ -1402,8 +1402,8 @@ function AppearanceClick() {
 	else if ((CharacterAppearanceMode == "Cloth" || CharacterAppearanceMode == "Permissions") && CharacterAppearanceSelectedGroup) {
 
 		// Prepares a 3x3 square of clothes to present all the possible options
-		var X = 1250;
-		var Y = 125;
+		let X = 1250;
+		let Y = 125;
 		for (let I = DialogInventoryOffset; (I < DialogInventory.length) && (I < DialogInventoryOffset + CharacterAppearanceNumClothPerPage); I++) {
 			if (MouseIn(X, Y, 225, 275)) {
 				const Item = DialogInventory[I];

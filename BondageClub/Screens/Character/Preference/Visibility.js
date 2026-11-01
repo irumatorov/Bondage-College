@@ -460,7 +460,7 @@ function PreferenceSubscreenVisibilityRefreshPreview() {
  * @returns {void} - Nothing
  */
 function PreferenceVisibilityAssetChanged(RefreshCheckboxes) {
-	var CurrAsset = PreferenceVisibilityGroupList[PreferenceVisibilityGroupIndex].Assets[PreferenceVisibilityAssetIndex];
+	const CurrAsset = PreferenceVisibilityGroupList[PreferenceVisibilityGroupIndex].Assets[PreferenceVisibilityAssetIndex];
 
 	if (RefreshCheckboxes) {
 		PreferenceVisibilityHideChecked = CurrAsset.Hidden;
@@ -468,7 +468,7 @@ function PreferenceVisibilityAssetChanged(RefreshCheckboxes) {
 	}
 
 	// Can't change the Block setting if the item is worn or set to limited permissions
-	var WornItem = InventoryGet(Player, PreferenceVisibilityGroupList[PreferenceVisibilityGroupIndex].Group.Name);
+	const WornItem = InventoryGet(Player, PreferenceVisibilityGroupList[PreferenceVisibilityGroupIndex].Group.Name);
 	PreferenceVisibilityCanBlock = (WornItem == null || WornItem.Asset.Name != CurrAsset.Asset.Name) && !CurrAsset.Limited;
 
 	PreferenceVisibilityPreviewAsset = CurrAsset.Asset;
@@ -503,8 +503,8 @@ function PreferenceVisibilityBlockChange() {
  * @param {"Hidden" | "Block"} Type
  */
 function PreferenceVisibilityCheckboxChanged(permissionRecord, CheckSetting, Type) {
-	var CurrGroup = PreferenceVisibilityGroupList[PreferenceVisibilityGroupIndex].Group.Name;
-	var CurrAsset = PreferenceVisibilityGroupList[PreferenceVisibilityGroupIndex].Assets[PreferenceVisibilityAssetIndex].Asset.Name;
+	const CurrGroup = PreferenceVisibilityGroupList[PreferenceVisibilityGroupIndex].Group.Name;
+	const CurrAsset = PreferenceVisibilityGroupList[PreferenceVisibilityGroupIndex].Assets[PreferenceVisibilityAssetIndex].Asset.Name;
 	const permission = permissionRecord[`${CurrGroup}/${CurrAsset}`] ??= PreferencePermissionGetDefault();
 	switch (Type) {
 		case "Block":

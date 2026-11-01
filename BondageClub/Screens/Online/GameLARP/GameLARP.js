@@ -207,8 +207,8 @@ function GameLARPRunProcess() {
 			DrawButton(775, 20, 200, 60, OnlineGameDictionaryText("ItemCancel"), "White");
 
 			// Prepares a 4x3 square selection with inventory from the buffer
-			var X = 15;
-			var Y = 110;
+			let X = 15;
+			let Y = 110;
 			for (let A = GameLARPInventoryOffset; (A < GameLARPInventory.length) && (A < GameLARPInventoryOffset + 12); A++) {
 				const asset = GameLARPInventory[A];
 				DrawAssetPreview(X, Y, asset, { Hover: true });
@@ -243,12 +243,10 @@ function GameLARPRunProcess() {
 
 			// Draw the timer
 			MainCanvas.font = CommonGetFont(108);
-			var Time = Math.ceil((GameLARPTurnTimer - TimerGetTime()) / 1000);
+			const Time = Math.ceil((GameLARPTurnTimer - TimerGetTime()) / 1000);
 			DrawText(((Time < 0) || (Time > GameLARPTimerDelay[GameLARPTimerDelay.length - 1])) ? OnlineGameDictionaryText("TimerNA") : Time.toString(), 250, 800, "Red", "White");
 			MainCanvas.font = CommonGetFont(36);
-
 		}
-
 	}
 
 	// Reset any notification that may have been raised
@@ -305,8 +303,8 @@ function GameLARPClickProcess() {
 		if (MouseIn(775, 20, 200, 60)) GameLARPTurnFocusGroup = null;
 
 		// Checks if one of the 4x3 inventory square is clicked
-		var X = 15;
-		var Y = 110;
+		let X = 15;
+		let Y = 110;
 		for (let A = GameLARPInventoryOffset; (A < GameLARPInventory.length) && (A < GameLARPInventoryOffset + 12); A++) {
 			if (MouseIn(X, Y, 225, 275))
 				ServerSend("ChatRoomGame", { GameProgress: "Action", Action: GameLARPAction ?? undefined, Item: GameLARPInventory[A].Name, Target: GameLARPTurnFocusCharacter.MemberNumber });
@@ -370,7 +368,7 @@ function GameLARPClick() {
 
 	// When the user selects a new class
 	if (MouseIn(900, 193, 400, 64) && (GameLARPGetStatus() == "")) {
-		var Index = 0;
+		let Index = 0;
 		for (let I = 0; I < GameLARPClass.length; I++)
 			if (GameLARPClass[I].Name == larp.Class)
 				Index = I;
@@ -524,7 +522,7 @@ function GameLARPGetBonus(Target, BonusType) {
 function GameLARPGetOdds(Action, Source, Target) {
 
 	// The basic odds are 50% + Offensive bonus of source - Defensive bonus of target
-	var Odds = 0.5 + GameLARPGetBonus(Source, 0) - GameLARPGetBonus(Target, 1);
+	let Odds = 0.5 + GameLARPGetBonus(Source, 0) - GameLARPGetBonus(Target, 1);
 
 	// Struggling starts at 10% + 10% for each new unsuccessful tries, tightening the bonds will reset it to 10%
 	if (Action == "Struggle") {
@@ -585,7 +583,7 @@ function GameLARPClothed(C) { return (InventoryGet(C, "Cloth") != null); }
  * @returns {boolean} - Returns TRUE if we can remove an item at a specific zone (cannot remove if there's a custom lock)
  */
 function GameLARPCanRemoveItem(C, Zone) {
-	var Item = InventoryGet(C, Zone);
+	const Item = InventoryGet(C, Zone);
 	if (Item == null) return false;
 	if (InventoryGetLock(Item) != null) return false;
 	return true;
@@ -605,7 +603,7 @@ function GameLARPBuildOptionAbility(Source, Target, Option, Ability) {
 	if ((Ability != "Evasion") && !GameLARPCanAct(Source)) return;
 
 	// If the ability was already used in that battle, it cannot be used again, the ability "Inspire" makes it usable once again
-	var AlreadyUsed = false;
+	let AlreadyUsed = false;
 	for (let P = 0; P < GameLARPProgress.length; P++) {
 		const progress = GameLARPProgress[P];
 		if (progress.Sender == Source.MemberNumber && progress.Data.GameProgress == "Action" && progress.Data.Action == Ability) AlreadyUsed = true;
@@ -673,11 +671,11 @@ function GameLARPBuildOption(Source, Target) {
 
 	// If the source clicks on herself, she can always pass her turn and do nothing
 	/** @type {GameLARPOption[]} */
-	var Option = [];
+	const Option = [];
 	if (Source.MemberNumber == Target.MemberNumber) Option.push({ Name: "Pass", Odds: GameLARPGetOdds("Pass", Source, Source) });
 
 	// If seduce is in progress on the source, all she can do is pass her turn
-	var PassTurn = false;
+	let PassTurn = false;
 	for (let P = ((GameLARPProgress.length - GameLARPPlayer.length * 2 + 1 > 0) ? GameLARPProgress.length - GameLARPPlayer.length * 2 + 1 : 0); P < GameLARPProgress.length; P++) {
 		const progress = GameLARPProgress[P];
 		if (progress.Success && progress.Data.GameProgress == "Action" && progress.Data.Action == "Seduce" && progress.Data.Target == Source.MemberNumber) PassTurn = true;
@@ -765,9 +763,9 @@ function GameLARPProcessAction(Action, ItemName, Source, Target, RNG) {
 	if ((Source == null) || (Target == null)) return;
 
 	// Gets the item description in the user language
-	var ItemDesc = "N/A";
+	let ItemDesc = "N/A";
 	if (ItemName != "") {
-		var A;
+		let A;
 		if ((Action == "RestrainLegs") || (Action == "Immobilize")) A = AssetGet(Target.AssetFamily, "ItemFeet", ItemName);
 		if ((Action == "RestrainArms") || (Action == "Detain")) A = AssetGet(Target.AssetFamily, "ItemArms", ItemName);
 		if ((Action == "RestrainMouth") || (Action == "Silence")) A = AssetGet(Target.AssetFamily, "ItemMouth", ItemName);
@@ -776,7 +774,7 @@ function GameLARPProcessAction(Action, ItemName, Source, Target, RNG) {
 	}
 
 	// If the odds are successful (0% never succeeds, 100% always succeeds)
-	var Odds = GameLARPGetOdds(Action, Source, Target);
+	const Odds = GameLARPGetOdds(Action, Source, Target);
 	if ((Odds >= 0.01) && ((Odds >= 1) || (Odds >= Math.round(RNG * 100) / 100))) {
 
 		// Regular restrain actions
@@ -894,7 +892,7 @@ function GameLARPAddChatLog(Msg, Source, Target, Description, RNG, Odds, Color) 
 	Msg = CommonStringSubstitute(Msg, GameLARPBuildSubstitutions(Source, Target, Description, RNG, Odds));
 
 	// Adds the message and scrolls down unless the user has scrolled up
-	var div = document.createElement("div");
+	const div = document.createElement("div");
 	div.setAttribute('class', 'ChatMessage ChatMessageServerMessage');
 	div.setAttribute('data-time', ChatRoomCurrentTime());
 	if ((Color != null) && (Color != "")) div.style.color = Color;
@@ -1041,18 +1039,15 @@ function GameLARPContinue() {
 		ServerAccountUpdate.QueueData({ Game: Player.Game }, true);
 
 		// Calculate the reputation gained, the longer the game took, the higher it will rise the rep, times 2 if the player team won
-		var RepGain = Math.round(GameLARPProgress.length / GameLARPPlayer.length * ((Player.Game?.LARP?.Team === Team) ? 0.5 : 0.25));
+		let RepGain = Math.round(GameLARPProgress.length / GameLARPPlayer.length * ((Player.Game?.LARP?.Team === Team) ? 0.5 : 0.25));
 		if (RepGain > 10) RepGain = 10;
 		if (RepGain > 0) DialogChangeReputation("LARP", RepGain);
 		ChatRoomCharacterUpdate(Player);
 
 		// If the player is one the winning team, she earns some money based on game length, split by the number of winners
-		if ((Player.Game?.LARP?.Team == Team) && (GameLARPProgress.length >= 5)) {
-			var PlayersInWinningTeam = 0;
-			for (let C = 0; C < GameLARPPlayer.length; C++)
-				if (GameLARPPlayer[C].Game?.LARP?.Team == Team)
-					PlayersInWinningTeam++;
-			var MoneyGain = Math.round(GameLARPPlayer.length * Math.sqrt(GameLARPProgress.length) / PlayersInWinningTeam);
+		if ((Player.Game?.LARP?.Team === Team) && (GameLARPProgress.length >= 5)) {
+			const PlayersInWinningTeam = GameLARPPlayer.filter(c => c.Game?.LARP?.Team === Team).length;
+			let MoneyGain = Math.round(GameLARPPlayer.length * Math.sqrt(GameLARPProgress.length) / PlayersInWinningTeam);
 			if (MoneyGain > 30) MoneyGain = 30;
 			if (MoneyGain > 0) CharacterChangeMoney(Player, MoneyGain);
 		}
@@ -1189,7 +1184,7 @@ function GameLARPDrawCharacter(C, X, Y, Zoom) {
 		GameLARPDrawIcon(C, X + 70 * Zoom, Y + 800 * Zoom, 0.6 * Zoom);
 		if ((GameLARPPlayer.length > 0) && (C.MemberNumber == GameLARPPlayer[GameLARPTurnPosition].MemberNumber) && (GameLARPGetStatus() == "Running") && (GameLARPTurnFocusCharacter == null)) {
 			MainCanvas.font = CommonGetFont(72);
-			var Time = Math.ceil((GameLARPTurnTimer - TimerGetTime()) / 1000);
+			const Time = Math.ceil((GameLARPTurnTimer - TimerGetTime()) / 1000);
 			DrawText(((Time < 0) || (Time > GameLARPTimerDelay[GameLARPTimerDelay.length - 1])) ? OnlineGameDictionaryText("TimerNA") : Time.toString(), X + 250 * Zoom, Y + 830 * Zoom, "Red", "Black");
 			MainCanvas.font = CommonGetFont(36);
 		}

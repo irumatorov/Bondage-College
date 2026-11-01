@@ -268,8 +268,8 @@ function KidnapUpperHandMoveAvailable(MoveType, DoMove) {
  * @returns {void} - Nothing
  */
 function KidnapAIMoveUpperHand() {
-	var Try = 0;
-	var MoveDone = false;
+	let Try = 0;
+	let MoveDone = false;
 	while ((Try < 100) && (MoveDone == false)) {
 		KidnapUpperHandSelection = Math.floor(Math.random() * (KidnapUpperHandMoveType.length - 1));
 		MoveDone = KidnapUpperHandMoveAvailable(KidnapUpperHandSelection, true);
@@ -321,8 +321,8 @@ function KidnapSelectMove(CardIndex) {
 	const kidnapCards = KidnapOpponent.KidnapCard ?? [];
 	const PlayerMove = playerCards[CardIndex].Move;
 	const OpponentMove = kidnapCards[OpponentCardIndex].Move;
-	var PM = KidnapMoveMap[PlayerMove][OpponentMove];
-	var OM = KidnapMoveMap[OpponentMove][PlayerMove];
+	const PM = KidnapMoveMap[PlayerMove][OpponentMove];
+	const OM = KidnapMoveMap[OpponentMove][PlayerMove];
 	KidnapDialog = "Player" + KidnapMoveType[PlayerMove] + "Opponent" + KidnapMoveType[OpponentMove];
 
 	// Keep the move to show it later
@@ -472,7 +472,7 @@ function KidnapDrawMove(C, Header, X, Side) {
  * @returns {void} - Nothing
  */
 function KidnapDrawMoveUpperHand() {
-	var X = (KidnapUpperHandVictim?.IsPlayer()) ? 1500 : 0;
+	const X = (KidnapUpperHandVictim?.IsPlayer()) ? 1500 : 0;
 	if (KidnapUpperHandVictim?.IsPlayer()) DrawTextWrap(TextGet("UpperHand" + KidnapUpperHandMoveType[KidnapUpperHandSelection]), 10, 300, 580, 200, "White");
 	DrawText(TextGet("UpperHandMove"), X + 250, 50, "white", "gray");
 	for (let M = 0; M <= KidnapUpperHandMoveType.length - 1; M++)
@@ -485,7 +485,7 @@ function KidnapDrawMoveUpperHand() {
  */
 function KidnapShowTimer() {
 	if ((KidnapMode == "SelectItem") || (KidnapMode == "SelectMove") || (KidnapMode == "UpperHand") || (KidnapMode == "ShowMove")) {
-		var Sec = Math.floor((KidnapTimer - CommonTime() + 1000) / 1000);
+		const Sec = Math.floor((KidnapTimer - CommonTime() + 1000) / 1000);
 		MainCanvas.font = "italic 300 " + CommonGetFont(200);
 		DrawText(Sec.toString(), (KidnapMode == "SelectItem") ? 500 : 1000, 500, (Sec <= 3) ? "red" : "white", "black");
 		MainCanvas.font = CommonGetFont(36);
@@ -515,8 +515,8 @@ function KidnapShowItem() {
 	DrawButton(1750, 25, 225, 65, TextGet("Cancel"), "White");
 
 	// For each items in the player inventory
-	var X = 1000;
-	var Y = 125;
+	let X = 1000;
+	let Y = 125;
 	for (let I = 0; I < DialogInventory.length; I++) {
 		const Item = DialogInventory[I];
 		DrawAssetPreview(X, Y, Item.Asset, { Hover: true });
@@ -539,7 +539,7 @@ function KidnapRun() {
 	if (!KidnapOpponent) return;
 
 	// Draw the kidnap elements
-	var X = 500;
+	let X = 500;
 	if (KidnapMode == "SelectItem") X = 0;
 	DrawCharacter(Player, X, 0, 1);
 	DrawCharacter(KidnapOpponent, X + 500, 0, 1);

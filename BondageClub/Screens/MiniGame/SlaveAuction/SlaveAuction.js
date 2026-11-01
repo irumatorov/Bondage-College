@@ -77,7 +77,7 @@ function SlaveAuctionRun() {
 
 	// If we must draw the "I bid X$" bubble
 	if ((SlaveAuctionBidTime >= CurrentTime - 3000) && (SlaveAuctionBidCurrent != "")) {
-		var X = -25;
+		let X = -25;
 		if (SlaveAuctionBidCurrent == "Player") X = 375;
 		if (SlaveAuctionBidCurrent == "Right") X = 1575;
 		DrawImage("Screens/" + CurrentModule + "/" + CurrentScreen + "/Bubble.png", X, 16);

@@ -110,13 +110,13 @@ function CommonIsNumeric(n) {
  * @deprecated
  */
 function CommonGetFormatDate() {
-	var d = new Date();
-	var yyyy = d.getFullYear();
-	var mm = d.getMonth() < 9 ? "0" + (d.getMonth() + 1) : (d.getMonth() + 1); // getMonth() is zero-based
-	var dd = d.getDate() < 10 ? "0" + d.getDate() : d.getDate();
-	var hh = d.getHours() < 10 ? "0" + d.getHours() : d.getHours();
-	var min = d.getMinutes() < 10 ? "0" + d.getMinutes() : d.getMinutes();
-	var ss = d.getSeconds() < 10 ? "0" + d.getSeconds() : d.getSeconds();
+	const d = new Date();
+	const yyyy = d.getFullYear();
+	const mm = d.getMonth() < 9 ? "0" + (d.getMonth() + 1) : (d.getMonth() + 1); // getMonth() is zero-based
+	const dd = d.getDate() < 10 ? "0" + d.getDate() : d.getDate();
+	const hh = d.getHours() < 10 ? "0" + d.getHours() : d.getHours();
+	const min = d.getMinutes() < 10 ? "0" + d.getMinutes() : d.getMinutes();
+	const ss = d.getSeconds() < 10 ? "0" + d.getSeconds() : d.getSeconds();
 	return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
 }
 
@@ -133,7 +133,8 @@ function CommonDetectMobile() {
  * @returns {{Name: string, Version: string}} - Browser info
  */
 function CommonGetBrowser() {
-	var ua = navigator.userAgent, tem, M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+	const ua = navigator.userAgent;
+	let tem, M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
 	if (/trident/i.test(M[1])) {
 		tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
 		return { Name: "IE", Version: (tem[1] || "N/A") };
@@ -167,16 +168,16 @@ function CommonParseInt(val, radix=null) {
  */
 function CommonParseCSV(str) {
 	/** @type {string[][]} */
-	var arr = [];
-	var quote = false;  // true means we're inside a quoted field
-	var c;
-	var col;
+	const arr = [];
+	let quote = false;  // true means we're inside a quoted field
+	let c;
+	let col;
 	// We remove whitespace on start and end
 	str = str.replace(/\r\n/g, '\n').trim();
 
 	// iterate over each character, keep track of current row and column (of the returned array)
 	for (let row = col = c = 0; c < str.length; c++) {
-		var cc = str[c], nc = str[c + 1];        // current character, next character
+		const cc = str[c], nc = str[c + 1];        // current character, next character
 		arr[row] = arr[row] || [];             // create a new row if necessary
 		arr[row][col] = arr[row][col] || '';   // create a new column (start with empty string) if necessary
 
@@ -514,18 +515,18 @@ function CommonDynamicFunction(FunctionName) {
 function CommonDynamicFunctionParams(FunctionName) {
 
 	// Gets the reverse (!) sign
-	var Reverse = false;
+	let Reverse = false;
 	if (FunctionName.substring(0, 1) == "!") Reverse = true;
 	FunctionName = FunctionName.replace("!", "");
 
 	// Gets the real function name and parameters
-	var openParenthesisIndex = FunctionName.indexOf("(");
-	var closedParenthesisIndex = FunctionName.indexOf(")", openParenthesisIndex);
-	var ParamsString = FunctionName.substring(openParenthesisIndex + 1, closedParenthesisIndex);
+	const openParenthesisIndex = FunctionName.indexOf("(");
+	const closedParenthesisIndex = FunctionName.indexOf(")", openParenthesisIndex);
+	const ParamsString = FunctionName.substring(openParenthesisIndex + 1, closedParenthesisIndex);
 
 	// Convert stringified numbers to actual numbers where possible
 	/** @type {(string | number)[]} */
-	var Params = [];
+	const Params = [];
 	if (ParamsString) {
 		for (let param of ParamsString.split(",")) {
 			param = param.trim().replace('"', '').replace('"', '');
@@ -866,7 +867,7 @@ function CommonGetRandomItemFromList(list) {
  */
 function CommonConvertStringToArray(s) {
 	/** @type {number[]} */
-	var arr = [];
+	let arr = [];
 	if (typeof s === "string") {
 		arr = s.split(',').reduce((list, curr) => {
 			if (!(!curr || Number.isNaN(Number(curr)))) list.push(Number(curr));
@@ -882,8 +883,8 @@ function CommonConvertStringToArray(s) {
  * @returns {string} - The shuffled string
  */
 function CommonStringShuffle(string) {
-	var parts = string.split('');
-	for (var i = parts.length; i > 0;) {
+	let parts = string.split('');
+	for (let i = parts.length; i > 0;) {
 		const random = Math.random() * i;
 		const temp = parts[--i];
 		parts[i] = parts[random];
@@ -1082,8 +1083,8 @@ function CommonLimitFunction(func, minWait = 0, maxWait = 1000) {
  */
 function CommonMemoize(func, argConvertors=null) {
 	/** @type {Record<string, ReturnType<T>>} */
-	var memo = {};
-	var memoized = /** @type {MemoizedFunction<T>} */(function (...args) {
+	let memo = {};
+	const memoized = /** @type {MemoizedFunction<T>} */(function (...args) {
 		let index = "";
 		if (argConvertors !== null) {
 			index += argConvertors.map((callback, i) => callback(args[i])).join(",");
@@ -2220,15 +2221,15 @@ var CommonRegEscape = (() => {
 		return RegExp.escape;
 	}
 
-	var WHITESPACES = (
+	const WHITESPACES = (
 		'\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u1680\u2000\u2001\u2002' +
 		'\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF'
 	);
 
-	var FIRST_DIGIT_OR_ASCII = /^[0-9a-z]/i;
-	var SYNTAX_SOLIDUS = /^[$()*+./?[\\\]^{|}]/;
-	var OTHER_PUNCTUATORS_AND_WHITESPACES = RegExp('^[!"#%&\',\\-:;<=>@`~' + WHITESPACES + ']');
-	var ControlEscape = {
+	const FIRST_DIGIT_OR_ASCII = /^[0-9a-z]/i;
+	const SYNTAX_SOLIDUS = /^[$()*+./?[\\\]^{|}]/;
+	const OTHER_PUNCTUATORS_AND_WHITESPACES = RegExp('^[!"#%&\',\\-:;<=>@`~' + WHITESPACES + ']');
+	const ControlEscape = {
 		'\u0009': 't',
 		'\u000A': 'n',
 		'\u000B': 'v',
@@ -2238,7 +2239,7 @@ var CommonRegEscape = (() => {
 
 	/** @type {(chr: string) => string} */
 	function escapeChar(chr) {
-		var hex = chr.charCodeAt(0).toString(16);
+		const hex = chr.charCodeAt(0).toString(16);
 		return hex.length < 3 ? '\\x' + hex.padStart(2, '0') : '\\u' + hex.padStart(4, '0');
 	}
 
@@ -2250,11 +2251,11 @@ var CommonRegEscape = (() => {
 			throw new TypeError('Argument is not a string');
 		}
 
-		var length = S.length;
-		var result = Array(length);
+		const length = S.length;
+		const result = Array(length);
 
-		for (var i = 0; i < length; i++) {
-			var chr = S.charAt(i);
+		for (let i = 0; i < length; i++) {
+			const chr = S.charAt(i);
 			if (i === 0 && FIRST_DIGIT_OR_ASCII.exec(chr)) {
 				result[i] = escapeChar(chr);
 			} else if (chr in ControlEscape) {
@@ -2265,7 +2266,7 @@ var CommonRegEscape = (() => {
 			} else if (OTHER_PUNCTUATORS_AND_WHITESPACES.exec(chr)) {
 				result[i] = escapeChar(chr);
 			} else {
-				var charCode = chr.charCodeAt(0);
+				const charCode = chr.charCodeAt(0);
 				if ((charCode & 0xF800) !== 0xD800) { // single UTF-16 code unit
 					result[i] = chr;
 				} else if (charCode >= 0xDC00 || i + 1 >= length || (S.charCodeAt(i + 1) & 0xFC00) !== 0xDC00) { // unpaired surrogate
