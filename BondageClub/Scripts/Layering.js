@@ -249,7 +249,7 @@ var Layering = {
 	 * @param {string} defaultPriority - The stringified default priority of the layer
 	 */
 	_ApplyLayerPriority(name, priority, defaultPriority) {
-		if (!this.OverridePriority || !this.Character) throw new Error("called before Layering.Init()");
+		if (this.OverridePriority === undefined || !this.Character) throw new Error("called before Layering.Init()");
 		const old = CommonIsObject(this.OverridePriority) ? this.OverridePriority[name] : this.OverridePriority;
 		if (!CommonIsObject(this.OverridePriority)) {
 			this._UpdateInputColors("layer-priority");
@@ -259,7 +259,8 @@ var Layering = {
 		if (!CommonIsObject(this.OverridePriority)) return;
 
 		if (!Number.isNaN(priority) && priority.toString() !== defaultPriority) {
-			this.OverridePriority[name] = CommonClamp(priority, -99, 99);
+			// Guaranteed to be an object by `this._InitOverridePriorityObject()`
+			/** @type {Partial<Record<LayerName, number>>} */(this.OverridePriority)[name] = CommonClamp(priority, -99, 99);
 		} else {
 			delete this.OverridePriority[name];
 		}
