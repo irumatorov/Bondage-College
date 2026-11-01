@@ -1560,15 +1560,14 @@ var ServerValidation = {
 	/**
 	 * Private helper to check arrays whose items must appear in a fixed list
 	 * @template T
-	 * @param {readonly T[]} list
-	 * @param {T[]} defaultIfEmpty
+	 * @param {readonly T[]} items
+	 * @param {T[]} defaultValue
 	 * @returns {(arg: unknown) => T[]}
 	 */
-	isArrayOfItems(list, defaultIfEmpty) {
+	isArrayOfItems(items, defaultValue) {
 		return (arg) => {
-			if (!Array.isArray(arg)) return defaultIfEmpty;
-			const values = arg.filter((r) => CommonIncludes(list, r));
-			return values.length > 0 ? values : defaultIfEmpty;
+			if (!Array.isArray(arg)) return defaultValue;
+			return arg.filter((r) => CommonIncludes(items, r));
 		};
 	},
 
