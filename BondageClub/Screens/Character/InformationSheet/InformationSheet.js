@@ -225,20 +225,20 @@ function InformationSheetContent(C) {
 		ElementCreate({
 			tag: "div",
 			classList: ["information-sheet-identity-slot"],
-			children: [InformationSheetIdentity(C)],
+			children: [InformationSheetIdentitySection(C)],
 		}),
 		ElementCreate({
 			tag: "div",
 			classList: ["information-sheet-relations-slot"],
 			children: [
-				InformationSheetColumn("Owner", [InformationSheetOwnership(C)], "Unowned", undefined, false),
-				InformationSheetRelationshipColumn(C),
+				InformationSheetOwnerSection(C),
+				InformationSheetRelationshipSection(C),
 			],
 		}),
 	];
-	if (C.IsPlayer()) sections.push(InformationSheetSkillColumn(C), InformationSheetPermissions());
-	if (C.IsPlayer() || C.IsOnline()) sections.push(InformationSheetReputationColumn(C));
-	if (C.IsNpc()) sections.push(InformationSheetTraitColumn(C));
+	if (C.IsPlayer()) sections.push(InformationSheetSkillSection(C), InformationSheetPermissionsSection());
+	if (C.IsPlayer() || C.IsOnline()) sections.push(InformationSheetReputationSection(C));
+	if (C.IsNpc()) sections.push(InformationSheetTraitSection(C));
 
 	return ElementCreate({
 		tag: "div",
@@ -275,7 +275,7 @@ function InformationSheetLayout(C) {
  * @param {Character} C
  * @returns {HTMLElement}
  */
-function InformationSheetIdentity(C) {
+function InformationSheetIdentitySection(C) {
 	/** @type {HTMLElement[]} */
 	const facts = [
 		...InformationSheetFact(TextGet("Name"), C.Name, null, true),
@@ -519,7 +519,7 @@ function InformationSheetOwnership(C) {
  * @param {boolean} [scroll]
  * @returns {HTMLElement}
  */
-function InformationSheetColumn(titleKey, entries, emptyKey = "None", area, scroll = true) {
+function InformationSheetSection(titleKey, entries, emptyKey = "None", area, scroll = true) {
 	return ElementCreate({
 		tag: "section",
 		classList: [
@@ -546,7 +546,15 @@ function InformationSheetColumn(titleKey, entries, emptyKey = "None", area, scro
  * @param {Character} C
  * @returns {HTMLElement}
  */
-function InformationSheetRelationshipColumn(C) {
+function InformationSheetOwnerSection(C) {
+	return InformationSheetSection("Owner", [InformationSheetOwnership(C)], "Unowned", undefined, false);
+}
+
+/**
+ * @param {Character} C
+ * @returns {HTMLElement}
+ */
+function InformationSheetRelationshipSection(C) {
 	/** @type {HTMLElement[]} */
 	const entries = [];
 
@@ -570,7 +578,7 @@ function InformationSheetRelationshipColumn(C) {
 
 	const titleKey = C.IsNpc() ?  "YourRelations" : "Relationships";
 
-	return InformationSheetColumn(titleKey, entries);
+	return InformationSheetSection(titleKey, entries);
 }
 
 /**
@@ -662,14 +670,14 @@ function InformationSheetBimeter(value, max, classList, color) {
  * @param {PlayerCharacter} C
  * @returns {HTMLElement}
  */
-function InformationSheetSkillColumn(C) {
+function InformationSheetSkillSection(C) {
 	/** @type {HTMLElement[]} */
 	const entries = [];
 	for (const type of SkillValidSkills) {
 		if (SkillGetLevelReal(C, type) === 0 && SkillGetProgress(C, type) === 0) continue;
 		entries.push(InformationSheetSkill(C, type));
 	}
-	return InformationSheetColumn("Skill", entries, "SkillNone", "skills");
+	return InformationSheetSection("Skill", entries, "SkillNone", "skills");
 }
 
 /**
@@ -826,7 +834,7 @@ function InformationSheetRefreshSkills(C) {
  * @param {Character} C
  * @returns {HTMLElement}
  */
-function InformationSheetReputationColumn(C) {
+function InformationSheetReputationSection(C) {
 	/** @type {HTMLElement[]} */
 	const entries = [InformationSheetDualReputation(C, "Dominant", ReputationGet(C, "Dominant"))];
 	const rest = C.Reputation
@@ -850,7 +858,7 @@ function InformationSheetReputationColumn(C) {
 			));
 		}
 	}
-	return InformationSheetColumn("Reputation", entries, "ReputationNone", "reputation");
+	return InformationSheetSection("Reputation", entries, "ReputationNone", "reputation");
 }
 
 /**
@@ -919,11 +927,11 @@ function InformationSheetMeterStat(label, value, amount, max, color) {
  * @param {NPCCharacter} C
  * @returns {HTMLElement}
  */
-function InformationSheetTraitColumn(C) {
+function InformationSheetTraitSection(C) {
 	const metAt = NPCEventGet(C, "PrivateRoomEntry") * CheatFactor("AutoShowTraits", 0);
 
 	/* Hidden for the first week after meeting her, then names only, then the values. */
-	if (CurrentTime < metAt + MS_PER_WEEK) return InformationSheetColumn("Trait", [], "TraitUnknown", "traits");
+	if (CurrentTime < metAt + MS_PER_WEEK) return InformationSheetSection("Trait", [], "TraitUnknown", "traits");
 
 	const levelsKnown = CurrentTime >= metAt + 2 * MS_PER_WEEK;
 	/** @type {HTMLElement[]} */
@@ -954,7 +962,7 @@ function InformationSheetTraitColumn(C) {
 			));
 		}
 	}
-	return InformationSheetColumn("Trait", entries, "None", "traits");
+	return InformationSheetSection("Trait", entries, "None", "traits");
 }
 
 /**
@@ -983,7 +991,7 @@ function InformationSheetTextStat(label, value, extra, classList) {
 /**
  * @returns {HTMLLabelElement}
  */
-function InformationSheetPermissions() {
+function InformationSheetPermissionsSection() {
 	const dropdownOptions = Object.values(AllowedInteractions)
 		.map((interaction) => /** @type {Omit<HTMLOptions<"option">, "tag">} */({
 			attributes: {
