@@ -373,6 +373,20 @@
 	background: #3a342c;
 }
 
+.information-sheet-trait {
+	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+	column-gap: 0.55em;
+}
+
+.information-sheet-trait-positive {
+	text-align: right;
+}
+
+.information-sheet-trait .information-sheet-stat-value {
+	padding-inline: 0.35em;
+	text-align: center;
+}
+
 .information-sheet-trait-bimeter .information-sheet-bimeter-fill {
 	background: #3a342c;
 }

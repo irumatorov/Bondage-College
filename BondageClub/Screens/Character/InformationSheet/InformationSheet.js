@@ -966,12 +966,22 @@ function InformationSheetTraitColumn(C) {
 			entries.push(InformationSheetTextStat(label, "??"));
 		} else {
 			// The first name of the pair is the positive pole, matching NPCTraitGet and Dominant reputation.
-			const pair = NPCTrait.find(([positive, negative]) => positive === trait.Name || negative === trait.Name);
+			const pair = NPCTrait.find(([pole, opposite]) => pole === trait.Name || opposite === trait.Name);
+			const positive = pair?.[0] ?? trait.Name;
+			const negative = pair?.[1] ?? NPCTraitReverse(trait.Name);
 			const signed = pair ? NPCTraitGet(C, pair[0]) : trait.Value;
 			entries.push(InformationSheetTextStat(
-				label,
+				TextGet("Trait" + negative),
 				Math.abs(signed).toString(),
-				[InformationSheetBimeter(signed, 100, ["information-sheet-trait-bimeter"])],
+				[
+					ElementCreate({
+						tag: "span",
+						classList: ["information-sheet-stat-label", "information-sheet-trait-positive"],
+						children: [TextGet("Trait" + positive)],
+					}),
+					InformationSheetBimeter(signed, 100, ["information-sheet-trait-bimeter"]),
+				],
+				["information-sheet-trait"],
 			));
 		}
 	}
