@@ -2,7 +2,7 @@
 var PrivateBackground = "Private";
 /** @type {NPCCharacter} */
 var PrivateVendor = /** @type {never} */ (null);
-/** @type {NPCCharacter[]} */
+/** @type {(PlayerCharacter | NPCCharacter)[]} */
 var PrivateCharacter = [];
 var PrivateCharacterOffset = 0;
 var PrivateCharacterShouldSync = false;
@@ -1124,14 +1124,15 @@ function PrivateClickCharacterButton() {
 			InformationSheetLoadCharacter(PrivateCharacter[C]);
 
 		// The cage is only available on certain conditions
-		if (MouseIn(ButtonX + 205, 900, 90, 90) && !PrivateCharacter[C].PrivateBed)
-			if ((NPCEventGet(PrivateCharacter[C], "SlaveMarketRent") <= CurrentTime) && (NPCEventGet(PrivateCharacter[C], "AsylumSent") <= CurrentTime) && (NPCEventGet(PrivateCharacter[C], "NPCBrainwashing") <= CurrentTime) && (NPCEventGet(PrivateCharacter[C], "Kidnap") <= CurrentTime))
-				if (LogQuery("Cage", "PrivateRoom") && !LogQuery("BlockCage", "Rule"))
-					if ((!Player.Cage) || (C == 0))
-						if (!PrivateCharacter[C].IsOwner()) {
-							PrivateCharacter[C].Cage = (!PrivateCharacter[C].Cage ? true : undefined);
-							if (C > 0) ServerPrivateCharacterSync();
-						}
+		cage: {
+			if (!MouseIn(ButtonX + 205, 900, 90, 90) || PrivateCharacter[C].PrivateBed) break cage;
+			if ((NPCEventGet(PrivateCharacter[C], "SlaveMarketRent") > CurrentTime) || (NPCEventGet(PrivateCharacter[C], "AsylumSent") > CurrentTime) || (NPCEventGet(PrivateCharacter[C], "NPCBrainwashing") > CurrentTime) || (NPCEventGet(PrivateCharacter[C], "Kidnap") > CurrentTime)) break cage;
+			if (!LogQuery("Cage", "PrivateRoom") || LogQuery("BlockCage", "Rule")) break cage;
+			if (Player.Cage && C != 0) break cage;
+			if (PrivateCharacter[C].IsOwner()) break cage;
+			PrivateCharacter[C].Cage = (!PrivateCharacter[C].Cage ? true : undefined);
+			if (C > 0) ServerPrivateCharacterSync();
+		}
 
 		// The cage is only available on certain conditions
 		if (MouseIn(ButtonX + 205, 900, 90, 90) && PrivateCharacter[C].PrivateBed)
@@ -1156,122 +1157,118 @@ function PrivateClickCharacterButton() {
  * @returns {void} - Nothing.
  */
 function PrivateClickCharacter() {
-
 	// Defines the character position in the private screen
-	var X = 1000 - ((PrivateCharacter.length - PrivateCharacterOffset) * 250);
-	if (X < 0) X = 0;
+	const X = CommonMax(0, 1000 - ((PrivateCharacter.length - PrivateCharacterOffset) * 250));
 
 	// For each character, we find the one that was clicked and open it's dialog
 	for (let C = PrivateCharacterOffset; (C < PrivateCharacter.length && C < PrivateCharacterOffset + 4); C++) {
 		const ButtonX = X + (C - PrivateCharacterOffset) * 470;
-		if (MouseXIn(ButtonX, 470))
-			if ((NPCEventGet(PrivateCharacter[C], "SlaveMarketRent") <= CurrentTime) && (NPCEventGet(PrivateCharacter[C], "AsylumSent") <= CurrentTime) && (NPCEventGet(PrivateCharacter[C], "NPCBrainwashing") <= CurrentTime) && !PrivateCharacter[C].PrivateBed) {
+		const char = PrivateCharacter[C];
+		if (!MouseXIn(ButtonX, 470)) continue;
+		if ((NPCEventGet(char, "SlaveMarketRent") > CurrentTime) || (NPCEventGet(char, "AsylumSent") > CurrentTime) || (NPCEventGet(char, "NPCBrainwashing") > CurrentTime) || char.PrivateBed) continue;
 
-				// If a kidnapping is in progress, we show the ransom note
-				if (NPCEventGet(PrivateCharacter[C], "Kidnap") >= CurrentTime) {
-					PrivateRansomCharacter = PrivateCharacter[C];
-					CommonSetScreen("Room", "PrivateRansom");
+		// If a kidnapping is in progress, we show the ransom note
+		if (NPCEventGet(char, "Kidnap") >= CurrentTime) {
+			PrivateRansomCharacter = PrivateCharacter[C];
+			CommonSetScreen("Room", "PrivateRansom");
+			return;
+		}
+
+		// If the arousal meter is shown for that character, we can interact with it
+		arousal: {
+			if (!char.IsPlayer() && !Player.ArousalSettings.ShowOtherMeter) break arousal;
+			if (!char.IsPlayer() && (char.ArousalSettings.Visible !== "Access" || !char.AllowItem) && char.ArousalSettings.Visible !== "All") break arousal;
+			if ((char.ArousalSettings.Active !== "Manual") && (char.ArousalSettings.Active !== "Hybrid") && (char.ArousalSettings.Active !== "Automatic")) break arousal;
+
+			// The arousal meter can be maximized or minimized by clicking on it
+			if (MouseIn(ButtonX + 60, 400, 80, 100) && !char.ArousalZoom) { char.ArousalZoom = true; return; }
+			if (MouseIn(ButtonX + 50, 615, 100, 100) && char.ArousalZoom) { char.ArousalZoom = false; return; }
+
+			// If the player can manually control her arousal or wants to fight her desire
+			if ((char.IsPlayer()) && MouseIn(ButtonX + 50, 200, 100, 415) && char.ArousalZoom)
+				if ((Player.ArousalSettings != null) && (Player.ArousalSettings.Active != null) && (Player.ArousalSettings.Progress != null)) {
+					if ((Player.ArousalSettings.Active == "Manual") || (Player.ArousalSettings.Active == "Hybrid")) {
+						var Arousal = Math.round((625 - MouseY) / 4);
+						ActivitySetArousal(Player, Arousal);
+						ActivityExpression(Player, Player.ArousalSettings.Progress);
+						if (Player.ArousalSettings.Progress == 100) ActivityOrgasmPrepare(Player);
+					}
 					return;
 				}
 
-				// If the arousal meter is shown for that character, we can interact with it
-				if ((PrivateCharacter[C].IsPlayer()) || (Player.ArousalSettings.ShowOtherMeter == null) || Player.ArousalSettings.ShowOtherMeter)
-					if ((PrivateCharacter[C].IsPlayer()) || ((PrivateCharacter[C].ArousalSettings != null) && (PrivateCharacter[C].ArousalSettings.Visible != null) && (PrivateCharacter[C].ArousalSettings.Visible == "Access") && PrivateCharacter[C].AllowItem) || ((PrivateCharacter[C].ArousalSettings != null) && (PrivateCharacter[C].ArousalSettings.Visible != null) && (PrivateCharacter[C].ArousalSettings.Visible == "All")))
-						if ((PrivateCharacter[C].ArousalSettings != null) && (PrivateCharacter[C].ArousalSettings.Active != null) && ((PrivateCharacter[C].ArousalSettings.Active == "Manual") || (PrivateCharacter[C].ArousalSettings.Active == "Hybrid") || (PrivateCharacter[C].ArousalSettings.Active == "Automatic"))) {
+			// Don't do anything if the thermometer is clicked without access to it
+			if (MouseIn(ButtonX + 50, 200, 100, 415) && char.ArousalZoom) return;
+		}
 
-							// The arousal meter can be maximized or minimized by clicking on it
-							if (MouseIn(ButtonX + 60, 400, 80, 100) && !PrivateCharacter[C].ArousalZoom) { PrivateCharacter[C].ArousalZoom = true; return; }
-							if (MouseIn(ButtonX + 50, 615, 100, 100) && PrivateCharacter[C].ArousalZoom) { PrivateCharacter[C].ArousalZoom = false; return; }
+		// Cannot click on a character that's having an orgasm
+		if (!char.IsPlayer() && (char.ArousalSettings != null) && (char.ArousalSettings.OrgasmTimer != null) && (char.ArousalSettings.OrgasmTimer > 0))
+			return;
 
-							// If the player can manually control her arousal or wants to fight her desire
-							if ((PrivateCharacter[C].IsPlayer()) && MouseIn(ButtonX + 50, 200, 100, 415) && PrivateCharacter[C].ArousalZoom)
-								if ((Player.ArousalSettings != null) && (Player.ArousalSettings.Active != null) && (Player.ArousalSettings.Progress != null)) {
-									if ((Player.ArousalSettings.Active == "Manual") || (Player.ArousalSettings.Active == "Hybrid")) {
-										var Arousal = Math.round((625 - MouseY) / 4);
-										ActivitySetArousal(Player, Arousal);
-										ActivityExpression(Player, Player.ArousalSettings.Progress);
-										if (Player.ArousalSettings.Progress == 100) ActivityOrgasmPrepare(Player);
-									}
-									return;
-								}
+		// Make Sure the NPC owner has the "PlayerCollaring" event set
+		if ((Player.Owner != null) && (Player.Owner.replace("NPC-", "").trim() === char.Name) && (NPCEventGet(char, "PlayerCollaring") <= 0)) {
+			NPCEventAdd(char, "PlayerCollaring", CurrentTime);
+			ServerPrivateCharacterSync();
+		}
 
-							// Don't do anything if the thermometer is clicked without access to it
-							if (MouseIn(ButtonX + 50, 200, 100, 415) && PrivateCharacter[C].ArousalZoom) return;
+		// Sets the new character (1000 if she's owner, 2000 if she's owned)
+		if (!char.IsPlayer()) {
+			PrivateCharacterShouldSync = true;
+			if ((char.Stage == "0") && char.IsOwner()) char.Stage = "1000";
+			if ((char.Stage == "0") && char.IsOwnedByPlayer()) char.Stage = "2000";
+			NPCTraitDialog(char);
+		}
+		CharacterSetCurrent(char);
+		if (!CurrentCharacter) return;
 
-						}
-
-				// Cannot click on a character that's having an orgasm
-				if (!PrivateCharacter[C].IsPlayer() && (PrivateCharacter[C].ArousalSettings != null) && (PrivateCharacter[C].ArousalSettings.OrgasmTimer != null) && (PrivateCharacter[C].ArousalSettings.OrgasmTimer > 0))
-					return;
-
-				// Make Sure the NPC owner has the "PlayerCollaring" event set
-				if ((Player.Owner != null) && (Player.Owner.replace("NPC-", "").trim() === PrivateCharacter[C].Name) && (NPCEventGet(PrivateCharacter[C], "PlayerCollaring") <= 0)) {
-					NPCEventAdd(PrivateCharacter[C], "PlayerCollaring", CurrentTime);
-					ServerPrivateCharacterSync();
-				}
-
-				// Sets the new character (1000 if she's owner, 2000 if she's owned)
-				if (!PrivateCharacter[C].IsPlayer()) {
-					PrivateCharacterShouldSync = true;
-					if ((PrivateCharacter[C].Stage == "0") && PrivateCharacter[C].IsOwner()) PrivateCharacter[C].Stage = "1000";
-					if ((PrivateCharacter[C].Stage == "0") && PrivateCharacter[C].IsOwnedByPlayer()) PrivateCharacter[C].Stage = "2000";
-					NPCTraitDialog(PrivateCharacter[C]);
-				}
-				CharacterSetCurrent(PrivateCharacter[C]);
-				if (!CurrentCharacter) return;
-
-				// If the owner has beeped the player
-				if ((CurrentCharacter.Stage == "1000") && Player.IsOwnedByCharacter(CurrentCharacter) && LogQuery("OwnerBeepActive", "PrivateRoom")) {
-					if (LogQuery("OwnerBeepTimer", "PrivateRoom")) {
-						CurrentCharacter.Stage = "1020";
-						CurrentCharacter.CurrentDialog = DialogFind(CurrentCharacter, "OwnerBeepSuccess");
-						NPCLoveChange(CurrentCharacter, 8);
-					} else {
-						CurrentCharacter.Stage = "1030";
-						CurrentCharacter.CurrentDialog = DialogFind(CurrentCharacter, "OwnerBeepFail");
-						NPCLoveChange(CurrentCharacter, -10);
-					}
-					LogDelete("OwnerBeepActive", "PrivateRoom");
-					LogAdd("OwnerBeepTimer", "PrivateRoom", CurrentTime + 1800000);
-				}
-
-				// If the owner is serious, she might force the player to kneel
-				if ((CurrentCharacter.Stage == "1000") && Player.IsOwnedByCharacter(CurrentCharacter) && !Player.IsKneeling() && Player.CanKneel() && (NPCTraitGet(CurrentCharacter, "Serious") >= Math.random() * 100 - 25)) {
-					CurrentCharacter.Stage = "1005";
-					NPCLoveChange(CurrentCharacter, -3);
-					CurrentCharacter.CurrentDialog = DialogFind(CurrentCharacter, "PlayerMustKneel");
-				}
-
-				// Prerequisite conditions for NPC giving gifts to player
-				if (Player.CanTalk() && CurrentCharacter.CanTalk() && Player.CanInteract() && CurrentCharacter.CanInteract() && !Player.Cage && !CurrentCharacter.Cage && ((CurrentCharacter.Love ?? 0) >= 80) && (Math.random() >= 0.85) && (NPCEventGet(CurrentCharacter, "NextGift") <= CurrentTime)) {
-
-					// Lovers can offer non-restraint gifts to dominant players
-					if ((CurrentCharacter.Stage == "0") && (PrivateGiftRegular != null) && (ReputationGet("Dominant") >= NPCTraitGet(CurrentCharacter, "Dominant"))) {
-						CurrentCharacter.Stage = "RegularGift0";
-						CurrentCharacter.CurrentDialog = DialogFind(CurrentCharacter, "RegularGiftIntro");
-					}
-
-					// Lovers can offer restraint gifts to submissive players
-					if ((CurrentCharacter.Stage == "0") && (PrivateGiftRestraint != null) && (ReputationGet("Dominant") < NPCTraitGet(CurrentCharacter, "Dominant"))) {
-						CurrentCharacter.Stage = "RestraintGift0";
-						CurrentCharacter.CurrentDialog = DialogFind(CurrentCharacter, "RestraintGiftIntro");
-					}
-
-					// Domme NPC can offer restraint gifts to submissive players
-					if ((CurrentCharacter.Stage == "1000") && (PrivateGiftRestraint != null)) {
-						CurrentCharacter.Stage = "DomGift0";
-						CurrentCharacter.CurrentDialog = DialogFind(CurrentCharacter, "DomGiftIntro");
-					}
-
-					// Domme can offer non-restraint gifts to dominant players
-					if ((CurrentCharacter.Stage == "2000") && (PrivateGiftRegular != null)) {
-						CurrentCharacter.Stage = "SubGift0";
-						CurrentCharacter.CurrentDialog = DialogFind(CurrentCharacter, "SubGiftIntro");
-					}
-
-				}
-
+		// If the owner has beeped the player
+		if ((CurrentCharacter.Stage == "1000") && Player.IsOwnedByCharacter(CurrentCharacter) && LogQuery("OwnerBeepActive", "PrivateRoom")) {
+			if (LogQuery("OwnerBeepTimer", "PrivateRoom")) {
+				CurrentCharacter.Stage = "1020";
+				CurrentCharacter.CurrentDialog = DialogFind(CurrentCharacter, "OwnerBeepSuccess");
+				NPCLoveChange(CurrentCharacter, 8);
+			} else {
+				CurrentCharacter.Stage = "1030";
+				CurrentCharacter.CurrentDialog = DialogFind(CurrentCharacter, "OwnerBeepFail");
+				NPCLoveChange(CurrentCharacter, -10);
 			}
+			LogDelete("OwnerBeepActive", "PrivateRoom");
+			LogAdd("OwnerBeepTimer", "PrivateRoom", CurrentTime + 1800000);
+		}
+
+		// If the owner is serious, she might force the player to kneel
+		if ((CurrentCharacter.Stage == "1000") && Player.IsOwnedByCharacter(CurrentCharacter) && !Player.IsKneeling() && Player.CanKneel() && (NPCTraitGet(CurrentCharacter, "Serious") >= Math.random() * 100 - 25)) {
+			CurrentCharacter.Stage = "1005";
+			NPCLoveChange(CurrentCharacter, -3);
+			CurrentCharacter.CurrentDialog = DialogFind(CurrentCharacter, "PlayerMustKneel");
+		}
+
+		// Prerequisite conditions for NPC giving gifts to player
+		if (Player.CanTalk() && CurrentCharacter.CanTalk() && Player.CanInteract() && CurrentCharacter.CanInteract() && !Player.Cage && !CurrentCharacter.Cage && ((CurrentCharacter.Love ?? 0) >= 80) && (Math.random() >= 0.85) && (NPCEventGet(CurrentCharacter, "NextGift") <= CurrentTime)) {
+
+			// Lovers can offer non-restraint gifts to dominant players
+			if ((CurrentCharacter.Stage == "0") && (PrivateGiftRegular != null) && (ReputationGet("Dominant") >= NPCTraitGet(CurrentCharacter, "Dominant"))) {
+				CurrentCharacter.Stage = "RegularGift0";
+				CurrentCharacter.CurrentDialog = DialogFind(CurrentCharacter, "RegularGiftIntro");
+			}
+
+			// Lovers can offer restraint gifts to submissive players
+			if ((CurrentCharacter.Stage == "0") && (PrivateGiftRestraint != null) && (ReputationGet("Dominant") < NPCTraitGet(CurrentCharacter, "Dominant"))) {
+				CurrentCharacter.Stage = "RestraintGift0";
+				CurrentCharacter.CurrentDialog = DialogFind(CurrentCharacter, "RestraintGiftIntro");
+			}
+
+			// Domme NPC can offer restraint gifts to submissive players
+			if ((CurrentCharacter.Stage == "1000") && (PrivateGiftRestraint != null)) {
+				CurrentCharacter.Stage = "DomGift0";
+				CurrentCharacter.CurrentDialog = DialogFind(CurrentCharacter, "DomGiftIntro");
+			}
+
+			// Domme can offer non-restraint gifts to dominant players
+			if ((CurrentCharacter.Stage == "2000") && (PrivateGiftRegular != null)) {
+				CurrentCharacter.Stage = "SubGift0";
+				CurrentCharacter.CurrentDialog = DialogFind(CurrentCharacter, "SubGiftIntro");
+			}
+		}
 	}
 }
 
