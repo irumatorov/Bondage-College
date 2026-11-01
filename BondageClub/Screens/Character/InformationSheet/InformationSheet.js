@@ -19,14 +19,9 @@ const InformationSheetIDs = Object.freeze({
 	profile: "information-sheet-profile",
 	ownersNotes: "information-sheet-owners-notes",
 	tooltip: "information-sheet-tooltip",
+	portrait: "information-sheet-portrait",
 	allowedInteractions: "information-sheet-allowed-interactions",
 });
-
-/** @type {HTMLDivElement | null} */
-let InformationSheetTooltip = null;
-
-/** @type {HTMLCanvasElement | null} */
-let InformationSheetPortrait = null;
 
 /** @type {Readonly<Record<0 | 1 | 2, "Dating" | "Engaged" | "Married">>} */
 const InformationSheetLoverStages = {
@@ -70,12 +65,11 @@ async function InformationSheetLoad() {
 	menu?.setAttribute("aria-orientation", "vertical");
 	menu?.setAttribute("data-direction", "ltr");
 
-	InformationSheetTooltip = ElementCreate({
+	ElementCreate({
 		tag: "div",
 		attributes: { id: InformationSheetIDs.tooltip, role: "tooltip", hidden: true },
 		parent: screen,
 	});
-	InformationSheetPortrait = /** @type {HTMLCanvasElement} */ (ElementWrap("information-sheet-portrait"));
 	InformationSheetSkillRefreshAt = CurrentTime + 1000;
 }
 
@@ -88,16 +82,13 @@ function InformationSheetRun() {
 	const C = InformationSheetSelection;
 	if (!C) return;
 
-	if (!InformationSheetPortrait) return;
-	const ctx = InformationSheetPortrait.getContext("2d");
+	const portrait = /** @type {HTMLCanvasElement} */ (ElementWrap(InformationSheetIDs.portrait));
+	if (!portrait) return;
+	const ctx = portrait.getContext("2d");
 	if (!ctx) return;
-	ctx.clearRect(0, 0, InformationSheetPortrait.width, InformationSheetPortrait.height);
+	ctx.clearRect(0, 0, portrait.width, portrait.height);
 	DrawCharacter(C, 0, 0, 1, true, ctx);
-
-	if (!C.IsPlayer() || InformationSheetSkillWatches.length === 0) return;
-	if (CurrentTime < InformationSheetSkillRefreshAt) return;
-	InformationSheetSkillRefreshAt = CurrentTime + 1000;
-	InformationSheetRefreshSkills(C);
+	if (C.IsPlayer()) InformationSheetRefreshSkills(C);
 }
 
 /**
@@ -125,7 +116,6 @@ function InformationSheetExit() {
 
 function InformationSheetUnload() {
 	InformationSheetHideTooltip();
-	InformationSheetTooltip = null;
 	InformationSheetSkillWatches = [];
 	ElementRemove(InformationSheetIDs.screen);
 }
@@ -312,7 +302,7 @@ function InformationSheetIdentity(C) {
 	const notes = [];
 	if (C.IsPlayer()) {
 		facts.push(...InformationSheetFact(TextGet("Money"), `$${C.Money}`));
-		notes.push(InformationSheetSince(
+		notes.push(InformationSheetDuration(
 			TextGet(C.IsBirthday() ? "Birthday" : "MemberFor"),
 			C.Creation,
 			C.IsBirthday() ? ["information-sheet-birthday"] : [],
@@ -320,7 +310,7 @@ function InformationSheetIdentity(C) {
 		notes.push(InformationSheetDifficulty(C));
 	} else if (C.IsOnline()) {
 		if (C.Creation != null) {
-			notes.push(InformationSheetSince(
+			notes.push(InformationSheetDuration(
 				TextGet(C.IsBirthday() ? "Birthday" : "MemberFor"),
 				C.Creation,
 				C.IsBirthday() ? ["information-sheet-birthday"] : [],
@@ -332,7 +322,7 @@ function InformationSheetIdentity(C) {
 			TextGet("AllowedInteraction" + C.AllowedInteractions.toString()),
 		));
 	} else if (C.IsNpc()) {
-		notes.push(InformationSheetSince(TextGet("FriendsFor"), NPCEventGet(C, "PrivateRoomEntry")));
+		notes.push(InformationSheetDuration(TextGet("FriendsFor"), NPCEventGet(C, "PrivateRoomEntry")));
 	}
 
 	return ElementCreate({
@@ -412,7 +402,7 @@ function InformationSheetDifficulty(C) {
  * @param {readonly string[]} [classList]
  * @returns {HTMLParagraphElement}
  */
-function InformationSheetSince(label, start, classList) {
+function InformationSheetDuration(label, start, classList) {
 	const formatted = CommonFormatDurationRange(CurrentTime, start, {
 		showFull: true,
 		includeYears: true,
@@ -456,7 +446,7 @@ function InformationSheetHover(host, text) {
  * @param {string} text
  */
 function InformationSheetShowTooltip(anchor, text) {
-	const tip = InformationSheetTooltip;
+	const tip = ElementWrap(InformationSheetIDs.tooltip);
 	if (!tip) return;
 	tip.textContent = text;
 	tip.removeAttribute("hidden");
@@ -479,7 +469,7 @@ function InformationSheetShowTooltip(anchor, text) {
 }
 
 function InformationSheetHideTooltip() {
-	const tip = InformationSheetTooltip;
+	const tip = ElementWrap(InformationSheetIDs.tooltip);
 	if (!tip) return;
 	tip.textContent = "";
 	tip.setAttribute("hidden", true);
@@ -516,7 +506,7 @@ function InformationSheetOwnership(C) {
 					ownerNumber !== -1 ? ")" : null,
 				],
 			},
-			since > 0 ? InformationSheetDuration(since) : null,
+			since > 0 ? InformationSheetDuration(TextGet("For"), since) : null,
 		],
 	});
 }
@@ -607,7 +597,7 @@ function InformationSheetLoverEntry(name, stage, start, memberNumber) {
 					memberNumber != null ? ")" : null,
 				],
 			},
-			start > 0 ? InformationSheetDuration(start) : null,
+			start > 0 ? InformationSheetDuration(TextGet("For"), start) : null,
 		],
 	});
 }
@@ -669,26 +659,6 @@ function InformationSheetBimeter(value, max, classList, color) {
 }
 
 /**
- * @param {number} start
- * @returns {HTMLParagraphElement}
- */
-function InformationSheetDuration(start) {
-	const formatted = CommonFormatDurationRange(CurrentTime, start, {
-		showFull: true,
-		includeYears: true,
-		includeMonths: true,
-		includeDays: true,
-	});
-	const line = ElementCreate({
-		tag: "p",
-		classList: ["information-sheet-duration"],
-		children: [`${TextGet("For")} ${formatted}`],
-	});
-	InformationSheetHover(line, InformationSheetTimestampTooltip(start));
-	return line;
-}
-
-/**
  * @param {PlayerCharacter} C
  * @returns {HTMLElement}
  */
@@ -747,7 +717,13 @@ function InformationSheetSkill(C, type) {
 			),
 		],
 	});
-	if (ratio !== 1) InformationSheetHover(skill, InformationSheetSkillRatioText(type, ratio));
+
+	const key = type === "Bondage" || type === "Evasion" ? `SkillRatio${type}` : "SkillRatio";
+	const ratioText = TextSubstitute(key, {
+		RATIO: Math.round(ratio * 100).toString(),
+	}).join("");
+
+	if (ratio !== 1) InformationSheetHover(skill, ratioText);
 	return skill;
 }
 
@@ -810,19 +786,6 @@ function InformationSheetSkillValue(C, type) {
 }
 
 /**
- * Why a lowered ratio hatches part of the skill bar. Bondage and evasion are the skills a player can turn down.
- * @param {SkillType} type
- * @param {number} ratio
- * @returns {string}
- */
-function InformationSheetSkillRatioText(type, ratio) {
-	const key = type === "Bondage" || type === "Evasion" ? `SkillRatio${type}` : "SkillRatio";
-	return TextSubstitute(key, {
-		RATIO: Math.round(ratio * 100).toString(),
-	}).join("");
-}
-
-/**
  * @param {number} modifier
  * @param {number} duration
  * @returns {string}
@@ -841,6 +804,10 @@ function InformationSheetModifierText(modifier, duration) {
  * @param {PlayerCharacter} C
  */
 function InformationSheetRefreshSkills(C) {
+	if (!C.IsPlayer() || InformationSheetSkillWatches.length === 0) return;
+	if (CurrentTime < InformationSheetSkillRefreshAt) return;
+	InformationSheetSkillRefreshAt = CurrentTime + 1000;
+
 	for (const watch of InformationSheetSkillWatches) {
 		const modifier = SkillGetModifier(C, watch.type);
 		watch.value.textContent = InformationSheetSkillValue(C, watch.type);
@@ -949,12 +916,13 @@ function InformationSheetMeterStat(label, value, amount, max, color) {
 }
 
 /**
- * Hidden for the first week after meeting her, then names only, then the values.
  * @param {NPCCharacter} C
  * @returns {HTMLElement}
  */
 function InformationSheetTraitColumn(C) {
 	const metAt = NPCEventGet(C, "PrivateRoomEntry") * CheatFactor("AutoShowTraits", 0);
+
+	/* Hidden for the first week after meeting her, then names only, then the values. */
 	if (CurrentTime < metAt + MS_PER_WEEK) return InformationSheetColumn("Trait", [], "TraitUnknown", "traits");
 
 	const levelsKnown = CurrentTime >= metAt + 2 * MS_PER_WEEK;
