@@ -184,6 +184,11 @@ EditorButtonTextToggleFog,Toggle Fog
 EditorButtonTextEditTiles,Tiles
 EditorButtonTextEditObjects,Objects
 EditorButtonTextEditEffects,Effects
+EditorButtonTextEditColors,Colors
+EditorColorReset,Reset
+EditorColorPasteFormat,Paste format
+EditorColorStopPaste,Stop pasting
+EditorColorPasteTitle,Paste format:
 EditorButtonTextBack,Back
 EditorButtonTextEraser,Eraser
 EditorButtonTextEraserAlt,Eraser. Hold Alt to paint an impassable empty space
@@ -198,3 +203,5 @@ TeleportPadTwoWay,Two way
 TeleportPadRemove,Remove
 TeleportPadColor,Color
 TeleportPadInvalid,It can't send to itself or to a wall
+ObjectSettingsRotation,Turn
+ObjectSettingsSize,Size

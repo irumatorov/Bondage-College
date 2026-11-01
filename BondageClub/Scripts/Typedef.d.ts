@@ -5543,6 +5543,21 @@ interface ChatRoomMapObject extends ChatRoomMapPhysicalElement {
 	OnClick?: (x: number, y: number) => void;
 	/** Whether admins can make the object a tether point, where leashes can be tied */
 	CanBeTetherPoint?: boolean;
+	/**
+	 * Recolorable layers of the object, drawn in order on top of each other.
+	 * Each layer is loaded from `<ImageName>_<Layer.Name>.png` (or the plain image with `Source: "Base"`) and must be a grayscale image.
+	 * The plain `<ImageName>.png` is still required for older clients and the object palette.
+	 */
+	ColorLayers?: readonly ChatRoomMapColorLayer[];
+	/** Layers drawn with their original colors, loaded from `<ImageName>_<Name>.png`; not shown in the Color tool */
+	FixedColorLayers?: readonly string[];
+}
+
+interface ChatRoomMapColorLayer {
+	Name: string;
+	DefaultColor: HexColor;
+	/** `"Base"` tints the plain `<ImageName>.png` instead of loading a separate layer image */
+	Source?: "Base";
 }
 
 /** {@link MapDoodadIsEffect}  */
@@ -5581,6 +5596,12 @@ interface ChatRoomMapTether {
 	Position: ChatRoomMapPos;
 	/** The member who tied the leash */
 	MemberNumber: number;
+}
+
+/** A color format copied from a map object, which can be pasted on other objects with the same ID */
+interface ChatRoomMapColorFormat {
+	ObjectID: number;
+	Colors: NonNullable<ChatRoomMapObjectSettings["Colors"]>;
 }
 
 /**

@@ -300,6 +300,12 @@ var MapManager = (function () {
 			data.Tiles = this.tiles.map(t => t ? String.fromCharCode(t.ID) : ChatRoomMapViewObjectStartID).join("");
 			data.Objects = this.objects.map(o => o ? String.fromCharCode(o.ID) : ChatRoomMapViewObjectStartID).join("");
 			data.CellData = this.objectConfigs;
+			const settingsByTile = Object.entries(data.ObjectSettings ?? {}).filter(([index, settings]) => this.objects[Number(index)]?.ID === settings?.ID);
+			if (settingsByTile.length) {
+				data.ObjectSettings = Object.fromEntries(settingsByTile);
+			} else {
+				delete data.ObjectSettings;
+			}
 			if (this.fogEnabled) {
 				data.Fog = true;
 			} else {
@@ -777,6 +783,24 @@ var MapManager = (function () {
 	const MAP_SYNC_VERSION_BIT_SIZE = 8;
 	const MAP_SYNC_CURRENT_VERSION = 0;
 	const CURRENT_EFFECTS_CODEC_VERSION = 0;
+
+	/**
+	 * Gets how admins turned, sized and colored placed objects from an exported map string's legacy part
+	 * @param {string} s
+	 * @returns {ServerChatRoomMapData["ObjectSettings"]}
+	 */
+	function DecodeExportedMapObjectSettings(s) {
+		const versionTagIdx = s.indexOf(MAP_EXPORT_VERSION_TAG);
+		const legacyPart = versionTagIdx < 0 ? s : s.slice(0, versionTagIdx);
+		try {
+			/** @type {unknown} */
+			const data = JSON.parse(LZString.decompressFromBase64(legacyPart) ?? "null");
+			if (!CommonIsObject(data)) return undefined;
+			return /** @type {Partial<ServerChatRoomMapData>} */ (data).ObjectSettings;
+		} catch {
+			return undefined;
+		}
+	}
 
 	/**
 	 * Decodes the string that was generated with the `/mapcopy` command.
@@ -1422,6 +1446,7 @@ var MapManager = (function () {
 				case "Tether":
 					return !!cell?.CanBeTetherPoint;
 			}
+			return false;
 		}
 
 		/**
@@ -1992,6 +2017,12 @@ var MapManager = (function () {
 			this.markDirtyEffects();
 			this.markDirtyObjectConfigs();
 
+			const settingsByTile = DecodeExportedMapObjectSettings(mapString);
+			if (CommonIsObject(settingsByTile)) {
+				ChatRoomData.MapData.ObjectSettings = settingsByTile;
+			} else {
+				delete ChatRoomData.MapData.ObjectSettings;
+			}
 			this.updateGlobalMapData();
 
 			return true;
@@ -2728,6 +2759,44 @@ function MapCanSetCell(id, type, x, y) {
 function MapIsCellValid(id, type, x, y) {
 	if (!MapCanSetCell(id, type, x, y)) return false;
 	return true;
+}
+
+/**
+ * Checks whether colors match the color layers of an object: one per layer, each `"Default"` or `#RRGGBB`
+ * @param {unknown} colors
+ * @param {ChatRoomMapObject | null} object
+ * @returns {colors is NonNullable<ChatRoomMapObjectSettings["Colors"]>}
+ */
+function MapIsValidObjectColors(colors, object) {
+	if (!object?.ColorLayers?.length || !Array.isArray(colors) || colors.length !== object.ColorLayers.length) return false;
+	return colors.every(/** @param {unknown} c */ c => c === "Default" || (typeof c === "string" && CommonIsColor(c) && c.length === 7));
+}
+
+/**
+ * Checks whether a copied color format can be pasted on an object.
+ * Objects sharing one `ColorLayers` definition (such as `MapColorLayersFill`) accept each other's formats.
+ * @param {ChatRoomMapColorFormat | null} format
+ * @param {ChatRoomMapObject | null} object
+ * @returns {boolean}
+ */
+function MapCanPasteColorFormat(format, object) {
+	if (!format || !object?.ColorLayers?.length) return false;
+	if (format.ObjectID === object.ID) return true;
+	return MapDataObjects.get(format.ObjectID)?.ColorLayers === object.ColorLayers;
+}
+
+/**
+ * Gets the colors to draw each color layer of the object placed on a tile with; layers left at default get their default color
+ * @param {ChatRoomMapPos} pos
+ * @param {ChatRoomMapObject} object
+ * @returns {HexColor[]}
+ */
+function MapGetObjectLayerColors(pos, object) {
+	const colors = ChatRoomMapViewGetObjectSettings(pos, object.ID)?.Colors ?? [];
+	return (object.ColorLayers ?? []).map((layer, i) => {
+		const color = colors[i];
+		return color && color !== "Default" ? color : layer.DefaultColor;
+	});
 }
 
 /**
