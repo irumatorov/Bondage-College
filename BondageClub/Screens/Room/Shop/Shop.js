@@ -110,10 +110,10 @@ function ShopClick() {
 	if (!ShopVendor) {
 		return;
 	}
-	if ((MouseX >= 0) && (MouseX < 500) && (MouseY >= 0) && (MouseY < 1000)) CharacterSetCurrent(Player);
-	if ((MouseX >= 500) && (MouseX < 1000) && (MouseY >= 0) && (MouseY < 1000)) CharacterSetCurrent(ShopVendor);
-	if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 25) && (MouseY < 115)) CommonSetScreen("Room", "MainHall");
-	if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 145) && (MouseY < 235)) InformationSheetLoadCharacter(Player);
+	if (MouseIn(0, 0, 500, 1000)) CharacterSetCurrent(Player);
+	if (MouseIn(500, 0, 500, 1000)) CharacterSetCurrent(ShopVendor);
+	if (MouseIn(1885, 25, 90, 90)) CommonSetScreen("Room", "MainHall");
+	if (MouseIn(1885, 145, 90, 90)) InformationSheetLoadCharacter(Player);
 }
 
 /**

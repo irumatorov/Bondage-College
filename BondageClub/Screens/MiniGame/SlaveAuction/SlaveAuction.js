@@ -122,13 +122,13 @@ function SlaveAuctionRun() {
  * @returns {void} - Nothing
  */
 function SlaveAuctionClick() {
-	if (!SlaveAuctionEnd && (SlaveAuctionBidCurrent != "Player") && (Player.Money >= SlaveAuctionBidAmount + 10) && (MouseX >= 800) && (MouseX < 975) && (MouseY >= 235) && (MouseY < 300)) {
+	if (!SlaveAuctionEnd && (SlaveAuctionBidCurrent != "Player") && (Player.Money >= SlaveAuctionBidAmount + 10) && MouseIn(800, 235, 175, 65)) {
 		SlaveAuctionSetNextBidTime();
 		SlaveAuctionBidCurrent = "Player";
 		SlaveAuctionBidAmount = SlaveAuctionBidAmount + 10;
 		SlaveAuctionBidTime = CurrentTime;
 	}
-	if (((SlaveAuctionBidCurrent != "Player") || SlaveAuctionEnd) && (MouseX >= 1025) && (MouseX < 1200) && (MouseY >= 235) && (MouseY < 300))
+	if (((SlaveAuctionBidCurrent != "Player") || SlaveAuctionEnd) && MouseIn(1025, 235, 175, 65))
 		MiniGameEnd();
 }
 

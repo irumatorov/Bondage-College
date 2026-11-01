@@ -428,10 +428,10 @@ function MainHallWalk(RoomName) {
 function MainHallClick() {
 
 	// Character, Dressing, Exit & Chat
-	if ((MouseX >= 750) && (MouseX < 1250) && (MouseY >= 0) && (MouseY < 1000)) CharacterSetCurrent(Player);
-	if ((MouseX >= 1645) && (MouseX < 1735) && (MouseY >= 25) && (MouseY < 115)) InformationSheetLoadCharacter(Player);
-	if ((MouseX >= 1765) && (MouseX < 1855) && (MouseY >= 25) && (MouseY < 115) && Player.CanChangeOwnClothes()) CharacterAppearanceLoadCharacter(Player);
-	if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 25) && (MouseY < 115)) {
+	if (MouseIn(750, 0, 500, 1000)) CharacterSetCurrent(Player);
+	if (MouseIn(1645, 25, 90, 90)) InformationSheetLoadCharacter(Player);
+	if (MouseIn(1765, 25, 90, 90) && Player.CanChangeOwnClothes()) CharacterAppearanceLoadCharacter(Player);
+	if (MouseIn(1885, 25, 90, 90)) {
 		if (window.confirm(TextGet("ExitConfirm"))) {
 			ServerAccountUpdate.SyncToServer();
 			window.location.reload();
@@ -444,64 +444,64 @@ function MainHallClick() {
 	if (Player.CanWalk() && (!Player.IsRestrained() || !Player.GameplaySettings.OfflineLockedRestrained)) {
 
 		// Chat, Shop & Private Room
-		if ((MouseX >= 1765) && (MouseX < 1855) && (MouseY >= 145) && (MouseY < 235) && MainHallAllow("Shop")) MainHallWalk("Shop");
-		if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 145) && (MouseY < 235) && !LogQuery("LockOutOfPrivateRoom", "Rule") && MainHallAllow("Private")) MainHallWalk("Private");
+		if (MouseIn(1765, 145, 90, 90) && MainHallAllow("Shop")) MainHallWalk("Shop");
+		if (MouseIn(1885, 145, 90, 90) && !LogQuery("LockOutOfPrivateRoom", "Rule") && MainHallAllow("Private")) MainHallWalk("Private");
 
 		// Introduction, Maid & Management
-		if ((MouseX >= 1645) && (MouseX < 1735) && (MouseY >= 265) && (MouseY < 355) && MainHallAllow("Introduction")) MainHallWalk("Introduction");
-		if ((MouseX >= 1765) && (MouseX < 1855) && (MouseY >= 265) && (MouseY < 355) && MainHallAllow("MaidQuarters")) MainHallWalk("MaidQuarters");
-		if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 265) && (MouseY < 355)) MainHallWalk("Management");
+		if (MouseIn(1645, 265, 90, 90) && MainHallAllow("Introduction")) MainHallWalk("Introduction");
+		if (MouseIn(1765, 265, 90, 90) && MainHallAllow("MaidQuarters")) MainHallWalk("MaidQuarters");
+		if (MouseIn(1885, 265, 90, 90)) MainHallWalk("Management");
 
 		// Kidnap League, Dojo & Explore/Sarah
-		if ((MouseX >= 1525) && (MouseX < 1615) && (MouseY >= 385) && (MouseY < 475) && MainHallAllow("ClubCard")) MainHallWalk("ClubCardLounge");
-		if ((MouseX >= 1645) && (MouseX < 1735) && (MouseY >= 385) && (MouseY < 475) && MainHallAllow("KidnapLeague")) MainHallWalk("KidnapLeague");
-		if ((MouseX >= 1765) && (MouseX < 1855) && (MouseY >= 385) && (MouseY < 475) && MainHallAllow("ShibariDojo")) MainHallWalk("Shibari");
-		if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 385) && (MouseY < 475) && SarahRoomAvailable && MainHallAllow("Sarah")) MainHallWalk("Sarah");
+		if (MouseIn(1525, 385, 90, 90) && MainHallAllow("ClubCard")) MainHallWalk("ClubCardLounge");
+		if (MouseIn(1645, 385, 90, 90) && MainHallAllow("KidnapLeague")) MainHallWalk("KidnapLeague");
+		if (MouseIn(1765, 385, 90, 90) && MainHallAllow("ShibariDojo")) MainHallWalk("Shibari");
+		if (MouseIn(1885, 385, 90, 90) && SarahRoomAvailable && MainHallAllow("Sarah")) MainHallWalk("Sarah");
 
 		// Cell, Slave Market & Look for trouble
-		if ((MouseX >= 1525) && (MouseX < 1615) && (MouseY >= 505) && (MouseY < 595) && MainHallAllow("Crafting")) CraftingShowScreen(false);
-		if ((MouseX >= 1645) && (MouseX < 1735) && (MouseY >= 505) && (MouseY < 595) && MainHallAllow("Trouble")) MainHallWalk("Trouble");
-		if ((MouseX >= 1765) && (MouseX < 1855) && (MouseY >= 505) && (MouseY < 595) && MainHallAllow("SlaveMarket")) MainHallWalk("SlaveMarket");
-		if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 505) && (MouseY < 595) && MainHallAllow("Cell")) MainHallWalk("Cell");
+		if (MouseIn(1525, 505, 90, 90) && MainHallAllow("Crafting")) CraftingShowScreen(false);
+		if (MouseIn(1645, 505, 90, 90) && MainHallAllow("Trouble")) MainHallWalk("Trouble");
+		if (MouseIn(1765, 505, 90, 90) && MainHallAllow("SlaveMarket")) MainHallWalk("SlaveMarket");
+		if (MouseIn(1885, 505, 90, 90) && MainHallAllow("Cell")) MainHallWalk("Cell");
 
 		// Asylum & College
-		if ((MouseX >= 1525) && (MouseX < 1615) && (MouseY >= 625) && (MouseY < 715) && !ManagementIsClubSlave() && MainHallAllow("Platform")) MainHallWalk("PlatformIntro");
-		if ((MouseX >= 1645) && (MouseX < 1735) && (MouseY >= 625) && (MouseY < 715) && !ManagementIsClubSlave() && MainHallAllow("LARPBattle")) MainHallWalk("LARP");
-		if ((MouseX >= 1765) && (MouseX < 1855) && (MouseY >= 625) && (MouseY < 715) && !ManagementIsClubSlave() && MainHallAllow("College")) MainHallWalk("CollegeEntrance");
-		if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 625) && (MouseY < 715) && MainHallAsylumOpen && MainHallAllow("Asylum")) MainHallWalk("AsylumEntrance");
+		if (MouseIn(1525, 625, 90, 90) && !ManagementIsClubSlave() && MainHallAllow("Platform")) MainHallWalk("PlatformIntro");
+		if (MouseIn(1645, 625, 90, 90) && !ManagementIsClubSlave() && MainHallAllow("LARPBattle")) MainHallWalk("LARP");
+		if (MouseIn(1765, 625, 90, 90) && !ManagementIsClubSlave() && MainHallAllow("College")) MainHallWalk("CollegeEntrance");
+		if (MouseIn(1885, 625, 90, 90) && MainHallAsylumOpen && MainHallAllow("Asylum")) MainHallWalk("AsylumEntrance");
 
 		// Movie Studio (Must be able to change to enter it)
-		if ((MouseX >= 1525) && (MouseX < 1615) && (MouseY >= 745) && (MouseY < 855) && Player.CanChangeOwnClothes() && MainHallAllow("MagicSchool")) MainHallWalk("MagicSchoolLaboratory");
-		if ((MouseX >= 1645) && (MouseX < 1735) && (MouseY >= 745) && (MouseY < 855) && Player.CanChangeOwnClothes() && !Player.IsRestrained() && Player.CanTalk() && MainHallAllow("Poker")) MainHallWalk("Poker");
-		if ((MouseX >= 1765) && (MouseX < 1855) && (MouseY >= 745) && (MouseY < 855) && Player.CanChangeOwnClothes() && MainHallAllow("Infiltration")) MainHallWalk("Infiltration");
-		if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 745) && (MouseY < 855) && Player.CanChangeOwnClothes() && MainHallAllow("MovieStudio")) MainHallWalk("MovieStudio");
+		if (MouseIn(1525, 745, 90, 90) && Player.CanChangeOwnClothes() && MainHallAllow("MagicSchool")) MainHallWalk("MagicSchoolLaboratory");
+		if (MouseIn(1645, 745, 90, 90) && Player.CanChangeOwnClothes() && !Player.IsRestrained() && Player.CanTalk() && MainHallAllow("Poker")) MainHallWalk("Poker");
+		if (MouseIn(1765, 745, 90, 90) && Player.CanChangeOwnClothes() && MainHallAllow("Infiltration")) MainHallWalk("Infiltration");
+		if (MouseIn(1885, 745, 90, 90) && Player.CanChangeOwnClothes() && MainHallAllow("MovieStudio")) MainHallWalk("MovieStudio");
 
 		// Custom content rooms - Gambling, Prison & Photographic
-		if ((MouseX >=   25) && (MouseX <  115) && (MouseY >=  25) && (MouseY < 115) && MainHallAllow("Gambling")) MainHallWalk("Gambling");
-		if ((MouseX >=  145) && (MouseX <  235) && (MouseY >=  25) && (MouseY < 115) && MainHallAllow("Prison")) MainHallWalk("Prison");
-		if ((MouseX >=  265) && (MouseX <  355) && (MouseY >=  25) && (MouseY < 115) && MainHallAllow("Photographic")) MainHallWalk("Photographic");
+		if (MouseIn(25, 25, 90, 90) && MainHallAllow("Gambling")) MainHallWalk("Gambling");
+		if (MouseIn(145, 25, 90, 90) && MainHallAllow("Prison")) MainHallWalk("Prison");
+		if (MouseIn(265, 25, 90, 90) && MainHallAllow("Photographic")) MainHallWalk("Photographic");
 
 		// Stable, Magic-Theater & Nursery
-		if ((MouseX >=   25) && (MouseX <  115) && (MouseY >= 145) && (MouseY < 235) && MainHallAllow("Stable")) MainHallWalk("Stable");
-		if ((MouseX >=  145) && (MouseX <  235) && (MouseY >= 145) && (MouseY < 235) && MainHallAllow("Magic")) MainHallWalk("Magic");
-		if ((MouseX >=  265) && (MouseX <  355) && (MouseY >= 145) && (MouseY < 235) && MainHallAllow("Nursery")) MainHallWalk("Nursery");
+		if (MouseIn(25, 145, 90, 90) && MainHallAllow("Stable")) MainHallWalk("Stable");
+		if (MouseIn(145, 145, 90, 90) && MainHallAllow("Magic")) MainHallWalk("Magic");
+		if (MouseIn(265, 145, 90, 90) && MainHallAllow("Nursery")) MainHallWalk("Nursery");
 
 		// Cafe, Arcade
-		if ((MouseX >=   25) && (MouseX <  115) && (MouseY >= 265) && (MouseY < 355) && MainHallAllow("Cafe")) MainHallWalk("Cafe");
-		if ((MouseX >=   145) && (MouseX <  235) && (MouseY >= 265) && (MouseY < 355) && MainHallAllow("Arcade")) MainHallWalk("Arcade");
+		if (MouseIn(25, 265, 90, 90) && MainHallAllow("Cafe")) MainHallWalk("Cafe");
+		if (MouseIn(145, 265, 90, 90) && MainHallAllow("Arcade")) MainHallWalk("Arcade");
 
 	} else {
 
 		// Special permission to enter the maid quarters and cafe if doing the maid serving drinks quest while being restrained
 		if (Player.CanWalk() && MaidQuartersOnlineDrinkStarted) {
-			if ((MouseX >= 1765) && (MouseX < 1855) && (MouseY >= 265) && (MouseY < 355))
+			if (MouseIn(1765, 265, 90, 90))
 				MainHallWalk("MaidQuarters");
-			if ((MouseX >=   25) && (MouseX <  115) && (MouseY >= 265) && (MouseY < 355))
+			if (MouseIn(25, 265, 90, 90))
 				MainHallWalk("Cafe");
 		}
 		// Special permission to enter the kidnappers league if doing the online bounty quest while being restrained
 		if (Player.CanWalk() && (InventoryIsWorn(Player, "ItemMisc", "BountySuitcase") || InventoryIsWorn(Player, "ItemMisc", "BountySuitcaseEmpty")))
-			if ((MouseX >= 1645) && (MouseX < 1735) && (MouseY >= 385) && (MouseY < 475))
+			if (MouseIn(1645, 385, 90, 90))
 				MainHallWalk("KidnapLeague");
 
 	}

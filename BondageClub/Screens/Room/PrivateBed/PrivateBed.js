@@ -173,8 +173,8 @@ function PrivateBedRun() {
 	// If we move the mouse over a character or a zone, we highlight it
 	if (!CommonIsMobile)
 		for (let C of PrivateBedCharacter) {
-			if ((MouseX >= C.PrivateBedLeft + 60) && (MouseX <= C.PrivateBedLeft + 140) && (MouseY >= C.PrivateBedTop + 400) && (MouseY <= C.PrivateBedTop + 500) && !C.ArousalZoom) { DrawEmptyRect(C.PrivateBedLeft + 60, C.PrivateBedTop + 400, 80, 100, "Cyan", 3); break; }
-			if ((MouseX >= C.PrivateBedLeft + 50) && (MouseX <= C.PrivateBedLeft + 150) && (MouseY >= C.PrivateBedTop + 615) && (MouseY <= C.PrivateBedTop + 715) && C.ArousalZoom) { DrawEmptyRect(C.PrivateBedLeft + 50, C.PrivateBedTop + 615, 100, 100, "Cyan", 3); break; }
+			if (MouseIn(C.PrivateBedLeft + 60, C.PrivateBedTop + 400, 80, 100) && !C.ArousalZoom) { DrawEmptyRect(C.PrivateBedLeft + 60, C.PrivateBedTop + 400, 80, 100, "Cyan", 3); break; }
+			if (MouseIn(C.PrivateBedLeft + 50, C.PrivateBedTop + 615, 100, 100) && C.ArousalZoom) { DrawEmptyRect(C.PrivateBedLeft + 50, C.PrivateBedTop + 615, 100, 100, "Cyan", 3); break; }
 			if (MouseIn(C.PrivateBedLeft + 100, C.PrivateBedTop, 300, C.HeightRatio * 1000)) {
 				for (let A = 0; A < AssetGroup.length; A++) {
 					const group = AssetGroup[A];
@@ -372,8 +372,8 @@ function PrivateBedClick() {
 	for (let C of PrivateBedCharacter) {
 
 		// The arousal meter can be maximized or minimized by clicking on it
-		if ((MouseX >= C.PrivateBedLeft + 60) && (MouseX <= C.PrivateBedLeft + 140) && (MouseY >= C.PrivateBedTop + 400) && (MouseY <= C.PrivateBedTop + 500) && !C.ArousalZoom) { C.ArousalZoom = true; return; }
-		if ((MouseX >= C.PrivateBedLeft + 50) && (MouseX <= C.PrivateBedLeft + 150) && (MouseY >= C.PrivateBedTop + 615) && (MouseY <= C.PrivateBedTop + 715) && C.ArousalZoom) { C.ArousalZoom = false; return; }
+		if (MouseIn(C.PrivateBedLeft + 60, C.PrivateBedTop + 400, 80, 100) && !C.ArousalZoom) { C.ArousalZoom = true; return; }
+		if (MouseIn(C.PrivateBedLeft + 50, C.PrivateBedTop + 615, 100, 100) && C.ArousalZoom) { C.ArousalZoom = false; return; }
 
 		// If we click in an arousal zone, we can trigger that activity
 		if (MouseIn(C.PrivateBedLeft, C.PrivateBedTop, 500, C.HeightRatio * 1000))

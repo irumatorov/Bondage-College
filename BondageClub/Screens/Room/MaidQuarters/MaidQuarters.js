@@ -306,8 +306,8 @@ function MaidQuartersRun() {
  */
 function MaidQuartersClick() {
 	const maid = MaidQuartersGetMaid();
-	if (!DailyJobSubSearchIsActive() && (MouseX >= 500) && (MouseX < 1000) && (MouseY >= 0) && (MouseY < 1000)) CharacterSetCurrent(Player);
-	if (!DailyJobSubSearchIsActive() && (MouseX >= 1000) && (MouseX < 1500) && (MouseY >= 0) && (MouseY < 1000)) {
+	if (!DailyJobSubSearchIsActive() && MouseIn(500, 0, 500, 1000)) CharacterSetCurrent(Player);
+	if (!DailyJobSubSearchIsActive() && MouseIn(1000, 0, 500, 1000)) {
 		ManagementClubSlaveDialog(maid);
 		CharacterSetCurrent(maid);
 		if (maid.Stage == "285") {
@@ -324,10 +324,10 @@ function MaidQuartersClick() {
 			maid.CurrentDialog = DialogFind(maid, MaidDialog);
 		}
 	}
-	if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 25) && (MouseY < 115) && Player.CanWalk()) CommonSetScreen("Room", "MainHall");
-	if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 145) && (MouseY < 235)) InformationSheetLoadCharacter(Player);
-	if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 265) && (MouseY < 355) && Player.CanChangeOwnClothes()) CharacterAppearanceLoadCharacter(Player);
-	if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 385) && (MouseY < 475) && Player.CanChangeOwnClothes() && LogQuery("JoinedSorority", "Maid")) {
+	if (MouseIn(1885, 25, 90, 90) && Player.CanWalk()) CommonSetScreen("Room", "MainHall");
+	if (MouseIn(1885, 145, 90, 90)) InformationSheetLoadCharacter(Player);
+	if (MouseIn(1885, 265, 90, 90) && Player.CanChangeOwnClothes()) CharacterAppearanceLoadCharacter(Player);
+	if (MouseIn(1885, 385, 90, 90) && Player.CanChangeOwnClothes() && LogQuery("JoinedSorority", "Maid")) {
 		if (!MaidQuartersPlayerInMaidUniform()) {
 			MaidQuartersWearMaidUniform();
 		} else {

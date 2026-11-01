@@ -130,7 +130,7 @@ function MaidCleaningDoMove() {
 		// If the game has started, we check the click position and remove a spot at that position
 		if (MiniGameRunning())
 			for (let S = 0; S < MaidCleaningSpots.length; S++)
-				if ((MouseX >= MaidCleaningSpots[S].X - Range) && (MouseX <= MaidCleaningSpots[S].X + Range) && (MouseY >= MaidCleaningSpots[S].Y - Range) && (MouseY <= MaidCleaningSpots[S].Y + Range)) {
+				if (MouseIn(MaidCleaningSpots[S].X - Range, MaidCleaningSpots[S].Y - Range, Range * 2, Range * 2)) {
 					if (MaidCleaningSpots[S].T == 1) MaidCleaningSpots.splice(S, 1);
 					else MaidCleaningSpots[S].T--;
 					return;

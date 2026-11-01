@@ -125,7 +125,7 @@ function TherapyClick() {
 	}
 
 	// If the game is over, clicking on the image will end it
-	else if (MiniGameEnded && (MouseX >= 0) && (MouseX <= 500) && (MouseY >= 0) && (MouseY <= 999))
+	else if (MiniGameEnded && MouseIn(0, 0, 500, 1000))
 		MiniGameEnd();
 
 }
@@ -141,9 +141,12 @@ function TherapyMouseDown() {
 
 		// Gets the move type and sends it
 		var MoveType = -1;
-		for (let M = 0; M < TherapyMoves.length; M++)
-			if ((MouseX >= 1125 + ((M % 3) * 250)) && (MouseX <= 1375 + ((M % 3) * 250)) && (MouseY >= 75 + Math.floor(M / 3) * 300) && (MouseY <= 325 + Math.floor(M / 3) * 300))
+		for (let M = 0; M < TherapyMoves.length; M++) {
+			const moveX = (M % 3) * 250;
+			const moveY = Math.floor(M / 3) * 300;
+			if (MouseIn(1125 + moveX, 75 + moveY, 250, 250))
 				MoveType = M;
+		}
 		TherapyDoMove(MoveType);
 
 	}

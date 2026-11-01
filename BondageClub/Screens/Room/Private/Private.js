@@ -1117,13 +1117,14 @@ function PrivateClickCharacterButton() {
 
 	// For each character, we check if the player clicked on the cage or information button
 	for (let C = PrivateCharacterOffset; (C < PrivateCharacter.length && C < PrivateCharacterOffset + 4); C++) {
+		const ButtonX = X + (C - PrivateCharacterOffset) * 470;
 
 		// The information sheet button is always available
-		if ((MouseX >= X + 85 + (C - PrivateCharacterOffset) * 470) && (MouseX <= X + 175 + (C - PrivateCharacterOffset) * 470))
+		if (MouseIn(ButtonX + 85, 900, 90, 90))
 			InformationSheetLoadCharacter(PrivateCharacter[C]);
 
 		// The cage is only available on certain conditions
-		if ((MouseX >= X + 205 + (C - PrivateCharacterOffset) * 470) && (MouseX <= X + 295 + (C - PrivateCharacterOffset) * 470) && !PrivateCharacter[C].PrivateBed)
+		if (MouseIn(ButtonX + 205, 900, 90, 90) && !PrivateCharacter[C].PrivateBed)
 			if ((NPCEventGet(PrivateCharacter[C], "SlaveMarketRent") <= CurrentTime) && (NPCEventGet(PrivateCharacter[C], "AsylumSent") <= CurrentTime) && (NPCEventGet(PrivateCharacter[C], "NPCBrainwashing") <= CurrentTime) && (NPCEventGet(PrivateCharacter[C], "Kidnap") <= CurrentTime))
 				if (LogQuery("Cage", "PrivateRoom") && !LogQuery("BlockCage", "Rule"))
 					if ((!Player.Cage) || (C == 0))
@@ -1133,12 +1134,12 @@ function PrivateClickCharacterButton() {
 						}
 
 		// The cage is only available on certain conditions
-		if ((MouseX >= X + 205 + (C - PrivateCharacterOffset) * 470) && (MouseX <= X + 295 + (C - PrivateCharacterOffset) * 470) && PrivateCharacter[C].PrivateBed)
+		if (MouseIn(ButtonX + 205, 900, 90, 90) && PrivateCharacter[C].PrivateBed)
 			delete PrivateCharacter[C].PrivateBed;
 
 		// Can switch girls position in the private room if there's more than one friend
 		if ((C > 0) && (C < PrivateCharacter.length - 1))
-			if ((MouseX >= X + 325 + (C - PrivateCharacterOffset) * 470) && (MouseX <= X + 415 + (C - PrivateCharacterOffset) * 470)) {
+			if (MouseIn(ButtonX + 325, 900, 90, 90)) {
 				var P = PrivateCharacter[C];
 				PrivateCharacter[C] = PrivateCharacter[C + 1];
 				PrivateCharacter[C + 1] = P;
@@ -1161,8 +1162,9 @@ function PrivateClickCharacter() {
 	if (X < 0) X = 0;
 
 	// For each character, we find the one that was clicked and open it's dialog
-	for (let C = PrivateCharacterOffset; (C < PrivateCharacter.length && C < PrivateCharacterOffset + 4); C++)
-		if ((MouseX >= X + (C - PrivateCharacterOffset) * 470) && (MouseX <= X + 470 + (C - PrivateCharacterOffset) * 470))
+	for (let C = PrivateCharacterOffset; (C < PrivateCharacter.length && C < PrivateCharacterOffset + 4); C++) {
+		const ButtonX = X + (C - PrivateCharacterOffset) * 470;
+		if (MouseXIn(ButtonX, 470))
 			if ((NPCEventGet(PrivateCharacter[C], "SlaveMarketRent") <= CurrentTime) && (NPCEventGet(PrivateCharacter[C], "AsylumSent") <= CurrentTime) && (NPCEventGet(PrivateCharacter[C], "NPCBrainwashing") <= CurrentTime) && !PrivateCharacter[C].PrivateBed) {
 
 				// If a kidnapping is in progress, we show the ransom note
@@ -1178,11 +1180,11 @@ function PrivateClickCharacter() {
 						if ((PrivateCharacter[C].ArousalSettings != null) && (PrivateCharacter[C].ArousalSettings.Active != null) && ((PrivateCharacter[C].ArousalSettings.Active == "Manual") || (PrivateCharacter[C].ArousalSettings.Active == "Hybrid") || (PrivateCharacter[C].ArousalSettings.Active == "Automatic"))) {
 
 							// The arousal meter can be maximized or minimized by clicking on it
-							if ((MouseX >= X + (C - PrivateCharacterOffset) * 470 + 60) && (MouseX <= X + (C - PrivateCharacterOffset) * 470 + 140) && (MouseY >= 400) && (MouseY <= 500) && !PrivateCharacter[C].ArousalZoom) { PrivateCharacter[C].ArousalZoom = true; return; }
-							if ((MouseX >= X + (C - PrivateCharacterOffset) * 470 + 50) && (MouseX <= X + (C - PrivateCharacterOffset) * 470 + 150) && (MouseY >= 615) && (MouseY <= 715) && PrivateCharacter[C].ArousalZoom) { PrivateCharacter[C].ArousalZoom = false; return; }
+							if (MouseIn(ButtonX + 60, 400, 80, 100) && !PrivateCharacter[C].ArousalZoom) { PrivateCharacter[C].ArousalZoom = true; return; }
+							if (MouseIn(ButtonX + 50, 615, 100, 100) && PrivateCharacter[C].ArousalZoom) { PrivateCharacter[C].ArousalZoom = false; return; }
 
 							// If the player can manually control her arousal or wants to fight her desire
-							if ((PrivateCharacter[C].IsPlayer()) && (MouseX >= X + (C - PrivateCharacterOffset) * 470 + 50) && (MouseX <= X + (C - PrivateCharacterOffset) * 470 + 150) && (MouseY >= 200) && (MouseY <= 615) && PrivateCharacter[C].ArousalZoom)
+							if ((PrivateCharacter[C].IsPlayer()) && MouseIn(ButtonX + 50, 200, 100, 415) && PrivateCharacter[C].ArousalZoom)
 								if ((Player.ArousalSettings != null) && (Player.ArousalSettings.Active != null) && (Player.ArousalSettings.Progress != null)) {
 									if ((Player.ArousalSettings.Active == "Manual") || (Player.ArousalSettings.Active == "Hybrid")) {
 										var Arousal = Math.round((625 - MouseY) / 4);
@@ -1194,7 +1196,7 @@ function PrivateClickCharacter() {
 								}
 
 							// Don't do anything if the thermometer is clicked without access to it
-							if ((MouseX >= X + (C - PrivateCharacterOffset) * 470 + 50) && (MouseX <= X + (C - PrivateCharacterOffset) * 470 + 150) && (MouseY >= 200) && (MouseY <= 615) && PrivateCharacter[C].ArousalZoom) return;
+							if (MouseIn(ButtonX + 50, 200, 100, 415) && PrivateCharacter[C].ArousalZoom) return;
 
 						}
 
@@ -1270,7 +1272,7 @@ function PrivateClickCharacter() {
 				}
 
 			}
-
+	}
 }
 
 /**
@@ -1329,8 +1331,8 @@ function PrivateClick() {
 
 	}
 
-	if ((MouseX <= 1885) && (MouseY < 900) && LogQuery("RentRoom", "PrivateRoom") && (!Player.Cage)) PrivateClickCharacter();
-	if ((MouseX <= 1885) && (MouseY >= 900) && LogQuery("RentRoom", "PrivateRoom")) PrivateClickCharacterButton();
+	if (MouseIn(0, 0, 1885, 900) && LogQuery("RentRoom", "PrivateRoom") && (!Player.Cage)) PrivateClickCharacter();
+	if (MouseIn(0, 900, 1885, 100) && LogQuery("RentRoom", "PrivateRoom")) PrivateClickCharacterButton();
 
 }
 
