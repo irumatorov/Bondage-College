@@ -106,12 +106,12 @@ function ChatRoomMapViewCreateOnEnterTeleportLogic(delay) {
 }
 
 /**
- * Returns the OnClick for a teleport pad: admins see where it sends to, outlined on the map, and change it
+ * Returns the OnClick for a teleport pad: in the object settings mode, admins see where it sends to, outlined on the map, and change it
  * @returns {ChatRoomMapObject["OnClick"]}
  */
 function ChatRoomMapViewCreateOnClickTeleportLogic() {
 	return (x, y) => {
-		if (!ChatRoomPlayerIsAdmin()) return;
+		if (!ChatRoomPlayerIsAdmin() || ChatRoomMapViewEditMode !== "ObjectSettings") return;
 		ChatRoomMapViewTeleportPadIndex = x + y * ChatRoomMapViewWidth;
 		ChatRoomMapViewTeleportPadPicking = false;
 		ChatRoomMapViewShowTeleportPadMenu(x, y);
@@ -605,10 +605,10 @@ const AssetsMapDataObjects = [
 	{ ID: 194, Type: "LivingRoom", Style: "FaintingCouch", Top: 0.3, Height: 0.55 },
 	{ ID: 195, Type: "LivingRoom", Style: "FiddleLeafFig", Top: -0.95, Left: 0.02, Height: 1.8, Width: 0.97 },
 	// Our LivingRoom set remapped off 190-195
-	{ ID: 185, Type: "LivingRoom", Style: "ModernLowboardSingle", Top: 0, Height: 1, BuildImageName: ChatRoomMapViewCreateRowImage("ModernLowboard") },
-	{ ID: 186, Type: "LivingRoom", Style: "ModernHighboardSingle", Top: -0.8, Height: 1.8, BuildImageName: ChatRoomMapViewCreateRowImage("ModernHighboard") },
-	{ ID: 187, Type: "LivingRoom", Style: "ModernBookshelfSingle", Top: -1.3, Height: 2.3, BuildImageName: ChatRoomMapViewCreateRowImage("ModernBookshelf") },
-	{ ID: 188, Type: "LivingRoom", Style: "NordicSideboardSingle", Top: -0.3, Height: 1.3, BuildImageName: ChatRoomMapViewCreateRowImage("NordicSideboard") },
+	{ ID: 185, Type: "LivingRoom", Style: "ModernLowboardSingle", Top: 0, Height: 1, JoinsNeighbors: true, BuildImageName: ChatRoomMapViewCreateRowImage("ModernLowboard") },
+	{ ID: 186, Type: "LivingRoom", Style: "ModernHighboardSingle", Top: -0.8, Height: 1.8, JoinsNeighbors: true, BuildImageName: ChatRoomMapViewCreateRowImage("ModernHighboard") },
+	{ ID: 187, Type: "LivingRoom", Style: "ModernBookshelfSingle", Top: -1.3, Height: 2.3, JoinsNeighbors: true, BuildImageName: ChatRoomMapViewCreateRowImage("ModernBookshelf") },
+	{ ID: 188, Type: "LivingRoom", Style: "NordicSideboardSingle", Top: -0.3, Height: 1.3, JoinsNeighbors: true, BuildImageName: ChatRoomMapViewCreateRowImage("NordicSideboard") },
 	{ ID: 189, Type: "LivingRoom", Style: "NordicCabinet", Top: -1.2, Height: 2.2 },
 	{ ID: 221, Type: "LivingRoom", Style: "ModernWardrobe", Top: -1.2, Height: 2.2 },
 	{
@@ -664,10 +664,10 @@ const AssetsMapDataObjects = [
 	{ ID: 300, Type: "FloorDecorationThemed", Style: "ShibariFrame", Top: -1, Height: 2 },
 	{ ID: 310, Type: "LivingRoom", Style: "JapaneseTable", Top: -0.1 },
 	{ ID: 320, Type: "FloorDecorationThemed", Style: "BanzaiTree", Top: -0.1 },
-	{ ID: 330, Type: "Kitchen", Style: "KitchenCounterSingle", Top: -0.3, Height: 1.3, BuildImageName: ChatRoomMapViewCreateKitchenCounterImage("KitchenCounter") },
-	{ ID: 331, Type: "Kitchen", Style: "KitchenCounterSinkSingle", Top: -0.3, Height: 1.3, BuildImageName: ChatRoomMapViewCreateKitchenCounterImage("KitchenCounterSink") },
-	{ ID: 332, Type: "Kitchen", Style: "KitchenCounterStoveElectricSingle", Top: -0.3, Height: 1.3, BuildImageName: ChatRoomMapViewCreateKitchenCounterImage("KitchenCounterStoveElectric") },
-	{ ID: 333, Type: "Kitchen", Style: "KitchenCounterStoveGasSingle", Top: -0.3, Height: 1.3, BuildImageName: ChatRoomMapViewCreateKitchenCounterImage("KitchenCounterStoveGas") },
+	{ ID: 330, Type: "Kitchen", Style: "KitchenCounterSingle", Top: -0.3, Height: 1.3, JoinsNeighbors: true, BuildImageName: ChatRoomMapViewCreateKitchenCounterImage("KitchenCounter") },
+	{ ID: 331, Type: "Kitchen", Style: "KitchenCounterSinkSingle", Top: -0.3, Height: 1.3, JoinsNeighbors: true, BuildImageName: ChatRoomMapViewCreateKitchenCounterImage("KitchenCounterSink") },
+	{ ID: 332, Type: "Kitchen", Style: "KitchenCounterStoveElectricSingle", Top: -0.3, Height: 1.3, JoinsNeighbors: true, BuildImageName: ChatRoomMapViewCreateKitchenCounterImage("KitchenCounterStoveElectric") },
+	{ ID: 333, Type: "Kitchen", Style: "KitchenCounterStoveGasSingle", Top: -0.3, Height: 1.3, JoinsNeighbors: true, BuildImageName: ChatRoomMapViewCreateKitchenCounterImage("KitchenCounterStoveGas") },
 	{ ID: 334, Type: "Kitchen", Style: "KitchenTallCabinetSingle", Top: -1.2, Height: 2.2 },
 	{ ID: 335, Type: "Kitchen", Style: "KitchenWallCabinetSingle", CanPlaceOnWalls: true, CanPlaceOnFloors: false, Top: 0.05, Height: 0.75, BuildImageName: ChatRoomMapViewCreateRowImage("KitchenWallCabinet") },
 	{ ID: 336, Type: "Office", Style: "OfficeStandingTable", Top: -0.5, Height: 1.5 },
@@ -1202,6 +1202,7 @@ const AssetsMapDataObjects = [
 		ID: 2033,
 		Type: "FloorObstacle",
 		Style: "VelourRopeBarrier",
+		JoinsNeighbors: true,
 		BuildImageName: function(x, y) {
 			let leftObjectId = MapManager.Map.getObjectId(x - 1, y);
 			let rightObjectId = MapManager.Map.getObjectId(x + 1, y);

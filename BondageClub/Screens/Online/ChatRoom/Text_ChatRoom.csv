@@ -184,7 +184,7 @@ EditorButtonTextToggleFog,Toggle Fog
 EditorButtonTextEditTiles,Tiles
 EditorButtonTextEditObjects,Objects
 EditorButtonTextEditEffects,Effects
-EditorButtonTextEditColors,Colors
+EditorButtonTextObjectSettings,Object settings
 EditorColorReset,Reset
 EditorColorPasteFormat,Paste format
 EditorColorStopPaste,Stop pasting
@@ -205,3 +205,4 @@ TeleportPadColor,Color
 TeleportPadInvalid,It can't send to itself or to a wall
 ObjectSettingsRotation,Turn
 ObjectSettingsSize,Size
+ObjectSettingsReset,Reset

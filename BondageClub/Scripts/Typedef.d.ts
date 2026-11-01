@@ -5521,6 +5521,8 @@ interface ChatRoomMapPhysicalElement extends ChatRoomMapDoodad {
 	CanPlaceOnFloors?: boolean; // default true
 	CanPlaceOnWalls?: boolean; // ex. Banners
 	CanPlaceInWalls?: boolean; // ex. Doors
+	/** Its picture joins up with the same objects next to it, so admins can't turn or size it */
+	JoinsNeighbors?: boolean;
 }
 
 /** {@link MapDoodadIsTile}  */

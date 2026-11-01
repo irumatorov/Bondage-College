@@ -747,6 +747,34 @@ describe("placed object settings", () => {
 		expect(Game.ChatRoomData.MapData.ObjectSettings).toEqual({});
 	});
 
+	it("can be undone, one step per change", () => {
+		const objects = Game.ChatRoomData.MapData.Objects;
+		Game.ChatRoomData.MapData.Objects = objects.slice(0, 41) + String.fromCharCode(362) + objects.slice(42);
+		Game.MapManager.OnViewActivate();
+		const pos = { X: 1, Y: 1 };
+		Game.ChatRoomMapViewRegisterObjectSettingsUndo(pos);
+		Game.ChatRoomMapViewSetObjectSettings(pos, 362, "Rotation", 30);
+		Game.ChatRoomMapViewRegisterObjectSettingsUndo(pos);
+		Game.ChatRoomMapViewSetObjectSettings(pos, 362, "Size", 150);
+		expect(Game.MapManager.Map.undo()).toBe(true);
+		expect(Game.ChatRoomData.MapData.ObjectSettings).toEqual({ 41: { ID: 362, Rotation: 30 } });
+		expect(Game.MapManager.Map.undo()).toBe(true);
+		expect(Game.ChatRoomData.MapData.ObjectSettings).toBeUndefined();
+		expect(Game.MapManager.Map.undo()).toBe(false);
+	});
+
+	it("only turns and sizes objects standing on their own", () => {
+		expect(Game.ChatRoomMapViewObjectCanTransform(Game.MapDataGetObject(362))).toBe(true);
+		expect(Game.ChatRoomMapViewObjectCanTransform(Game.MapDataGetObject(710))).toBe(false);
+		expect(Game.ChatRoomMapViewObjectCanTransform(Game.MapDataGetObject(2033))).toBe(false);
+		expect(Game.ChatRoomMapViewObjectCanTransform(Game.MapDataGetObject(3010))).toBe(false);
+		for (const id of [185, 186, 187, 188, 330, 331, 332, 333]) {
+			expect(Game.ChatRoomMapViewObjectCanTransform(Game.MapDataGetObject(id))).toBe(false);
+		}
+		Game.ChatRoomData.MapData.ObjectSettings = { 41: { ID: 710, Rotation: 90, Size: 150 } };
+		expect(Game.ChatRoomMapViewGetObjectSettings({ X: 1, Y: 1 }, 710)).toEqual({ ID: 710 });
+	});
+
 	describe("colors", () => {
 		const throne = Game.MapDataGetObject(150);
 		const couch = Game.MapDataGetObject(710);

@@ -97,8 +97,6 @@ var ChatRoomMapViewDialogMenu = null;
 var ChatRoomMapViewPanel;
 /** @type {HTMLElement} */
 var ChatRoomMapViewPanelContainer;
-/** @type {null | number} */
-var ChatRoomMapViewSelectedObjectIndex = null;
 /** @type {"Edit" | "Paste"} */
 var ChatRoomMapViewColorTool = "Edit";
 /** @type {ChatRoomMapColorFormat | null} */
@@ -540,7 +538,6 @@ function ChatRoomMapViewStartColorPaste() {
 	if (!format || !object || !layers?.length) return;
 
 	ChatRoomMapViewColorTool = "Paste";
-	ChatRoomMapViewSelectedObjectIndex = null;
 
 	const colors = layers.map((layer, i) => {
 		const color = format.Colors[i];
@@ -592,6 +589,7 @@ function ChatRoomMapViewPasteColorFormat(x, y) {
  * @returns {void}
  */
 function ChatRoomMapViewSaveObjectColors(pos, object, colors) {
+	ChatRoomMapViewRegisterObjectSettingsUndo(pos);
 	ChatRoomMapViewSetObjectSettings(pos, object.ID, "Colors", colors);
 	ChatRoomMapViewScheduleMapUpdate();
 }
@@ -808,8 +806,8 @@ function ChatRoomMapViewGetButtons() {
 			case "Tile":
 				ChatRoomMapViewEditorSetMode("TileType", "");
 				break;
-			case "Color":
-				if (ChatRoomMapViewColorTool === "Paste" || ChatRoomMapViewSelectedObjectIndex != null) ChatRoomMapViewSetSelectedTile(undefined);
+			case "ObjectSettings":
+				ChatRoomMapViewHideDialogMenu();
 				ChatRoomMapViewResetColorTool();
 				ChatRoomMapViewEditMode = "";
 				break;
@@ -914,14 +912,14 @@ function ChatRoomMapViewGetButtons() {
 
 				ChatMapRoomViewCreateCategoryButton(() => {
 					if (!ChatRoomPlayerIsAdmin()) return;
-					ChatRoomMapViewEditMode = "Color";
+					ChatRoomMapViewEditMode = "ObjectSettings";
 					ChatRoomMapViewEditSubMode = "";
 					ChatRoomMapViewEditObject = null;
 					ChatRoomMapViewReloadEditorPanel();
-				}, "Icons/ColorChange.png", TextGet("EditorButtonTextEditColors")),
+				}, "Icons/Use.png", TextGet("EditorButtonTextObjectSettings")),
 				...buttons,
 			];
-		case "Color":
+		case "ObjectSettings":
 			return [
 				backButton,
 				...buttons,
@@ -1774,58 +1772,6 @@ function ChatRoomMapViewGetColoredObjectImage(obj, imageName, colors) {
 	return canvas;
 }
 
-/** @type {Map<string, { canvas: HTMLCanvasElement, pad: number, width: number, height: number }>} */
-const ChatRoomMapViewObjectOutlineCache = new Map();
-
-/**
- * Gets the outline color of a colorable object for the Color tool
- * @param {number} Pos - The index of the cell
- * @param {ChatRoomMapObject} Obj - The object on the cell
- * @returns {string}
- */
-function ChatRoomMapViewGetOutlineColor(Pos, Obj) {
-	if (ChatRoomMapViewEditMode === "Color" && ChatRoomMapViewColorTool !== "Paste" && ChatRoomMapViewSelectedObjectIndex === Pos) return "cyan";
-	if (ChatRoomMapViewColorTool === "Paste" && MapCanPasteColorFormat(ChatRoomMapViewColorFormat, Obj)) return "gold";
-	return "white";
-}
-
-/**
- * Gets a glowing outline around the silhouette of an object image.
- * The outline is padded on each side by `pad` pixels of the source image, which is `width` x `height` pixels.
- * @param {ChatRoomMapObject} Obj - The object to outline
- * @param {string} ImageName - The image name, as returned by the object's `BuildImageName`
- * @param {string} Color - The outline color
- * @returns {{ canvas: HTMLCanvasElement, pad: number, width: number, height: number } | null} - The outline, or `null` while the image is not available
- */
-function ChatRoomMapViewGetObjectOutline(Obj, ImageName, Color) {
-	const url = MapGetAssetUrl("Object", Obj.Type, ImageName);
-	const key = `${url}|${Color}`;
-	const cached = ChatRoomMapViewObjectOutlineCache.get(key);
-	if (cached) return cached;
-
-	const img = DrawGetImage(url);
-	if (!img) return null;
-
-	const pad = Math.max(4, Math.round(Math.max(img.width, img.height) / 50));
-	const canvas = document.createElement("canvas");
-	canvas.width = img.width + pad * 2;
-	canvas.height = img.height + pad * 2;
-	const ctx = canvas.getContext("2d");
-	if (!ctx) return null;
-
-	ctx.shadowColor = Color;
-	ctx.shadowBlur = pad;
-	for (let i = 0; i < 3; i++) ctx.drawImage(img, pad, pad);
-	ctx.shadowColor = "transparent";
-	ctx.shadowBlur = 0;
-	ctx.globalCompositeOperation = "destination-out";
-	ctx.drawImage(img, pad, pad);
-
-	const outline = { canvas, pad, width: img.width, height: img.height };
-	ChatRoomMapViewObjectOutlineCache.set(key, outline);
-	return outline;
-}
-
 /**
  * Draw the map grid and character on screen
  * @param {number} Left - The X position on the screen
@@ -2020,15 +1966,6 @@ function ChatRoomMapViewDrawGrid(Left, Top, Width, Height) {
 				const right = rect[0] + (rect[2] + Math.abs(rect[2] * Math.cos(angle)) + Math.abs(rect[3] * Math.sin(angle))) / 2;
 				if (settings && right > TileCanvasX + TileWidth) rowOverflow.push({ draw, right });
 
-				if (ChatRoomMapViewEditMode === "Color" && Obj.ColorLayers && !Fog) {
-					const outline = ChatRoomMapViewGetObjectOutline(Obj, ImageName, ChatRoomMapViewGetOutlineColor(Pos, Obj));
-					if (outline) {
-						const scaleX = rect[2] / outline.width;
-						const scaleY = rect[3] / outline.height;
-						DrawImageResize(outline.canvas, rect[0] - outline.pad * scaleX, rect[1] - outline.pad * scaleY,
-							outline.canvas.width * scaleX, outline.canvas.height * scaleY, { Rotation: objectRotation });
-					}
-				}
 			}
 			// While placing empty space, show what currently blocks standing, including an impassable cell with no sprite
 			if (!Fog && ChatRoomMapViewEditMode === "Object" && ChatRoomMapViewEditSubMode === "EmptySpace" && ChatRoomMapViewObjectBlocksStanding(Obj)) {
@@ -2941,6 +2878,7 @@ function ChatRoomMapViewMove(D, Force = false) {
  */
 function ChatRoomMapViewUndo() {
 	if (!ChatRoomData?.MapData) return;
+	if (ChatRoomMapViewEditMode === "ObjectSettings" && ChatRoomMapViewColorTool !== "Paste") ChatRoomMapViewHideDialogMenu();
 	MapManager.Map.undo();
 	MapManager.Map.updatePlayerPerception();
 }
@@ -2957,7 +2895,7 @@ function ChatRoomMapViewKeyDown(event) {
 		document.activeElement === ElementWrap("InputChat")
 		|| document.activeElement === ElementWrap("chat-room-map-view-panel-editor-search-input"))) return false;
 
-	if (event.key === "Escape" && ChatRoomMapViewEditMode === "Color" && ChatRoomMapViewColorTool === "Paste") {
+	if (event.key === "Escape" && ChatRoomMapViewEditMode === "ObjectSettings" && ChatRoomMapViewColorTool === "Paste") {
 		ChatRoomMapViewStopColorPaste();
 		return true;
 	}
@@ -3059,7 +2997,7 @@ function ChatRoomMapViewClick() {
 	}
 
 	// When clicking on a character
-	if ((MouseX <= 1000) && (ChatRoomMapViewFocusedCharacter != null) && (ChatRoomMapViewEditMode != "Tile") && (ChatRoomMapViewEditMode != "Object") && (ChatRoomMapViewEditMode != "Color") && !ChatRoomMapViewEditStarted) {
+	if ((MouseX <= 1000) && (ChatRoomMapViewFocusedCharacter != null) && (ChatRoomMapViewEditMode != "Tile") && (ChatRoomMapViewEditMode != "Object") && (ChatRoomMapViewEditMode != "ObjectSettings") && !ChatRoomMapViewEditStarted) {
 
 		// Checks if the arousal meter is showing
 		let MeterShow = ChatRoomMapViewFocusedCharacter.IsPlayer();
@@ -3110,7 +3048,7 @@ function ChatRoomMapViewClick() {
 		return;
 	}
 
-	if (ChatRoomMapViewEditMode === "Color") {
+	if (ChatRoomMapViewEditMode === "ObjectSettings") {
 		if (!ChatRoomPlayerIsAdmin()) return;
 		if (ChatRoomMapViewColorTool === "Paste") ChatRoomMapViewPasteColorFormat(pos.X, pos.Y);
 		else ChatRoomMapViewSetSelectedTile(pos);
@@ -3126,16 +3064,13 @@ function ChatRoomMapViewClick() {
  */
 function ChatRoomMapViewSetSelectedTile(pos) {
 	ChatRoomMapViewHideDialogMenu();
-	if (!pos) {
-		ChatRoomMapViewSelectedObjectIndex = null;
-		return;
-	}
+	if (!pos) return;
 	const objectId = MapManager.Map.getObjectId(pos.X, pos.Y);
-	ChatRoomMapViewSelectedObjectIndex = MapCoordinatesToIndex(pos.X, pos.Y);
 	if (objectId) {
 		const object = MapGetDoodad("Object", objectId);
 		object?.OnClick?.(pos.X, pos.Y);
-		if (ChatRoomMapViewObjectCanChange(objectId) && ChatRoomPlayerIsAdmin()) ChatRoomMapViewShowObjectSettings(pos, objectId);
+		const editing = ChatRoomMapViewEditMode === "ObjectSettings" && ChatRoomPlayerIsAdmin();
+		if (editing && ChatRoomMapViewObjectCanChange(objectId)) ChatRoomMapViewShowObjectSettings(pos, objectId);
 	}
 }
 
@@ -3151,6 +3086,33 @@ function ChatRoomMapViewObjectCanChange(objectId) {
 }
 
 /**
+ * Whether admins can turn and size an object; ones that join up with their neighbors or hang on walls only take colors
+ * @param {ChatRoomMapObject} object
+ * @returns {boolean}
+ */
+function ChatRoomMapViewObjectCanTransform(object) {
+	return !object.JoinsNeighbors && !object.CanPlaceOnWalls;
+}
+
+/**
+ * Lets the next undo put back the settings of the object placed on a tile, as they are before a change
+ * @param {ChatRoomMapPos} pos
+ * @returns {void}
+ */
+function ChatRoomMapViewRegisterObjectSettingsUndo(pos) {
+	const index = MapCoordinatesToIndex(pos.X, pos.Y);
+	const settings = ChatRoomData?.MapData?.ObjectSettings?.[index];
+	MapManager.Map.registerUndo(() => {
+		const mapData = ChatRoomData?.MapData;
+		if (!mapData) return;
+		const settingsByTile = { ...mapData.ObjectSettings };
+		if (settings) settingsByTile[index] = settings;
+		else delete settingsByTile[index];
+		mapData.ObjectSettings = settingsByTile;
+	});
+}
+
+/**
  * Gets how an admin turned, sized and colored the object placed on a tile, if they did
  * @param {ChatRoomMapPos} pos
  * @param {number} objectId - The object on the tile; a change made to another object doesn't apply
@@ -3163,10 +3125,11 @@ function ChatRoomMapViewGetObjectSettings(pos, objectId) {
 	const colors = MapIsValidObjectColors(settings.Colors, object) && settings.Colors.some(c => c !== "Default")
 		? settings.Colors.map(c => c === "Default" ? c : /** @type {HexColor} */ (c.toUpperCase()))
 		: undefined;
+	const transform = object && ChatRoomMapViewObjectCanTransform(object);
 	return {
 		ID: objectId,
-		...(CommonIsInteger(settings.Rotation, 1, 359) && { Rotation: settings.Rotation }),
-		...(CommonIsInteger(settings.Size, 50, 200) && { Size: settings.Size }),
+		...(transform && CommonIsInteger(settings.Rotation, 1, 359) && { Rotation: settings.Rotation }),
+		...(transform && CommonIsInteger(settings.Size, 50, 200) && { Size: settings.Size }),
 		...(colors && { Colors: colors }),
 	};
 }
@@ -3208,36 +3171,65 @@ function ChatRoomMapViewShowObjectSettings(pos, objectId) {
 	const object = MapGetDoodad("Object", objectId);
 	if (!object) return;
 	const settings = ChatRoomMapViewGetObjectSettings(pos, objectId);
+	let changing = false;
 	/**
 	 * @param {"Rotation" | "Size"} key
 	 * @param {number} min
 	 * @param {number} max
 	 * @param {number} neutral
 	 */
-	const slider = (key, min, max, neutral) => ElementCreate({
+	const slider = (key, min, max, neutral) => /** @type {HTMLInputElement} */ (ElementCreate({
+		tag: "input",
+		attributes: { type: "range", min, max, value: settings?.[key] ?? neutral },
+		eventListeners: {
+			input: (event) => {
+				if (!changing) ChatRoomMapViewRegisterObjectSettingsUndo(pos);
+				changing = true;
+				ChatRoomMapViewSetObjectSettings(pos, objectId, key, /** @type {HTMLInputElement} */ (event.target).valueAsNumber);
+			},
+			change: () => {
+				changing = false;
+				ChatRoomMapViewScheduleMapUpdate();
+			},
+		},
+	}));
+	/** @type {(key: "Rotation" | "Size", input: HTMLInputElement) => HTMLElement} */
+	const row = (key, input) => ElementCreate({
 		tag: "label",
 		classList: ["chat-room-map-view-dialog-control"],
-		children: [
-			{ tag: "span", children: [TextGet(`ObjectSettings${key}`)] },
-			{
-				tag: "input",
-				attributes: { type: "range", min, max, value: settings?.[key] ?? neutral },
-				eventListeners: {
-					input: (event) => ChatRoomMapViewSetObjectSettings(pos, objectId, key, /** @type {HTMLInputElement} */ (event.target).valueAsNumber),
-					change: () => ChatRoomMapViewScheduleMapUpdate(),
-				},
-			},
-		],
+		children: [{ tag: "span", children: [TextGet(`ObjectSettings${key}`)] }, input],
 	});
+	const rotation = slider("Rotation", 0, 359, 0);
+	const size = slider("Size", 50, 200, ChatRoomMapViewObjectSize);
+	const transform = ChatRoomMapViewObjectCanTransform(object) ? [
+		row("Rotation", rotation),
+		row("Size", size),
+		ElementCreate({
+			tag: "div",
+			classList: ["chat-room-map-view-dialog-color-buttons"],
+			children: [
+				ChatRoomMapViewCreateColorButton(TextGet("ObjectSettingsReset"), () => {
+					const current = ChatRoomMapViewGetObjectSettings(pos, objectId);
+					if (!current?.Rotation && !current?.Size) return;
+					ChatRoomMapViewRegisterObjectSettingsUndo(pos);
+					ChatRoomMapViewSetObjectSettings(pos, objectId, "Rotation", 0);
+					ChatRoomMapViewSetObjectSettings(pos, objectId, "Size", ChatRoomMapViewObjectSize);
+					rotation.valueAsNumber = 0;
+					size.valueAsNumber = ChatRoomMapViewObjectSize;
+					ChatRoomMapViewScheduleMapUpdate();
+				}),
+			],
+		}),
+	] : [];
 	const controls = ElementCreate({
 		tag: "div",
 		classList: ["chat-room-map-view-dialog-controls"],
 		children: [
-			slider("Rotation", 0, 359, 0),
-			slider("Size", 50, 200, ChatRoomMapViewObjectSize),
+			...transform,
 			...object.ColorLayers?.length ? [ChatRoomMapViewCreateObjectColors(pos, object)] : [],
 		],
 	});
+	if (!controls.childElementCount) return;
 	ChatRoomMapViewShowDialogMenu(ChatRoomMapViewGetObjectDisplayName(object), controls);
 }
 

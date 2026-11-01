@@ -60,7 +60,7 @@ type UnpackedIndex<T extends readonly [number, ...unknown[]]> = T extends readon
 
 type ChatRoomMapViewObjectModeType = "Tile" | "Object" | "Effect";
 
-type ChatRoomMapViewEditModeType = "" | ChatRoomMapViewObjectModeType | "TileType" | "ObjectType" | "Color";
+type ChatRoomMapViewEditModeType = "" | ChatRoomMapViewObjectModeType | "TileType" | "ObjectType" | "ObjectSettings";
 
 type ChatRoomMapViewTool = {
 	canPaint: () => boolean;
