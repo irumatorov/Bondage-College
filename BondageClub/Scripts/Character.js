@@ -601,7 +601,7 @@ function CharacterCreate(CharacterAssetFamily, Type, CharacterID) {
 				return loves;
 			}
 
-			for (let L of this.Lovership) {
+			for (const L of this.Lovership) {
 				if (typeof L.MemberNumber === "number") {
 					// Anything with a MemberNumber is a relationship with an online character, so properties should be fine
 					loves.push(L);
@@ -1403,17 +1403,16 @@ function CharacterLoadOnline(data, SourceMemberNumber) {
 			if ((Char.Description != data.Description) || (Char.Title != data.Title) || (Char.Nickname != data.Nickname) || (Char.LabelColor != data.LabelColor) || (ChatRoomData?.Character == null))
 				Refresh = true;
 			else
-				for (let C = 0; C < ChatRoomData.Character.length; C++)
-					if (ChatRoomData.Character[C].ID == data.ID)
-						if (ChatRoomData?.Character[C]?.Appearance?.length != data.Appearance?.length)
+				for (const char of ChatRoomData.Character)
+					if (char.ID == data.ID)
+						if (char.Appearance?.length != data.Appearance?.length)
 							Refresh = true;
 						else
-							for (let A = 0; A < (data.Appearance?.length ?? 0) && !Refresh; A++) {
-								const Old = ChatRoomData?.Character[C]?.Appearance?.[A];
-								const New = data.Appearance?.[A];
-								if ((New?.Name !== Old?.Name) || (New?.Group !== Old?.Group) || JSON.stringify(New?.Color) !== JSON.stringify(Old?.Color)) Refresh = true;
-								else if ((New?.Property != null) && (Old?.Property != null) && (JSON.stringify(New?.Property) !== JSON.stringify(Old.Property))) Refresh = true;
-								else if (((New?.Property != null) && (Old?.Property == null)) || ((New?.Property == null) && (Old?.Property != null))) Refresh = true;
+							for (const [A, newApp] of (data.Appearance ?? []).entries()) {
+								const Old = char.Appearance?.[A];
+								if ((newApp?.Name !== Old?.Name) || (newApp?.Group !== Old?.Group) || JSON.stringify(newApp?.Color) !== JSON.stringify(Old?.Color)) Refresh = true;
+								else if ((newApp?.Property != null) && (Old?.Property != null) && (JSON.stringify(newApp?.Property) !== JSON.stringify(Old.Property))) Refresh = true;
+								else if (((newApp?.Property != null) && (Old?.Property == null)) || ((newApp?.Property == null) && (Old?.Property != null))) Refresh = true;
 							}
 
 		// Flags "refresh" if the ownership or lovership or inventory or blockitems or limiteditems has changed

@@ -37,8 +37,8 @@ async function EmptyLoad() {
  * @type {ScreenRunHandler}
  */
 function EmptyRun() {
-	for (let C = 0; C < EmptyCharacter.length; C++)
-		DrawCharacter(EmptyCharacter[C], 1000 - EmptyCharacter.length * 250 + C * 500 + EmptyCharacterOffset, 0, 1);
+	for (const [C, char] of EmptyCharacter.entries())
+		DrawCharacter(char, 1000 - EmptyCharacter.length * 250 + C * 500 + EmptyCharacterOffset, 0, 1);
 }
 
 /**
@@ -46,9 +46,9 @@ function EmptyRun() {
  * @type {MouseEventListener}
  */
 function EmptyClick() {
-	for (let C = 0; C < EmptyCharacter.length; C++)
+	for (const [C, char] of EmptyCharacter.entries())
 		if (MouseIn(1000 - EmptyCharacter.length * 250 + C * 500 + EmptyCharacterOffset, 0, 500, 1000))
-			CharacterSetCurrent(EmptyCharacter[C]);
+			CharacterSetCurrent(char);
 }
 
 /**

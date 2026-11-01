@@ -673,7 +673,7 @@ var PreferenceArousalSettingsValidate = {
 			// Old object-based activities
 			let newActivity = PreferenceArousalSettingsDefault.Activity;
 			const objectArousalSettings = /** @type {{ Name: string, Self: number, Other: number}[]} */ (/** @type {unknown} */ (arg));
-			for (let oldActivity of objectArousalSettings) {
+			for (const oldActivity of objectArousalSettings) {
 				if (!CommonIsObject(oldActivity) || typeof oldActivity.Name !== "string" || typeof oldActivity.Self === "number" || typeof oldActivity.Other === "number") continue;
 
 				const activity = AssetGetActivity(C.AssetFamily, oldActivity.Name);
@@ -700,7 +700,7 @@ var PreferenceArousalSettingsValidate = {
 			// Old object-based zones
 			let newZone = PreferenceArousalSettingsDefault.Zone;
 			const objectZoneSettings = /** @type {{ Name: AssetGroupItemName, Factor: ArousalFactor, Orgasm: boolean }[]} */ (/** @type {unknown} */ (arg));
-			for (let oldZone of objectZoneSettings) {
+			for (const oldZone of objectZoneSettings) {
 				if (!CommonIsObject(oldZone) || typeof oldZone.Name !== "string" || typeof oldZone.Factor !== "number" || typeof oldZone.Orgasm !== "boolean") continue;
 
 				const group = AssetGroupGet(C.AssetFamily, oldZone.Name);
@@ -726,7 +726,7 @@ var PreferenceArousalSettingsValidate = {
 			// Old object-based fetishes
 			let newFetish = PreferenceArousalSettingsDefault.Fetish;
 			const objectFetishSettings = /** @type {{ Name: FetishName, Factor: ArousalFactor }[]} */ (/** @type {unknown} */ (arg));
-			for (let oldFetish of objectFetishSettings) {
+			for (const oldFetish of objectFetishSettings) {
 				if (!CommonIsObject(oldFetish) || typeof oldFetish.Name !== "string" || typeof oldFetish.Factor !== "number") continue;
 
 				const fetish = AssetGetFetish(C.AssetFamily, oldFetish.Name);

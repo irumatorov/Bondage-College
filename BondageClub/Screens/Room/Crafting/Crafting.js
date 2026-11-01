@@ -488,12 +488,12 @@ function CraftingAssetsPopulate() {
  */
 function CraftingItemHasEffect(Item, Effect) {
 	if (Item?.Effect != null)
-		for (let E of Effect)
-			if (Item.Effect.indexOf(E) >= 0)
+		for (const E of Effect)
+			if (Item.Effect.includes(E))
 				return true;
 	if (Item?.AllowEffect != null)
-		for (let E of Effect)
-			if (Item.AllowEffect.indexOf(E) >= 0)
+		for (const E of Effect)
+			if (Item.AllowEffect.includes(E))
 				return true;
 	return false;
 }

@@ -152,9 +152,9 @@ function InventoryItemVulvaTechnoChastityCageClickVoiceControl(C, item, _offset)
  */
 function InventoryItemVulvaChastityCageVoiceControlClickSet(C, item) {
 	let triggerValuesTemp = [];
-	for (let I = 0; I < InventoryItemVulvaTechnoChastityCageVoiceTriggers.length; I++) {
-		const triggerValue = ElementValue("TechnoChastityCage" + InventoryItemVulvaTechnoChastityCageVoiceTriggers[I]);
-		const value = triggerValue !== "" ? triggerValue : InventoryItemVulvaTechnoChastityCageVoiceTriggerValues[I];
+	for (const [i, trigger] of InventoryItemVulvaTechnoChastityCageVoiceTriggers.entries()) {
+		const triggerValue = ElementValue(`TechnoChastityCage${trigger}`);
+		const value = triggerValue !== "" ? triggerValue : InventoryItemVulvaTechnoChastityCageVoiceTriggerValues[i];
 		triggerValuesTemp.push(value);
 	}
 

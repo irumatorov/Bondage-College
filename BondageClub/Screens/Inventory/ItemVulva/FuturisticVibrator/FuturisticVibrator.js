@@ -97,9 +97,9 @@ function InventoryItemVulvaFuturisticVibratorClickSet() {
 	if (!C || !item) return;
 	item.Property ??= {};
 	const ItemVulvaFuturisticVibratorTriggerValuesTemp = [];
-	for (let I = 0; I < ItemVulvaFuturisticVibratorTriggers.length; I++) {
-		const trigger = ElementValue(`FuturisticVibe${ItemVulvaFuturisticVibratorTriggers[I]}`);
-		const value = trigger != "" ? trigger : ItemVulvaFuturisticVibratorTriggerValues[I] ?? "";
+	for (const [i, trigger] of ItemVulvaFuturisticVibratorTriggers.entries()) {
+		const triggerValue = ElementValue(`FuturisticVibe${trigger}`);
+		const value = triggerValue != "" ? triggerValue : ItemVulvaFuturisticVibratorTriggerValues[i] ?? "";
 		ItemVulvaFuturisticVibratorTriggerValuesTemp.push(value);
 	}
 
@@ -138,9 +138,9 @@ function InventoryItemVulvaFuturisticVibratorDetectMsg(msg, TriggerValues) {
 	// If the message is OOC, just return immediately
 	if (msg.indexOf('(') == 0) return commandsReceived;
 
-	for (let I = 0; I < TriggerValues.length; I++) {
+	for (const [i, triggerValue] of TriggerValues.entries()) {
 		// Don't execute arbitrary regex
-		let regexString = TriggerValues[I].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		let regexString = triggerValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 		// Allow `*` wildcard, and normalize case
 		regexString = regexString.replace(/\*/g, ".*");//regexString.replaceAll("\\*", ".*")
@@ -164,7 +164,7 @@ function InventoryItemVulvaFuturisticVibratorDetectMsg(msg, TriggerValues) {
 		}
 		const success = triggerRegex.test(msg);
 
-		if (success) commandsReceived.push(ItemVulvaFuturisticVibratorTriggers[I]);
+		if (success) commandsReceived.push(ItemVulvaFuturisticVibratorTriggers[i]);
 	}
 	return commandsReceived;
 }

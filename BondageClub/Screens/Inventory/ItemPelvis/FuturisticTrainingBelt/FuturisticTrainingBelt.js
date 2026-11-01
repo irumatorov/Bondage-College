@@ -393,8 +393,8 @@ function InventoryFuturisticTrainingBeltCheckPunishSpeech(Item, LastTime) {
 				let words =  Item.Property.PunishRequiredSpeechWord.split(",");
 				if (gagLevel < 8) {
 					let pass = false;
-					for (let W = 0; W <  words.length; W++) {
-						let checkWord = words[W].replace(/[\p{P} ~+=^$|\\<>`]+/ugm, "").toUpperCase();
+					for (const word of words) {
+						let checkWord = word.replace(/[\p{P} ~+=^$|\\<>`]+/ugm, "").toUpperCase();
 						if (msgTruncated.includes(checkWord)) {pass = true; break;}
 					}
 					if (!pass) return { name: "RequiredSpeech" };
@@ -409,8 +409,8 @@ function InventoryFuturisticTrainingBeltCheckPunishSpeech(Item, LastTime) {
 				let triggerRegex;
 
 				if (gagLevel < 8) {
-					for (let W = 0; W <  words.length; W++) {
-						let checkWord = words[W].replace(/[\p{P} ~+=^$|\\<>`]+/ugm, "").toUpperCase();
+					for (const word of words) {
+						let checkWord = word.replace(/[\p{P} ~+=^$|\\<>`]+/ugm, "").toUpperCase();
 
 						if (nonLatinCharRegex.test(checkWord)) {
 							triggerRegex = new RegExp(checkWord);

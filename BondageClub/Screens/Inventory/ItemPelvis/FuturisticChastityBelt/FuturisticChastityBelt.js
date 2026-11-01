@@ -25,9 +25,9 @@ function InventoryFuturisticChastityBeltCheckPunish(Item) {
 		&& StruggleProgressPrevItem != null
 		&& StruggleProgressStruggleCount > 0
 	) {
-		var inFocus = false;
-		for (var Z = 0; Z < InventoryItemPelvisFuturisticChastityBeltTamperZones.length; Z++)
-			if (Player.FocusGroup.Name == InventoryItemPelvisFuturisticChastityBeltTamperZones[Z])
+		let inFocus = false;
+		for (const zone of InventoryItemPelvisFuturisticChastityBeltTamperZones)
+			if (Player.FocusGroup.Name == zone)
 				inFocus = true;
 
 		if (inFocus) {

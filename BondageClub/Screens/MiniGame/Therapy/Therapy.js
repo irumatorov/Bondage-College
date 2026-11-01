@@ -52,7 +52,7 @@ function TherapyRun() {
 		if (TherapyGenerateMoveTimer < CurrentTime) {
 			if (MiniGameProgress < 0) MiniGameProgress = 0;
 			TherapyGenerateMoveTimer = TherapyGenerateMoveTimer + 100;
-			for (let M = 0; M < TherapyMoves.length; M++) {
+			for (let M of TherapyMoves.keys()) {
 				if ((TherapyMoves[M] > 0) && (TherapyMoves[M] <= CurrentTime)) {
 					TherapyStress++;
 					TherapyMoves[M] = 0;
@@ -64,10 +64,9 @@ function TherapyRun() {
 		}
 
 		// Draws the move
-		for (let M = 0; M < TherapyMoves.length; M++)
+		for (const M of TherapyMoves.keys())
 			if (TherapyMoves[M] >= CurrentTime)
 				DrawCircle(1250 + ((M % 3) * 250), 200 + Math.floor(M / 3) * 300, 100, 25, "cyan");
-
 	} else if (MiniGameEnded) {
 
 		// Draw the end message
@@ -75,9 +74,7 @@ function TherapyRun() {
 		else if (MiniGameVictory) DrawText(TextGet("Victory"), 1500, 250, "white");
 		else DrawText(TextGet("Defeat"), 1500, 250, "white");
 		DrawText(TextGet("ClickContinue"), 1500, 350, "white");
-
 	}
-
 }
 
 /**
@@ -141,7 +138,7 @@ function TherapyMouseDown() {
 
 		// Gets the move type and sends it
 		var MoveType = -1;
-		for (let M = 0; M < TherapyMoves.length; M++) {
+		for (const M of TherapyMoves.keys()) {
 			const moveX = (M % 3) * 250;
 			const moveY = Math.floor(M / 3) * 300;
 			if (MouseIn(1125 + moveX, 75 + moveY, 250, 250))

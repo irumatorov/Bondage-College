@@ -186,9 +186,9 @@ function InventoryItemMiscCombinationPadlockClickHook(data, originalFunction) {
 			// We only accept code made of digits and of 4 numbers
 			if (ValidationCombinationNumberRegex.test(NewCode)) {
 				DialogFocusSourceItem.Property.CombinationNumber = NewCode;
-				for (let A = 0; A < C.Appearance.length; A++) {
-					if (C.Appearance[A].Asset.Group.Name == C.FocusGroup.Name)
-						C.Appearance[A] = DialogFocusSourceItem;
+				for (const [i, A] of C.Appearance.entries()) {
+					if (A.Asset.Group.Name == C.FocusGroup.Name)
+						C.Appearance[i] = DialogFocusSourceItem;
 				}
 				if (ServerPlayerIsInChatRoom()) {
 					const Dictionary = new DictionaryBuilder()

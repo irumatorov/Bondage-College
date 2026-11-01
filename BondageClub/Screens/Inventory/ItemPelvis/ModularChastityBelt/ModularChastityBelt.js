@@ -239,10 +239,10 @@ function InventoryItemPelvisModularChastityBeltVoiceNext(C, item) {
  * @param {Item} item
  */
 function InventoryItemPelvisModularChastityBeltVoiceControlClickSet(C, item) {
-	var InventoryItemPelvisModularChastityBeltVoiceTriggerValuesTemp = [];
-	for (let I = 0; I < InventoryItemPelvisModularChastityBeltVoiceTriggers.length; I++) {
-		const triggerValue = ElementValue("ModularChastityBelt" + InventoryItemPelvisModularChastityBeltVoiceTriggers[I]);
-		const value = triggerValue !== "" ? triggerValue : InventoryItemPelvisModularChastityBeltVoiceTriggerValues[I];
+	const InventoryItemPelvisModularChastityBeltVoiceTriggerValuesTemp = [];
+	for (const [i, trigger] of InventoryItemPelvisModularChastityBeltVoiceTriggers.entries()) {
+		const triggerValue = ElementValue(`ModularChastityBelt${trigger}`);
+		const value = triggerValue !== "" ? triggerValue : InventoryItemPelvisModularChastityBeltVoiceTriggerValues[i];
 		InventoryItemPelvisModularChastityBeltVoiceTriggerValuesTemp.push(value);
 	}
 

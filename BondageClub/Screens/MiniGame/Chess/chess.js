@@ -101,8 +101,7 @@ function MiniGameChessStart(Depth, PlayerColor) {
 		// Set a default best move value
 		let bestMoveValue = isMaximizingPlayer ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
 		// Search through all possible moves
-		for (let i = 0; i < possibleMoves.length; i++) {
-			const move = possibleMoves[i];
+		for (const move of possibleMoves) {
 			// Make the move, but undo before exiting loop
 			chessgame.move(move);
 			// Recursively get the value from this move

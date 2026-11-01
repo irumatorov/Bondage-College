@@ -2208,13 +2208,13 @@ var ClubCardList = [
 			const opponent = ClubCardGetOpponent(CCPlayer);
 			let tiersSum = 0;
 			let opponentTiersSum = 0;
-			for (let i = 0; i < CCPlayer.Hand.length; i++) {
-				CCPlayer.Hand[i].Revealed = true;
-				tiersSum += CCPlayer.Hand[i].RequiredLevel ?? 1;
+			for (const card of CCPlayer.Hand) {
+				card.Revealed = true;
+				tiersSum += card.RequiredLevel ?? 1;
 			}
-			for (let i = 0; i < opponent.Hand.length; i++) {
-				opponent.Hand[i].Revealed = true;
-				opponentTiersSum += opponent.Hand[i].RequiredLevel ?? 1;
+			for (const card of opponent.Hand) {
+				card.Revealed = true;
+				opponentTiersSum += card.RequiredLevel ?? 1;
 			}
 			if (tiersSum > opponentTiersSum) ClubCardPlayerAddFame(CCPlayer, CCPlayer.Level, this.Name);
 			else if (tiersSum < opponentTiersSum) ClubCardPlayerAddFame(opponent, opponent.Level, this.Name);
@@ -2371,9 +2371,9 @@ var ClubCardList = [
 		FamePerTurn: 1,
 		CanActive: true,
 		OnPlay: function(CCPlayer) {
-			for (let i = 0; i < CCPlayer.Board.length; i++) {
-				if (ClubCardCardHasGroup(CCPlayer.Board[i], "Slave") || ClubCardCardHasGroup(CCPlayer.Board[i], "Submissive") || ClubCardCardHasGroup(CCPlayer.Board[i], "CollegeStudent")) {
-					CCPlayer.Board[i].MoneyPerTurn = (CCPlayer.Board[i].MoneyPerTurn ?? 0) + 1;
+			for (const card of CCPlayer.Board) {
+				if (ClubCardCardHasGroup(card, "Slave") || ClubCardCardHasGroup(card, "Submissive") || ClubCardCardHasGroup(card, "CollegeStudent")) {
+					card.MoneyPerTurn = (card.MoneyPerTurn ?? 0) + 1;
 				}
 			}
 		}
@@ -2614,8 +2614,8 @@ var ClubCardList = [
 		FamePerTurn: 5,
 		OnPlay: function(CCPlayer) {
 			ClubCardPlayerAddMoney(CCPlayer, -15);
-			for (let i = 0; i < CCPlayer.Hand.length; i++) {
-				CCPlayer.Hand[i].Revealed = true;
+			for (const card of CCPlayer.Hand) {
+				card.Revealed = true;
 			}
 		}
 	},
@@ -3317,8 +3317,8 @@ var ClubCardList = [
 		Type: "Event",
 		RequiredLevel: 5,
 		OnPlay: function(CCPlayer) {
-			for (let i = 0; i < CCPlayer.Board.length; i++) {
-				if (ClubCardCardHasGroup(CCPlayer.Board[i], "Submissive") || ClubCardCardHasGroup(CCPlayer.Board[i], "Dominant")) CCPlayer.Board[i].FamePerTurn = (CCPlayer.Board[i].FamePerTurn ?? 0) + 1;
+			for (const card of CCPlayer.Board) {
+				if (ClubCardCardHasGroup(card, "Submissive") || ClubCardCardHasGroup(card, "Dominant")) card.FamePerTurn = (card.FamePerTurn ?? 0) + 1;
 			}
 		}
 	},
@@ -4159,8 +4159,8 @@ var ClubCardList = [
 		Type: "Event",
 		RequiredLevel: 4,
 		OnPlay: function(CCPlayer) {
-			for (let i = 0; i < CCPlayer.Board.length; i++) {
-				if (ClubCardCardHasGroup(CCPlayer.Board[i], "Slave")) CCPlayer.Board[i].FamePerTurn = (CCPlayer.Board[i].FamePerTurn ?? 0) + 1;
+			for (const card of CCPlayer.Board) {
+				if (ClubCardCardHasGroup(card, "Slave")) card.FamePerTurn = (card.FamePerTurn ?? 0) + 1;
 			}
 		}
 	},
@@ -4606,8 +4606,7 @@ function ClubCardMessagePacketProcessing() {
 	let isHypnotherapist = false;
 	let isGangbangBanger = false;
 
-	for (let i = 0; i < ClubCardMessageStorage.length; i++) {
-		const message = ClubCardMessageStorage[i];
+	for (const [i, message] of ClubCardMessageStorage.entries()) {
 		if (message.TextGetKey === "Effect Rope Slave") ropeSlaveMessages.push({ message, index: i });
 		else if (message.TextGetKey === "Effect Living Art") livingArtMessages.push({ message, index: i });
 		else if (message.TextGetKey === "StealMoney") stealMoneyMessages.push({ message, index: i });

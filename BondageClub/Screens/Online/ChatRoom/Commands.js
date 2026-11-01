@@ -537,8 +537,8 @@ function CommandBuildSuggestionsContext(options) {
 
 	const activeArguments = CommandResolveProperty(active, "Arguments");
 	if (activeArguments) {
-		for (let i = 0; i < activeArguments.length; i++) {
-			const argKey = CommandGetArgumentKey(activeArguments[i]);
+		for (const [i, arg] of activeArguments.entries()) {
+			const argKey = CommandGetArgumentKey(arg);
 			if (argKey) args[argKey] = remaining[i];
 		}
 	}

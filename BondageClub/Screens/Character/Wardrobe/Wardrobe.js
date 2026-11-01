@@ -208,14 +208,12 @@ function WardrobeRun() {
 	if (WardrobeSelection !== -1 || !WardrobeShowsCharacters()) return;
 
 	const filteredSlots = WardrobeGetFilteredSlots();
-	const slotsPerPage = WardrobeGetSlotsPerPage();
 	const { zoom } = WardrobeGetSlotCanvasSize();
-	for (let C = 0; C < slotsPerPage; C++) {
-		const slot = filteredSlots[C];
+	for (const [i, slot] of filteredSlots.entries()) {
 		if (slot == null || WardrobeIsSlotEmpty(slot)) continue;
 		const character = WardrobeCharacter[slot];
 		if (!character) continue;
-		WardrobeDrawToCanvas(WardrobeID.slotCanvas(C), character, zoom);
+		WardrobeDrawToCanvas(WardrobeID.slotCanvas(i), character, zoom);
 	}
 }
 
@@ -639,12 +637,13 @@ function WardrobeEnsureVisibleCharacters(filteredSlots = WardrobeGetFilteredSlot
 			viewport = filteredSlots.slice(start, end);
 		}
 		const { width, height } = WardrobeGetSlotCanvasSize();
-		for (let cell = start; cell < end; cell++) {
-			const button = ElementWrap(WardrobeID.slotButton(cell));
-			if (!button || WardrobeIsSlotEmpty(filteredSlots[cell]) || button.querySelector("canvas")) continue;
+		for (const [i, cell] of viewport.entries()) {
+			const index = start + i;
+			const button = ElementWrap(WardrobeID.slotButton(index));
+			if (!button || WardrobeIsSlotEmpty(cell) || button.querySelector("canvas")) continue;
 			ElementCreate({
 				tag: "canvas",
-				attributes: { id: WardrobeID.slotCanvas(cell), width: String(width), height: String(height), "aria-hidden": "true" },
+				attributes: { id: WardrobeID.slotCanvas(index), width: String(width), height: String(height), "aria-hidden": "true" },
 				classList: ["wardrobe-slot-canvas"],
 				parent: button,
 			});
@@ -656,10 +655,10 @@ function WardrobeEnsureVisibleCharacters(filteredSlots = WardrobeGetFilteredSlot
 		...viewport.filter((slot) => !WardrobeIsSlotEmpty(slot)),
 	]);
 	let released = false;
-	for (let slot = 0; slot < WardrobeCharacter.length; slot++) {
-		if (keep.has(slot) || !WardrobeCharacter[slot]) continue;
-		CharacterDelete(/** @type {Character} */(WardrobeCharacter[slot]));
-		WardrobeCharacter[slot] = null;
+	for (const [i, slot] of WardrobeCharacter.entries()) {
+		if (keep.has(i) || !slot) continue;
+		CharacterDelete(slot);
+		WardrobeCharacter[i] = null;
 		released = true;
 	}
 	// Recreated slots reuse CharacterIDs; drop blit signatures so Run cannot skip stale pixels.
@@ -1420,10 +1419,10 @@ function WardrobeUpdateElements(filteredSlots = WardrobeGetFilteredSlots()) {
 	ElementWrap(WardrobeID.slotGrid)?.toggleAttribute("hidden", gridHidden);
 	WardrobeUpdateSidePreviewVisibility();
 
-	for (let C = 0; C < slotsPerPage; C++) {
-		const slot = filteredSlots[C];
-		const cell = ElementWrap(WardrobeID.slotCell(C));
-		const button = ElementWrap(WardrobeID.slotButton(C));
+	for (let i = 0; i < slotsPerPage; i++) {
+		const slot = filteredSlots[i];
+		const cell = ElementWrap(WardrobeID.slotCell(i));
+		const button = ElementWrap(WardrobeID.slotButton(i));
 		if (!button) continue;
 		cell?.toggleAttribute("hidden", slot == null);
 		button.toggleAttribute("hidden", slot == null);
@@ -1438,11 +1437,11 @@ function WardrobeUpdateElements(filteredSlots = WardrobeGetFilteredSlots()) {
 		const isEmpty = slot != null && WardrobeIsSlotEmpty(slot);
 		button.classList.toggle("wardrobe-slot-empty-button", isEmpty);
 
-		const loadBtn = ElementWrap(WardrobeID.slotLoad(C));
+		const loadBtn = ElementWrap(WardrobeID.slotLoad(i));
 		const shouldHideLoadButton = slot == null || isEmpty || WardrobeReorderMode !== "None";
 		loadBtn?.toggleAttribute("hidden", shouldHideLoadButton);
 
-		const slotIcon = ElementWrap(WardrobeID.slotEmpty(C));
+		const slotIcon = ElementWrap(WardrobeID.slotEmpty(i));
 		if (slotIcon) {
 			const showIcon = slot != null && (isEmpty || !showPreviews);
 			slotIcon.toggleAttribute("hidden", !showIcon);
@@ -1453,12 +1452,12 @@ function WardrobeUpdateElements(filteredSlots = WardrobeGetFilteredSlots()) {
 		}
 
 		if (!showPreviews) continue;
-		const slotCanvas = ElementWrap(WardrobeID.slotCanvas(C));
+		const slotCanvas = ElementWrap(WardrobeID.slotCanvas(i));
 		const wasHidden = slotCanvas?.hasAttribute("hidden");
 		slotCanvas?.toggleAttribute("hidden", slot == null || isEmpty);
 		// Force a fresh blit when a slot canvas becomes visible again.
 		if (wasHidden && slotCanvas && !slotCanvas.hasAttribute("hidden")) {
-			WardrobeInvalidateCanvasCache(WardrobeID.slotCanvas(C));
+			WardrobeInvalidateCanvasCache(WardrobeID.slotCanvas(i));
 		}
 	}
 	WardrobeFitSlotLabels();

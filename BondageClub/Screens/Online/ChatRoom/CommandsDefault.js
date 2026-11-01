@@ -547,8 +547,8 @@ const CommonCommands = [
 					CurrentBlush = Blush.Property.Expression;
 				}
 				let Level = 0;
-				for (let i = 0; i < BlushLevels.length; i++) {
-					if (CurrentBlush == BlushLevels[i]) {
+				for (const [i, blushLevel] of BlushLevels.entries()) {
+					if (CurrentBlush == blushLevel) {
 						Level = i;
 						break;
 					}

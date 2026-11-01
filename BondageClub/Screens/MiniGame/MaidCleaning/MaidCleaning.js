@@ -34,8 +34,8 @@ function MaidCleaningGenerateSpots(MaxSpot) {
  * @returns {void} - Nothing
  */
 function MaidCleaningDrawSpots() {
-	for (let S = 0; S < MaidCleaningSpots.length; S++)
-		DrawImage("Screens/MiniGame/MaidCleaning/Spot" + MaidCleaningSpots[S].T + ".png", MaidCleaningSpots[S].X - (MaidCleaningSpotSize / 2), MaidCleaningSpots[S].Y - (MaidCleaningSpotSize / 2));
+	for (const spot of MaidCleaningSpots)
+		DrawImage("Screens/MiniGame/MaidCleaning/Spot" + spot.T + ".png", spot.X - (MaidCleaningSpotSize / 2), spot.Y - (MaidCleaningSpotSize / 2));
 }
 
 /**
@@ -129,10 +129,10 @@ function MaidCleaningDoMove() {
 
 		// If the game has started, we check the click position and remove a spot at that position
 		if (MiniGameRunning())
-			for (let S = 0; S < MaidCleaningSpots.length; S++)
-				if (MouseIn(MaidCleaningSpots[S].X - Range, MaidCleaningSpots[S].Y - Range, Range * 2, Range * 2)) {
-					if (MaidCleaningSpots[S].T == 1) MaidCleaningSpots.splice(S, 1);
-					else MaidCleaningSpots[S].T--;
+			for (const [i, spot] of MaidCleaningSpots.entries())
+				if (MouseIn(spot.X - Range, spot.Y - Range, Range * 2, Range * 2)) {
+					if (spot.T == 1) MaidCleaningSpots.splice(i, 1);
+					else spot.T--;
 					return;
 				}
 

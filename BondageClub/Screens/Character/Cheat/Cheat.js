@@ -55,9 +55,9 @@ function CheatImport() {
 		CheatBrowserName = BI.Name;
 		CheatBrowserVersion = BI.Version;
 		CheatBrowserTime = CommonTime();
-		for (let C = 0; C < CheatList.length; C++) {
-			var AC = localStorage.getItem("BondageClubCheat" + CheatList[C]);
-			if ((AC != null) && (AC.toUpperCase() == "TRUE")) CheatActivated.push(CheatList[C]);
+		for (const cheat of CheatList) {
+			var AC = localStorage.getItem("BondageClubCheat" + cheat);
+			if ((AC != null) && (AC.toUpperCase() == "TRUE")) CheatActivated.push(cheat);
 		}
 	}
 }
@@ -67,8 +67,8 @@ function CheatImport() {
  * @returns {void} - Nothing
  */
 function CheatExport() {
-	for (let C = 0; C < CheatList.length; C++)
-		localStorage.setItem("BondageClubCheat" + CheatList[C], (CheatActivated.indexOf(CheatList[C]) >= 0) ? "true" : "false");
+	for (const cheat of CheatList)
+		localStorage.setItem("BondageClubCheat" + cheat, (CheatActivated.indexOf(cheat) >= 0) ? "true" : "false");
 }
 
 /**
@@ -79,9 +79,9 @@ function CheatRun() {
 
 	// List all the cheats
 	MainCanvas.textAlign = "left";
-	for (let C = 0; C < CheatList.length; C++) {
-		DrawButton(150 + Math.floor(C / 8) * 850, 115 + ((C % 8) * 100), 64, 64, "", "White", CheatActive(CheatList[C]) ? "Icons/Checked.png" : "");
-		DrawText(TextGet(CheatList[C]), 250 + Math.floor(C / 8) * 850, 147 + ((C % 8) * 100), "Black", "Gray");
+	for (const [i, cheat] of CheatList.entries()) {
+		DrawButton(150 + Math.floor(i / 8) * 850, 115 + ((i % 8) * 100), 64, 64, "", "White", CheatActive(cheat) ? "Icons/Checked.png" : "");
+		DrawText(TextGet(cheat), 250 + Math.floor(i / 8) * 850, 147 + ((i % 8) * 100), "Black", "Gray");
 	}
 
 	// Draw the exit button
@@ -100,13 +100,12 @@ function CheatClick() {
 	if (MouseIn(1815, 75, 90, 90)) CheatExit();
 
 	// When the user activates an option
-	for (let C = 0; C < CheatList.length; C++)
-		if (MouseIn(150 + Math.floor(C / 8) * 850, 115 + ((C % 8) * 100), 64, 64)) {
-			var CheatName = CheatList[C];
-			if (CheatActivated.indexOf(CheatName) >= 0)
-				CheatActivated.splice(CheatActivated.indexOf(CheatName), 1);
+	for (const [i, cheat] of CheatList.entries())
+		if (MouseIn(150 + Math.floor(i / 8) * 850, 115 + ((i % 8) * 100), 64, 64)) {
+			if (CheatActivated.indexOf(cheat) >= 0)
+				CheatActivated.splice(CheatActivated.indexOf(cheat), 1);
 			else
-				CheatActivated.push(CheatName);
+				CheatActivated.push(cheat);
 			return;
 		}
 

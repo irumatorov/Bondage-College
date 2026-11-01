@@ -51,14 +51,14 @@ var MainHallRopeColor = "Default";
 function MainHallPlayerNeedsHelpAndHasNoOwnerOrLoverItem() {
 	var needsHelp = false;
 
-	for (let E = Player.Appearance.length - 1; E >= 0; E--) {
-		if (Player.Appearance[E].Asset.IsRestraint) {
+	for (const appearance of Player.Appearance) {
+		if (appearance.Asset.IsRestraint) {
 			needsHelp = true;
 			break;
 		}
 
-		for (let L = 0; L < MainHallStrongLocks.length; L++) {
-			if (((Player.Appearance[E].Property != null) && (Player.Appearance[E].Property.LockedBy == MainHallStrongLocks[L]))) {
+		for (const lock of MainHallStrongLocks) {
+			if (appearance.Property?.LockedBy == lock) {
 				needsHelp = true;
 				break;
 			}
@@ -536,12 +536,12 @@ function MainHallOpenChangelog() {
  */
 function MainHallMaidReleasePlayer() {
 	if (MainHallMaid.CanInteract()) {
-		for (let D = 0; D < MainHallMaid.Dialog.length; D++)
-			if ((MainHallMaid.Dialog[D].Stage == "0") && (MainHallMaid.Dialog[D].Option === null))
-				MainHallMaid.Dialog[D].Result = DialogFind(MainHallMaid, "AlreadyReleased");
+		for (const dialog of MainHallMaid.Dialog)
+			if (dialog.Stage == "0" && dialog.Option === null)
+				dialog.Result = DialogFind(MainHallMaid, "AlreadyReleased");
 		CharacterRelease(Player);
-		for (let L = 0; L < MainHallStrongLocks.length; L++)
-			CharacterReleaseFromLock(Player, MainHallStrongLocks[L]);
+		for (const lock of MainHallStrongLocks)
+			CharacterReleaseFromLock(Player, lock);
 		if (LogQuery("MaidsDisabled", "Maid"))
 			LogDelete("MaidsDisabled", "Maid");
 		MainHallMaid.Stage = "10";
@@ -554,9 +554,9 @@ function MainHallMaidReleasePlayer() {
  */
 function MainHallMaidAngry() {
 	if ((ReputationGet("Dominant") < 30) && !DialogIsHeadMaid()) {
-		for (let D = 0; D < MainHallMaid.Dialog.length; D++)
-			if ((MainHallMaid.Dialog[D].Stage == "PlayerGagged") && (MainHallMaid.Dialog[D].Option === null))
-				MainHallMaid.Dialog[D].Result = DialogFind(MainHallMaid, "LearnedLesson");
+		for (const dialog of MainHallMaid.Dialog)
+			if (dialog.Stage == "PlayerGagged" && dialog.Option === null)
+				dialog.Result = DialogFind(MainHallMaid, "LearnedLesson");
 		ReputationProgress("Dominant", 1);
 		InventoryWearRandom(Player, "ItemMouth");
 		if (Player.CanInteract()) {
@@ -767,10 +767,10 @@ function MainHallMaidShamePlayer() {
  * @returns {void} - Nothing
  */
 function MainHallMaidChangeCollarPlayer() {
-	for (let A = 0; A < Player.Appearance.length; A++)
-		if (Player.Appearance[A].Asset.Name == "SlaveCollar") {
-			Player.Appearance[A].Property = CommonCloneDeep(InventoryItemNeckSlaveCollarTypes[0].Property);
-			Player.Appearance[A].Color = [...Player.Appearance[A].Asset.DefaultColor];
+	for (const appearance of Player.Appearance)
+		if (appearance.Asset.Name == "SlaveCollar") {
+			appearance.Property = CommonCloneDeep(InventoryItemNeckSlaveCollarTypes[0].Property);
+			appearance.Color = [...appearance.Asset.DefaultColor];
 		}
 	MainHallMaidPunishmentPlayer();
 }

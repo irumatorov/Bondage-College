@@ -87,8 +87,8 @@ function ReputationLoad(NewRep) {
 	if (NewRep != null) {
 
 		// Add each reputation entry one by one
-		for (let R = 0; R < NewRep.length; R++)
-			ReputationChange(NewRep[R].Type, NewRep[R].Value, false);
+		for (const rep of NewRep)
+			ReputationChange(rep.Type, rep.Value, false);
 
 	}
 

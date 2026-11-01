@@ -52,8 +52,8 @@ function InventoryItemNeckFuturisticCollarDrawHook(data, originalFunction) {
 		var FuturisticCollarItems = InventoryItemNeckFuturisticCollarGetItems(C);
 		var FuturisticCollarItemsUnlockable = InventoryItemNeckFuturisticCollarGetItems(C, true);
 		var lockedItems = 0;
-		for (let I = 0; I < FuturisticCollarItems.length; I++) {
-			if (InventoryGetLock(FuturisticCollarItems[I])) {
+		for (const futuItem of FuturisticCollarItems) {
+			if (InventoryGetLock(futuItem)) {
 				lockedItems += 1;
 			}
 		}
@@ -151,8 +151,8 @@ function InventoryItemNeckFuturisticCollarClickHook(data, originalFunction) {
 		var FuturisticCollarItems = InventoryItemNeckFuturisticCollarGetItems(C);
 		var FuturisticCollarItemsUnlockable = InventoryItemNeckFuturisticCollarGetItems(C, true);
 		var lockedItems = 0;
-		for (let I = 0; I < FuturisticCollarItems.length; I++) {
-			if (InventoryGetLock(FuturisticCollarItems[I])) {
+		for (const futuItem of FuturisticCollarItems) {
+			if (InventoryGetLock(futuItem)) {
 				lockedItems += 1;
 			}
 		}
