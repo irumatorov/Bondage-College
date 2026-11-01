@@ -144,8 +144,7 @@ function InformationSheetLoadCharacter(C) {
 }
 
 /**
- * Icon buttons for the screen menu. The column runs downward from the exit button.
- * Profile and owner notes share one row, with notes to the left.
+ * Generate menu buttons for the given character.
  * @param {Character} C
  * @returns {HTMLElement[]}
  */
@@ -184,21 +183,24 @@ function InformationSheetMenuButtons(C) {
 		);
 	}
 
-	const showNotes = C.HasOwnerNotes() || C.IsFullyOwnedByPlayer();
 	buttons.push(
 		InformationSheetMenuButton(
 			InformationSheetIDs.profile,
 			() => OnlineProfileStart("description"),
 			"Icons/Introduction.png",
 			TextGet("MenuProfile"),
-		),
-		...(showNotes ? [InformationSheetMenuButton(
-			InformationSheetIDs.ownersNotes,
-			() => OnlineProfileStart("ownersNotes"),
-			"Icons/Management.png",
-			TextGet("MenuOwnersNotes"),
-		)] : []),
+		)
 	);
+	if (C.HasOwnerNotes() || C.IsFullyOwnedByPlayer()) {
+		buttons.push(
+			InformationSheetMenuButton(
+				InformationSheetIDs.ownersNotes,
+				() => OnlineProfileStart("ownersNotes"),
+				"Icons/Management.png",
+				TextGet("MenuOwnersNotes")
+			)
+		);
+	}
 
 	return buttons;
 }
@@ -223,8 +225,7 @@ function InformationSheetMenuButton(id, onClick, image, tooltip, classList) {
 }
 
 /**
- * Portrait on the left. Identity and skills stack on one side, with reputation beside the skills.
- * Owner and significant others stay on the right.
+ * Generate DOM elements for the screen's contents.
  * @param {Character} C
  * @returns {HTMLDivElement}
  */
@@ -269,6 +270,7 @@ function InformationSheetContent(C) {
 }
 
 /**
+ * Returns the screen layout to use for the given character.
  * @param {Character} C
  * @returns {"player" | "online" | "npc" | "basic"}
  */
@@ -750,8 +752,7 @@ function InformationSheetSkill(C, type) {
 }
 
 /**
- * One pip per level. Levels already reached are full, and the current level is filled by its progress.
- * A ratio below 1 hatches the difference between the skill in use and the skill earned.
+ * Generates the skill progress bar widget.
  * @param {number} level
  * @param {number} progress
  * @param {number} ratio
