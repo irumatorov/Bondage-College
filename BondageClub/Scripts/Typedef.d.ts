@@ -5543,6 +5543,25 @@ interface ChatRoomMapObject extends ChatRoomMapPhysicalElement {
 	OnClick?: (x: number, y: number) => void;
 	/** Whether admins can make the object a tether point, where leashes can be tied */
 	CanBeTetherPoint?: boolean;
+	/** Items can't be placed on top of the object, as it's flat or on a wall: they lie on the floor */
+	CannotPlaceItems?: boolean;
+}
+
+/** A room item, with the asset it stands for if this client has it */
+interface ChatRoomMapRoomItemEntry {
+	tile: number;
+	group: string;
+	name: string;
+	rotation: number;
+	size: number;
+	asset: Asset | null;
+}
+
+/** The room's items as last checked, with the {@link ServerChatRoomMapData.Items} they were checked from */
+interface ChatRoomMapViewRoomItems {
+	raw: unknown;
+	takeable?: ChatRoomMapRoomItemTakeable;
+	entries: ChatRoomMapRoomItemEntry[];
 }
 
 /** {@link MapDoodadIsEffect}  */

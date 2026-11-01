@@ -180,6 +180,18 @@ EditorButtonTextEditRange,Edit Range
 EditorButtonTextZoomIn,Zoom In
 EditorButtonTextZoomOut,Zoom Out
 EditorButtonTextToggleFog,Toggle Fog
+RoomItemTitle,Room items
+RoomItemPlace,Place held item here
+RoomItemUseObject,Use
+RoomItemRotation,Turn
+RoomItemSize,Size
+RoomItemSwap,Swap order
+RoomItemTake,Take
+RoomItemRemove,Remove
+RoomItemTakeableLabel,Who can take one
+RoomItemTakeableNo,Nobody
+RoomItemTakeableOnePerPlayer,One per player
+RoomItemTakeableUnlimited,"Anyone, any number"
 
 EditorButtonTextEditTiles,Tiles
 EditorButtonTextEditObjects,Objects

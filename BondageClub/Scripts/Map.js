@@ -779,6 +779,23 @@ var MapManager = (function () {
 	const CURRENT_EFFECTS_CODEC_VERSION = 0;
 
 	/**
+	 * Gets the room's items from an exported map string's legacy part, checked like the ones the server sends
+	 * @param {string} s
+	 * @returns {ChatRoomMapItems | undefined}
+	 */
+	function DecodeExportedMapItems(s) {
+		const versionTagIdx = s.indexOf(MAP_EXPORT_VERSION_TAG);
+		const legacyPart = versionTagIdx < 0 ? s : s.slice(0, versionTagIdx);
+		try {
+			/** @type {unknown} */
+			const data = JSON.parse(LZString.decompressFromBase64(legacyPart) ?? "null");
+			return CommonIsObject(data) ? ChatRoomMapViewValidateRoomItems(/** @type {{ Items?: unknown }} */ (data).Items) : undefined;
+		} catch {
+			return undefined;
+		}
+	}
+
+	/**
 	 * Decodes the string that was generated with the `/mapcopy` command.
 	 * Should support every map that was generated on any prior version.
 	 * @param {string} s
@@ -1992,6 +2009,12 @@ var MapManager = (function () {
 			this.markDirtyEffects();
 			this.markDirtyObjectConfigs();
 
+			const items = DecodeExportedMapItems(mapString);
+			if (items) {
+				ChatRoomData.MapData.Items = ChatRoomMapViewEncodeRoomItems(items);
+			} else {
+				delete ChatRoomData.MapData.Items;
+			}
 			this.updateGlobalMapData();
 
 			return true;
