@@ -29,8 +29,6 @@ var ChatRoomMapViewMaxEditRange = 5;
  */
 var ChatRoomMapViewEditBackup = [];
 /** @type {null | number} */
-var ChatRoomMapViewUpdateRoomNext = null;
-/** @type {null | number} */
 var ChatRoomMapViewUpdatePlayerNext = null;
 /** @type {null | number} */
 var ChatRoomMapViewUpdateLastMapDataNext = null;
@@ -1790,20 +1788,19 @@ function ChatRoomMapViewUpdatePlayerFlag(UpdateTimeOffset = 0) {
  *
  * @returns {void} - Nothing
  */
-function ChatRoomMapViewScheduleMapUpdate() {
-	if (ChatRoomMapViewUpdateRoomNext == null) ChatRoomMapViewUpdateRoomNext = CommonTime() + 5000;
-}
+var ChatRoomMapViewScheduleMapUpdate = CommonDebounce(5_000, () => {
+	if (!ChatRoomData) return;
+	if (!ChatRoomPlayerIsAdmin()) return;
+	ServerSend("ChatRoomAdmin", { MemberNumber: Player.ID, Room: ChatRoomGetSettings(ChatRoomData), Action: "Update" });
+});
 
 /**
  * Updates the room data if needed
+ * @deprecated Use {@link ChatRoomMapViewScheduleMapUpdate}
  * @returns {void} - Nothing
  */
 function ChatRoomMapViewUpdateRoomSync() {
-	if (!ChatRoomData) return;
-	if ((ChatRoomMapViewUpdateRoomNext == null) || (ChatRoomMapViewUpdateRoomNext > CommonTime())) return;
-	if (!ChatRoomPlayerIsAdmin()) return;
-	ChatRoomMapViewUpdateRoomNext = null;
-	ServerSend("ChatRoomAdmin", { MemberNumber: Player.ID, Room: ChatRoomGetSettings(ChatRoomData), Action: "Update" });
+
 }
 
 /**
