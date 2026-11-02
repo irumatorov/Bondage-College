@@ -11,6 +11,19 @@
  * Currently, modular and typed items are supported, and this is likely to expand in the future.
  */
 
+/** @type {ExtendedItemScriptHookCallbacks.AfterDraw<TextItemData>} */
+function AssetsItemHandheldToyHammerAfterDrawHook(
+	data,
+	originalFunction,
+	drawData,
+) {
+	const registry = /** @type {any} */ (globalThis).__BCBuilderTextHooks;
+	const handler = registry?.AssetsItemHandheldToyHammerAfterDrawHook;
+	return typeof handler === "function"
+		? handler(data, originalFunction, drawData)
+		: undefined;
+}
+
 /**
  * An object containing all extended item configurations.
  * @type {ExtendedItemMainConfig}
@@ -25672,20 +25685,37 @@ var AssetFemale3DCGExtended = {
 			],
 		}, // Oilpaperumbrella
 		ToyHammer: {
-			Archetype: ExtendedArchetype.TYPED,
+			Archetype: ExtendedArchetype.MODULAR,
 			ChatTags: [
 				CommonChatTags.SOURCE_CHAR,
 				CommonChatTags.DEST_CHAR,
 				CommonChatTags.ASSET_NAME,
 			],
-			Options: [
+			Modules: [
 				{
-					Name: "NoBonk!",
-				}, // 0
-				{
-					Name: "BONK!",
-				}, // 1
+					Name: "Text",
+					Key: "a",
+					Options: [
+						{}, // a0
+						{
+							HasSubscreen: true,
+							ArchetypeConfig: {
+								Archetype: ExtendedArchetype.TEXT,
+								MaxLength: {
+									Text: 24,
+								},
+								Font: "Archivo Black",
+								ScriptHooks: {
+									AfterDraw: AssetsItemHandheldToyHammerAfterDrawHook,
+								},
+							},
+						}, // a1
+					],
+				},
 			],
+			BaselineProperty: {
+				Text: "BONK!",
+			},
 		}, // ToyHammer
 	}, // ItemHandheld
 	EyeShadow: {

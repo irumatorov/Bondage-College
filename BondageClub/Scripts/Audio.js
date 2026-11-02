@@ -225,6 +225,13 @@ var AudioActions = [
 	},
 	{
 		IsAction: (data) => [
+			"ItemHandheldToyHammerSeta0",
+			"ItemHandheldToyHammerSeta1"
+		].some(A => data.Content.includes(A)),
+		GetSoundEffect: () => "SqueakyToy",
+	},
+	{
+		IsAction: (data) => [
 			"FuturisticTrainingBeltSetStateLowPriorityTeaseLow",
 			"FuturisticTrainingBeltSetStateLowPriorityLowLow"
 		].some(A => data.Content.includes(A)),
