@@ -92,6 +92,11 @@ var LoginFrameCount = 0;
 var LoginFrameTotalTime = 0;*/
 
 const LoginIDs = Object.freeze({
+	container: "login-container",
+	serverButton: "login-server-button",
+	serverDialog: "login-server-dialog",
+	serverList: "login-server-list",
+	form: "Login",
 	name: "InputName",
 	password: "InputPassword",
 	language: "LanguageDropdown",
@@ -107,6 +112,17 @@ const LoginIDs = Object.freeze({
 	cheats: "login-cheats-button",
 	footer: "login-footer"
 });
+
+/**
+ * The list of available servers for the server selector.
+ * @type {{ name: string, url: string }[]}
+ */
+const LoginServers = [
+	{ name: "America", url: `https://www.bondageprojects.elementfx.com/${GameVersion}/BondageClub/` },
+	{ name: "Europe A", url: `https://www.bondageeurope.com/${GameVersion}/BondageClub/` },
+	{ name: "Europe B", url: `https://www.bondage-europe.com/${GameVersion}/BondageClub/` },
+	{ name: "Asia", url: `https://www.bondage-asia.com/club/${GameVersion}/` }
+];
 
 /**
  * Loads the next thank you bubble
@@ -218,31 +234,6 @@ async function LoginLoad() {
 	}
 	ActivityDictionaryLoad();
 	OnlneGameDictionaryLoad();
-	const form = ElementCreateForm("Login");
-
-	ElementCreate({
-		tag: "span",
-		classList: ["login-text", "NoSelect"],
-		attributes: {
-			id: LoginIDs.welcome
-		},
-		children: [
-			TextGet("Welcome"),
-		],
-		parent: form
-	});
-
-	ElementCreate({
-		tag: "span",
-		classList: ["login-text", "NoSelect"],
-		attributes: {
-			id: LoginIDs.status
-		},
-		children: [
-			LoginGetStatus() ?? TextGet("EnterNamePassword"),
-		],
-		parent: form
-	});
 
 	const username = ElementCreateInput(LoginIDs.name, "text", "", "20");
 	username.setAttribute("autocomplete", "username");
@@ -254,106 +245,6 @@ async function LoginLoad() {
 	pass.setAttribute("enterkeyhint", "go");
 	pass.addEventListener("keydown", LoginEventListeners._KeyDownInputPassword);
 
-	ElementCreate({
-		tag: "label",
-		classList: ["vertical"],
-		children: [
-			{
-				tag: "span",
-				classList: ["login-text", "NoSelect"],
-				attributes: {
-					id: LoginIDs.nameLabel
-				},
-				children: [
-					TextGet("AccountName"),
-				],
-			},
-			username
-		],
-		parent: form
-	});
-
-	ElementCreate({
-		tag: "label",
-		classList: ["vertical"],
-		children: [
-			{
-				tag: "span",
-				classList: ["login-text", "NoSelect"],
-				attributes: {
-					id: LoginIDs.passwordLabel
-				},
-				children: [
-					TextGet("Password"),
-				],
-			},
-			pass
-		],
-		parent: form
-	});
-
-	const loginButton = ElementButton.Create(LoginIDs.login, () => {
-		const Name = ElementValue(LoginIDs.name);
-		const Password = ElementValue(LoginIDs.password);
-		LoginDoLogin(Name, Password);
-	},
-	{
-		label: TextGet("Login"),
-	});
-	document.body.appendChild(loginButton);
-
-	const newCharacter = ElementCreate({
-		tag: "span",
-		classList: ["login-text", "NoSelect"],
-		attributes: {
-			id: LoginIDs.newCharacter
-		},
-		children: [
-			TextGet("CreateNewCharacter"),
-		],
-		parent: document.body
-	});
-
-	const register = ElementButton.Create(LoginIDs.register, () => {
-		DisclaimerOpen((isAccepted) => {
-			if (isAccepted) {
-				CharacterCreatePlayer();
-				InventoryRemove(Player, "ItemFeet");
-				InventoryRemove(Player, "ItemLegs");
-				InventoryRemove(Player, "ItemArms");
-				CharacterAppearanceSetDefault(Player);
-
-				// Redirect the player to the login screen after they have their character created
-				CharacterAppearanceLoadCharacter(Player, (result) => {
-					if (result)
-						CommonSetScreen("Character", "Creation");
-					else
-						CommonSetScreen("Character", "Login");
-				});
-			} else {
-				window.location.reload();
-			}
-		});
-	},
-	{
-		label: TextGet("NewCharacter"),
-		name: "register",
-	});
-
-	const resetPassword = ElementButton.Create(LoginIDs.passwordReset, () => {
-		CommonSetScreen("Character", "PasswordReset");
-	},
-	{
-		label: TextGet("PasswordReset"),
-	});
-
-	const cheats = ElementButton.Create(LoginIDs.cheats, () => {
-		CommonSetScreen("Character", "Cheat");
-	},
-	{
-		label: TextGet("Cheats"),
-	});
-
 	const languages = TranslationDictionary.map(l => {
 		return {
 			children: [l.Icon, " ", l.LanguageName],
@@ -364,34 +255,306 @@ async function LoginLoad() {
 			},
 		};
 	});
-	const languageDropdown = ElementDropdown.Create(LoginIDs.language, languages, function(event) {
-		TranslationSwitchLanguage(/** @type {"" | "TW" | ServerChatRoomLanguage} */(this.value) || "EN");
-		TextLoad();
-		ActivityDictionaryLoad();
-		CommonPromiseCatch(
-			AssetLoadDescription("Female3DCG")
-				.then(() => TextScreenCache?.loadedPromise)
-				.then(() => {
-					LoginReloadLanguageText();
-				})
-		);
+
+	// Determine the current server index by matching the page origin against server URLs
+	const currentOrigin = location.origin + "/";
+	let currentHostname = location.hostname + (location.port != "" ? ":" + location.port : "");
+	for (let i = 0; i < LoginServers.length; i++) {
+		if (LoginServers[i].url.startsWith(currentOrigin)) {
+			currentHostname = LoginServers[i].name;
+			break;
+		}
+	}
+
+	const serverDialog = ElementCreate({
+		tag: "dialog",
+		attributes: {
+			id: LoginIDs.serverDialog,
+			name: LoginIDs.serverDialog,
+			closedby: "any"
+		},
+		children: [
+			{
+				tag: "div",
+				classList: ["login-server-container"],
+				children: [
+					{
+						tag: "header",
+						classList: ["login-server-dialog-header"],
+						children: [
+							{
+								tag: "div",
+								classList: ["login-server-dialog-title"],
+								children: [
+									TextGet("SelectServer"),
+								],
+							},
+							ElementButton.Create(
+								null, function() {
+									serverDialog.close();
+								}, null,
+								{
+									button: {
+										children: ["×"],
+										classList: ["login-server-dialog-close-button"],
+										attributes: { "aria-label": TextGet("Close") },
+									},
+								},
+							)
+						]
+					},
+					{
+						tag: "div",
+						classList: ["login-server-dialog-disclaimer"],
+						children: [
+							TextGet("SelectServerDisclaimer")
+						]
+					},
+					{
+						tag: "div",
+						attributes: {
+							id: LoginIDs.serverList
+						},
+						children: LoginServers.map(({name, url}, index) => {
+							const element = ElementCreate({
+								tag: "a",
+								attributes: {
+									href: url,
+									target: "_blank",
+									rel: "noopener noreferrer",
+									status: "unknown",
+								},
+								classList: ["login-server-entry"],
+								children: [
+									{
+										tag: "div",
+										classList: ["login-server-name"],
+										children: [
+											name
+										]
+									},
+									{
+										tag: "div",
+										classList: ["login-server-status"],
+										children: [
+											{
+												tag: "div",
+												classList: ["login-server-status-latency"],
+											},
+											{
+												tag: "div",
+												classList: ["login-server-status-icon"]
+											}
+										]
+									}
+								]});
+							return element;
+						})
+					}
+				]
+			},
+		],
+	});
+
+	const form = ElementCreate({
+		tag: "form",
+		attributes: {
+			id: LoginIDs.form,
+			name: LoginIDs.form,
+			method: "dialog",
+			["screen-generated"]: CurrentScreen,
+		},
+		children: [
+			{
+				tag: "div",
+				classList: ["login-fields"],
+				children: [
+					{
+						tag: "label",
+						classList: ["login-field"],
+						children: [
+							{
+								tag: "span",
+								classList: ["login-text", "NoSelect"],
+								attributes: {
+									id: LoginIDs.nameLabel
+								},
+								children: [
+									TextGet("AccountName"),
+								],
+							},
+							username
+						],
+					},
+					{
+						tag: "label",
+						classList: ["login-field"],
+						children: [
+							{
+								tag: "span",
+								classList: ["login-text", "NoSelect"],
+								attributes: {
+									id: LoginIDs.passwordLabel
+								},
+								children: [
+									TextGet("Password"),
+								],
+							},
+							pass
+						],
+					},
+				]
+			},
+			ElementButton.Create(LoginIDs.login, () => {
+				const Name = ElementValue(LoginIDs.name);
+				const Password = ElementValue(LoginIDs.password);
+				LoginDoLogin(Name, Password);
+			},
+			{
+				label: TextGet("Login"),
+			})
+		]
+	});
+
+	const footer = ElementCreate({
+		tag: "footer",
+		attributes: {
+			id: LoginIDs.footer
+		},
+		children: [
+			{
+				tag: "span",
+				classList: ["login-text", "NoSelect"],
+				attributes: {
+					id: LoginIDs.newCharacter
+				},
+				children: [
+					TextGet("CreateNewCharacter"),
+				],
+			},
+			ElementButton.Create(LoginIDs.register, () => {
+				DisclaimerOpen((isAccepted) => {
+					if (isAccepted) {
+						CharacterCreatePlayer();
+						InventoryRemove(Player, "ItemFeet");
+						InventoryRemove(Player, "ItemLegs");
+						InventoryRemove(Player, "ItemArms");
+						CharacterAppearanceSetDefault(Player);
+
+						// Redirect the player to the login screen after they have their character created
+						CharacterAppearanceLoadCharacter(Player, (result) => {
+							if (result)
+								CommonSetScreen("Character", "Creation");
+							else
+								CommonSetScreen("Character", "Login");
+						});
+					} else {
+						window.location.reload();
+					}
+				});
+			},
+			{
+				label: TextGet("NewCharacter"),
+				name: "register",
+			}),
+			ElementButton.Create(LoginIDs.passwordReset, () => {
+				CommonSetScreen("Character", "PasswordReset");
+			},
+			{
+				label: TextGet("PasswordReset"),
+			}),
+			ElementButton.Create(LoginIDs.cheats, () => {
+				CommonSetScreen("Character", "Cheat");
+			},
+			{
+				label: TextGet("Cheats"),
+			}),
+			ElementDropdown.Create(LoginIDs.language, languages, function(event) {
+				TranslationSwitchLanguage(/** @type {"" | "TW" | ServerChatRoomLanguage} */(this.value) || "EN");
+				TextLoad();
+				ActivityDictionaryLoad();
+				CommonPromiseCatch(
+					AssetLoadDescription("Female3DCG")
+						.then(() => TextScreenCache?.loadedPromise)
+						.then(() => {
+							LoginReloadLanguageText();
+						})
+				);
+			})
+		]
 	});
 
 	ElementCreate({
 		tag: "div",
 		attributes: {
-			id: LoginIDs.footer
+			id: LoginIDs.container
 		},
+		parent: document.body,
 		children: [
-			newCharacter,
-			register,
-			resetPassword,
-			cheats,
-			languageDropdown,
-		],
-		parent: document.body
-	});
+			serverDialog,
+			{
+				tag: "div",
+				classList: ["spacer"],
+				style: { "--gap": "1.3em" }
+			},
+			{
+				tag: "div",
+				classList: ["login-text", "NoSelect"],
+				attributes: {
+					id: LoginIDs.welcome
+				},
+				children: [
+					TextGet("Welcome"),
+				],
+			},
+			{
+				tag: "div",
+				classList: ["login-text", "NoSelect"],
+				attributes: {
+					id: LoginIDs.status
+				},
+				children: [
+					LoginGetStatus() ?? TextGet("EnterNamePassword"),
+				],
+			},
+			ElementButton.Create(LoginIDs.serverButton, () => {
+				const list = ElementWrap(LoginIDs.serverList);
+				if (!list) return;
+				const serverPingingController = new AbortController();
+				Array.from(list.children).forEach((child) => {
+					if (child instanceof HTMLAnchorElement)
+						void LoginUpdateServerEntry(child.href, serverPingingController.signal);
+				});
+				serverDialog.showModal();
+				serverDialog.focus();
 
+				serverDialog.addEventListener("close", () => {
+					serverPingingController.abort();
+				}, { once: true });
+			},
+			{
+				noStyling: true,
+			},
+			{
+				button: {
+					children: [LoginCreateServerEntry(currentOrigin, currentHostname, false)],
+				}
+			}
+			),
+			form,
+			{
+				tag: "div",
+				classList: ["flex"],
+			},
+			footer,
+			{
+				tag: "div",
+				classList: ["spacer"],
+				style: { "--gap": "0.3em" }
+			},
+		]
+	});
+	void LoginUpdateServerEntry(currentOrigin);
 	TextPrefetchFile(BackgroundsStringsPath);
 	TextPrefetchFile(AssetStringsPath);
 	TextPrefetch("Room", "MainHall");
@@ -456,22 +619,8 @@ function LoginKeyDown(ev) {
  * Unload function - called when the login page unloads
  */
 function LoginUnload() {
-	ElementRemove(LoginIDs.welcome);
-	ElementRemove(LoginIDs.status);
-
-	ElementRemove(LoginIDs.nameLabel);
-	ElementRemove(LoginIDs.name);
-	ElementRemove(LoginIDs.passwordLabel);
-	ElementRemove(LoginIDs.password);
-
-	ElementRemove(LoginIDs.login);
-
-	ElementRemove(LoginIDs.footer);
-	ElementRemove(LoginIDs.newCharacter);
-	ElementRemove(LoginIDs.register);
-	ElementRemove(LoginIDs.passwordReset);
-	ElementRemove(LoginIDs.cheats);
-	ElementRemove(LoginIDs.language);
+	ElementRemove(LoginIDs.container);
+	ElementRemove(LoginIDs.serverDialog);
 
 	CharacterDelete(/** @type {NPCCharacter} */ (LoginCharacter));
 	LoginCharacter = null;
@@ -479,22 +628,7 @@ function LoginUnload() {
 
 /** @type {ScreenResizeHandler} */
 function LoginResize(load) {
-	ElementPositionFixed(LoginIDs.welcome, 500, 50, 1000);
-	ElementPositionFixed(LoginIDs.status, 500, 100, 1000);
-
-	ElementPositionFixed(LoginIDs.nameLabel, 500, 200, 1000);
-	ElementPositionFixed(LoginIDs.name, 750, 260, 500);
-	ElementPositionFixed(LoginIDs.passwordLabel, 500, 330, 1000);
-	ElementPositionFixed(LoginIDs.password, 750, 390, 500);
-
-	ElementSetPosition(LoginIDs.login, 1000, 490);
-	ElementSetFontSize(LoginIDs.login, "auto");
-
-	ElementPositionFixed(LoginIDs.footer, 500, 670, 1000, 320);
-	ElementSetSize(LoginIDs.register, 400);
-	ElementSetSize(LoginIDs.passwordReset, 400);
-	ElementSetSize(LoginIDs.cheats, 400);
-	ElementSetSize(LoginIDs.language, 400);
+	ElementPositionFixed(LoginIDs.container, 500, 0, 1000, 1000);
 }
 
 function LoginReloadLanguageText() {
@@ -1375,4 +1509,88 @@ function LoginGetStatus() {
 	} else {
 		return null;
 	}
+}
+
+/**
+ * Updates a server entry
+ * @param {string} url - The url to the server
+ * @param {AbortSignal} [signal]
+ * @returns {Promise<void>} Nothing
+ */
+async function LoginUpdateServerEntry(url, signal) {
+	const elements = document.querySelectorAll(".login-server-entry[href='" + url + "']");
+	if (elements.length == 0 || signal?.aborted) return;
+
+	const separator = url.includes('?') ? '&' : '?';
+	const cacheBustedUrl = `${url}${separator}_t=${Date.now()}`;
+
+	const startTime = performance.now();
+	let latency = null;
+
+	try {
+		await fetch(cacheBustedUrl, {
+			method: "HEAD",
+			mode: "no-cors",
+			cache: "no-store",
+			signal
+		});
+		latency = Math.round(performance.now() - startTime);
+	} catch (error) {
+		if (error instanceof DOMException && error.name == "AbortError") return;
+	}
+
+	if (signal?.aborted) return;
+	for (const element of elements) {
+		if (latency == null) element.removeAttribute("latency");
+		else element.setAttribute("latency", String(latency));
+		element.setAttribute("status", latency == null ? "unknown" : (latency < 100 ? "low" : latency < 200 ? "medium" : "high"));
+
+		const latencyElement = element.querySelector(".login-server-status-latency");
+		if (latencyElement != null) {
+			latencyElement.textContent = latency == null ? "" : `${Math.round(latency / 10) * 10}ms`;
+		}
+	}
+}
+
+/**
+ * Creates a server entry
+ * @param {string} url - The url to the server
+ * @param {string} name - The name of the server
+ * @param {boolean} [redirect]
+ * @returns {HTMLElement} The server entry
+ */
+function LoginCreateServerEntry(url, name, redirect) {
+	return ElementCreate({
+		tag: redirect ? "a" : "button",
+		attributes: {
+			href: url,
+			target: "_blank",
+			rel: "noopener noreferrer",
+			status: "unknown",
+			current: url.startsWith(location.origin) ? "true" : "false"
+		},
+		classList: ["login-server-entry"],
+		children: [
+			{
+				tag: "div",
+				classList: ["login-server-name"],
+				children: [
+					name
+				]
+			},
+			{
+				tag: "div",
+				classList: ["login-server-status"],
+				children: [
+					{
+						tag: "div",
+						classList: ["login-server-status-latency"],
+					},
+					{
+						tag: "div",
+						classList: ["login-server-status-icon"]
+					}
+				]
+			}
+		]});
 }

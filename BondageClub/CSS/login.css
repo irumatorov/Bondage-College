@@ -1,5 +1,4 @@
 #login-register-button span,
-#login-login-button span,
 #login-password-reset-button span,
 #login-cheats-button span,
 #login-new-character-label span {
@@ -23,12 +22,6 @@
 	justify-content: end;
 }
 
-#login-login-button {
-	transform: translateX(-50%);
-	padding-inline: 0.5em;
-	min-width: min(20vh, 10vw);
-}
-
 #login-password-reset-button {
 	min-width: max-content;
 	padding-inline: 0.5em;
@@ -43,4 +36,133 @@
 #LanguageDropdown {
 	font-family: "Twemoji Country Flags", "Arial", sans-serif;
 	border: var(--border-width) solid black;
+}
+#login-container,
+#Login {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+#login-container .spacer {
+	height: var(--gap);
+}
+#login-container .flex {
+	flex: 1;
+}
+.login-fields {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6em;
+	margin-bottom: 1.4em;
+}
+.login-field {
+	display: flex;
+	flex-direction: column;
+	width: 12.5em;
+	gap: 0.2em;
+}
+
+#login-login-button {
+	padding-inline: 0.5em;
+	width: 5em;
+}
+
+#login-server-dialog {
+	width: 12em;
+	border: var(--border-width) solid black;
+	background: white;
+	padding: 0.5em;
+	gap: 0.2em;
+}
+
+.login-server-container {
+	display: flex;
+	flex-direction: column;
+}
+#login-server-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3em;
+}
+.login-server-entry {
+	background: white;
+	border: 1px solid black;
+	padding: 0.5em;
+	text-decoration: none;
+	color: black;
+	font-family: sans;
+	display: flex;
+	flex-direction: row;
+	gap: 0.2em;
+	justify-content: space-between;
+	user-select: none;
+}
+
+.login-server-status {
+	display: flex;
+	flex-direction: row;
+	gap: 0.2em;
+}
+.login-server-status-latency {
+	white-space: nowrap;
+	font-size: 0.7em;
+	align-self: center;
+}
+.login-server-status-icon {
+	width: 1.1em;
+	aspect-ratio: 1;
+	align-self: center;
+}
+.login-server-entry[status="low"] .login-server-status-icon {
+	background-color: green;
+}
+.login-server-entry[status="medium"] .login-server-status-icon {
+	background-color: orange;
+}
+.login-server-entry[status="high"] .login-server-status-icon {
+	background-color: red;
+}
+.login-server-entry[status="unknown"] .login-server-status-icon {
+	background-color: rgb(225, 225, 225);
+}
+#login-server-list .login-server-entry[current] {
+	border-bottom: 0.2em solid black;
+	cursor: unset;
+	pointer-events: none;
+}
+.login-server-entry:not(#login-server-list [current]):hover {
+	background-color: #f5f5f5;
+}
+
+#login-server-button {
+	margin: 0.5em 0;
+}
+#login-server-button .login-server-entry {
+	cursor: pointer;
+}
+
+.login-server-dialog-header {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	gap: 0.2em;
+	align-items: center;
+	margin-bottom: 0.5em;
+}
+
+.login-server-dialog-close-button {
+	aspect-ratio: 1;
+	width: 1.2em;
+	border: none;
+	background: none;
+}
+
+.login-server-dialog-disclaimer {
+	font-size: 0.7em;
+	margin-bottom: 0.5em;
+}
+
+#login-footer button,
+#login-footer select {
+	width: 10em;
 }
