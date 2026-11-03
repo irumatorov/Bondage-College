@@ -308,7 +308,7 @@ function GameLARPClickProcess() {
 		var X = 15;
 		var Y = 110;
 		for (let A = GameLARPInventoryOffset; (A < GameLARPInventory.length) && (A < GameLARPInventoryOffset + 12); A++) {
-			if ((MouseX >= X) && (MouseX <= X + 225) && (MouseY >= Y) && (MouseY <= Y + 275))
+			if (MouseIn(X, Y, 225, 275))
 				ServerSend("ChatRoomGame", { GameProgress: "Action", Action: GameLARPAction ?? undefined, Item: GameLARPInventory[A].Name, Target: GameLARPTurnFocusCharacter.MemberNumber });
 			X = X + 250;
 			if (X > 800) {
@@ -321,7 +321,7 @@ function GameLARPClickProcess() {
 
 		// If we must catch the click on one of the buttons
 		for (let O = 0; O < GameLARPOption.length; O++)
-			if ((MouseX >= 50) && (MouseX < 450) && (MouseY >= 35 + (O * 100)) && (MouseY <= 100 + (O * 100)))
+			if (MouseIn(50, 35 + (O * 100), 400, 65))
 				GameLARPClickOption(GameLARPOption[O].Name);
 
 		// If we must exit from the currently focused character

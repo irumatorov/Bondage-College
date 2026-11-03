@@ -1219,7 +1219,7 @@ function DrawBackNextButton(Left, Top, Width, Height, Label, Color, Image=null, 
 	if (CommonIsMobile) return;
 	if (BackText == null) BackText = () => "MISSING VALUE FOR: BACK TEXT";
 	if (NextText == null) NextText = () => "MISSING VALUE FOR: NEXT TEXT";
-	if ((MouseX >= Left) && (MouseX <= Left + Width) && (MouseY >= Top) && (MouseY <= Top + Height) && !Disabled) {
+	if (MouseIn(Left, Top, Width, Height) && !Disabled) {
 		DrawHoverElements.push(() => {
 			const tooltip = MouseX < LeftSplit ? BackText() : MouseX >= RightSplit ? NextText() : "";
 			const rect = tooltipPosition ?? RectMakeRect(Left, Top, Width, Height);

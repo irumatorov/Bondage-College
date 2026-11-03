@@ -132,11 +132,11 @@ function MagicRun() {
  * @returns {void} - Nothing
  */
 function MagicClick() {
-	if ((MouseX >= 250) && (MouseX < 750) && (MouseY >= 0) && (MouseY < 1000)) CharacterSetCurrent(Player);
-	if ((MouseX >= 750) && (MouseX < 1250) && (MouseY >= 0) && (MouseY < 1000)) CharacterSetCurrent(MagicPerformer);
-	if ((MouseX >= 1250) && (MouseX < 1750) && (MouseY >= 0) && (MouseY < 1000)) CharacterSetCurrent(MagicAssistant);
-	if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 25) && (MouseY < 115) && Player.CanWalk()) CommonSetScreen("Room", "MainHall");
-	if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 145) && (MouseY < 235)) InformationSheetLoadCharacter(Player);
+	if (MouseIn(250, 0, 500, 1000)) CharacterSetCurrent(Player);
+	if (MouseIn(750, 0, 500, 1000)) CharacterSetCurrent(MagicPerformer);
+	if (MouseIn(1250, 0, 500, 1000)) CharacterSetCurrent(MagicAssistant);
+	if (MouseIn(1885, 25, 90, 90) && Player.CanWalk()) CommonSetScreen("Room", "MainHall");
+	if (MouseIn(1885, 145, 90, 90)) InformationSheetLoadCharacter(Player);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////

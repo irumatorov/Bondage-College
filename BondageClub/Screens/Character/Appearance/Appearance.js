@@ -1407,7 +1407,7 @@ function AppearanceClick() {
 		var X = 1250;
 		var Y = 125;
 		for (let I = DialogInventoryOffset; (I < DialogInventory.length) && (I < DialogInventoryOffset + CharacterAppearanceNumClothPerPage); I++) {
-			if ((MouseX >= X) && (MouseX < X + 225) && (MouseY >= Y) && (MouseY < Y + 275)) {
+			if (MouseIn(X, Y, 225, 275)) {
 				const Item = DialogInventory[I];
 				const CurrentItem = InventoryGet(C, CharacterAppearanceSelectedGroup.Name);
 				const worn = (!!CurrentItem && (CurrentItem.Asset.Name == Item.Asset.Name));

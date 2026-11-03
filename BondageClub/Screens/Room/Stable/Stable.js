@@ -136,18 +136,18 @@ function StableRun() {
 // When the user clicks in the stable
 function StableClick() {
 	if (StablePlayerInIsolation == true) {
-		if ((MouseX >= 750) && (MouseX < 1250) && (MouseY >= 0) && (MouseY < 1000)) CharacterSetCurrent(Player);
+		if (MouseIn(750, 0, 500, 1000)) CharacterSetCurrent(Player);
 	} else if (StableProgress >= 0) {
 		// If the user wants to speed up the add / swap / remove progress
-		if ((MouseX >= 0) && (MouseX < 2000) && (MouseY >= 200) && (MouseY < 1000) && (StableProgress >= 0) && CommonIsMobile) StableGenericRun(false);
-		if ((MouseX >= 1750) && (MouseX <= 1975) && (MouseY >= 25) && (MouseY <= 100)) StableGenericCancel();
+		if (MouseIn(0, 200, 2000, 800) && (StableProgress >= 0) && CommonIsMobile) StableGenericRun(false);
+		if (MouseIn(1750, 25, 225, 75)) StableGenericCancel();
 	} else {
-		if ((MouseX >= 250) && (MouseX < 750) && (MouseY >= 0) && (MouseY < 1000)) CharacterSetCurrent(Player);
-		if ((MouseX >= 750) && (MouseX < 1250) && (MouseY >= 0) && (MouseY < 1000)) CharacterSetCurrent(StableTrainer);
-		if ((MouseX >= 1250) && (MouseX < 1750) && (MouseY >= 0) && (MouseY < 1000)) CharacterSetCurrent(StablePony);
-		if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 25) && (MouseY < 115) && Player.CanWalk() && (!StablePlayerTrainingActiv || StablePlayerIsExamPony())) CommonSetScreen("Room", "MainHall");
-		if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 145) && (MouseY < 235)) InformationSheetLoadCharacter(Player);
-		if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 265) && (MouseY < 355) && StableCanHideDice()) StableHideDice();
+		if (MouseIn(250, 0, 500, 1000)) CharacterSetCurrent(Player);
+		if (MouseIn(750, 0, 500, 1000)) CharacterSetCurrent(StableTrainer);
+		if (MouseIn(1250, 0, 500, 1000)) CharacterSetCurrent(StablePony);
+		if (MouseIn(1885, 25, 90, 90) && Player.CanWalk() && (!StablePlayerTrainingActiv || StablePlayerIsExamPony())) CommonSetScreen("Room", "MainHall");
+		if (MouseIn(1885, 145, 90, 90)) InformationSheetLoadCharacter(Player);
+		if (MouseIn(1885, 265, 90, 90) && StableCanHideDice()) StableHideDice();
 	}
 }
 

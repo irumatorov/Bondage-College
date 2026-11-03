@@ -1575,7 +1575,7 @@ function ChatRoomMapViewDrawGrid(Left, Top, Width, Height) {
 				DrawStatus(C, Left + ScreenX + (TileWidth * 0.05), Top + ScreenY - (TileHeight * 0.85), TileHeight * 1.8 / 1000);
 
 				// Keeps the character under the cursor
-				if ((MouseX >= Left + ScreenX + (TileWidth * 0.05)) && (MouseX <= Left + ScreenX + (TileWidth * 0.95)) && (MouseY >= Top + ScreenY - (TileHeight * 0.85)) && (MouseY <= Top + ScreenY + (TileHeight * 0.95))) {
+				if (MouseIn(Left + ScreenX + (TileWidth * 0.05), Top + ScreenY - (TileHeight * 0.85), TileWidth * 0.9, TileHeight * 1.8)) {
 					ChatRoomMapViewFocusedCharacter = C;
 					ChatRoomMapViewFocusedCharacterX = Left + ScreenX + (TileWidth * 0.05);
 					ChatRoomMapViewFocusedCharacterY = Top + ScreenY - (TileHeight * 0.85);

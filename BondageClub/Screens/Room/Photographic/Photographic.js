@@ -67,16 +67,16 @@ function PhotographicRun() {
 }
 
 function PhotographicClick() {
-	if ((MouseX >= 250) && (MouseX < 750) && (MouseY >= 0) && (MouseY < 1000)) CharacterSetCurrent(Player);
-	if ((MouseX >= 750) && (MouseX < 1250) && (MouseY >= 0) && (MouseY < 1000)) CharacterSetCurrent(PhotographicSub);
-	if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 25) && (MouseY < 115) && Player.CanWalk()) {
+	if (MouseIn(250, 0, 500, 1000)) CharacterSetCurrent(Player);
+	if (MouseIn(750, 0, 500, 1000)) CharacterSetCurrent(PhotographicSub);
+	if (MouseIn(1885, 25, 90, 90) && Player.CanWalk()) {
 		CharacterRefresh(Player);
 		CommonSetScreen("Room", "MainHall");
 	}
-	if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 145) && (MouseY < 235)) InformationSheetLoadCharacter(Player);
-	if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 265) && (MouseY < 355) && Player.CanInteract()) CommonTakePhoto(750, 0, 500, 1000);
-	if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 385) && (MouseY < 475)  && Player.CanKneel()) PoseSetActive(Player, Player.ActivePoseMapping.BodyLower !== "Kneel" ? "Kneel" : "BaseLower", true);
-	if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 505) && (MouseY < 595) && Player.CanChangeOwnClothes()) CharacterAppearanceLoadCharacter(Player);
+	if (MouseIn(1885, 145, 90, 90)) InformationSheetLoadCharacter(Player);
+	if (MouseIn(1885, 265, 90, 90) && Player.CanInteract()) CommonTakePhoto(750, 0, 500, 1000);
+	if (MouseIn(1885, 385, 90, 90)  && Player.CanKneel()) PoseSetActive(Player, Player.ActivePoseMapping.BodyLower !== "Kneel" ? "Kneel" : "BaseLower", true);
+	if (MouseIn(1885, 505, 90, 90) && Player.CanChangeOwnClothes()) CharacterAppearanceLoadCharacter(Player);
 }
 
 function PhotographicShotThePlayerPhoto() {
