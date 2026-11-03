@@ -185,16 +185,16 @@ function PrisonRun() {
 /** @type {MouseEventListener} */
 function PrisonClick() {
 	if ((MaidQuartersCurrentRescue == "Prison") && !MaidQuartersCurrentRescueCompleted) {
-		if ((MouseX >= 1000) && (MouseX < 1500) && (MouseY >= 0) && (MouseY < 1000)) CharacterSetCurrent(Player);
-		if ((MouseX >= 500) && (MouseX < 1000) && (MouseY >= 0) && (MouseY < 1000) && PrisonSubIsPresent) CharacterSetCurrent(PrisonSub);
+		if (MouseIn(1000, 0, 500, 1000)) CharacterSetCurrent(Player);
+		if (MouseIn(500, 0, 500, 1000) && PrisonSubIsPresent) CharacterSetCurrent(PrisonSub);
 	} else if (PrisonPlayerCatchedBadGirl == true) {
-		if ((MouseX >= 500) && (MouseX < 1000) && (MouseY >= 0) && (MouseY < 1000)) CharacterSetCurrent(Player);
-		if ((MouseX >= 1000) && (MouseX < 1500) && (MouseY >= 0) && (MouseY < 1000) && PrisonPoliceIsPresent) CharacterSetCurrent(PrisonPolice);
+		if (MouseIn(500, 0, 500, 1000)) CharacterSetCurrent(Player);
+		if (MouseIn(1000, 0, 500, 1000) && PrisonPoliceIsPresent) CharacterSetCurrent(PrisonPolice);
 	} else {
-		if ((MouseX >= 500) && (MouseX < 1000) && (MouseY >= 0) && (MouseY < 1000)) CharacterSetCurrent(Player);
-		if ((MouseX >= 1000) && (MouseX < 1500) && (MouseY >= 0) && (MouseY < 1000) && PrisonMaidIsPresent) CharacterSetCurrent(PrisonMaid);
+		if (MouseIn(500, 0, 500, 1000)) CharacterSetCurrent(Player);
+		if (MouseIn(1000, 0, 500, 1000) && PrisonMaidIsPresent) CharacterSetCurrent(PrisonMaid);
 	}
-	if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 25) && (MouseY < 115)) {
+	if (MouseIn(1885, 25, 90, 90)) {
 		if (MaidQuartersCurrentRescue == "Prison" && !MaidQuartersCurrentRescueCompleted && PrisonSubIsPresent) {
 			CharacterSetCurrent(Player);
 			Player.CurrentDialog = TextGet("Watch");
@@ -205,7 +205,7 @@ function PrisonClick() {
 			Player.CurrentDialog = TextGet("LockKey");
 		}
 	}
-	if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 145) && (MouseY < 235)) InformationSheetLoadCharacter(Player);
+	if (MouseIn(1885, 145, 90, 90)) InformationSheetLoadCharacter(Player);
 }
 
 // #region Player

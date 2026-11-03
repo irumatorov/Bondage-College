@@ -133,7 +133,7 @@ function PuppyWalkerClick() {
 	}
 
 	// If the game is over, clicking on the image will end it
-	if (MiniGameEnded && (MouseX >= 800) && (MouseX <= 1200) && (MouseY >= 0) && (MouseY <= 999))
+	if (MiniGameEnded && MouseIn(800, 0, 400, 1000))
 		MiniGameEnd();
 
 }
@@ -145,11 +145,11 @@ function PuppyWalkerClick() {
 function PuppyWalkerMouseDown() {
 
 	// If the game has started, we check the click position and send it as a move
-	if (MiniGameStarted && (MouseY >= 350) && (MouseY <= 650) && !MiniGameEnded) {
-		if ((MouseX >= 50) && (MouseX <= 350)) PuppyWalkerDoMove(0);
-		if ((MouseX >= 450) && (MouseX <= 750)) PuppyWalkerDoMove(1);
-		if ((MouseX >= 1250) && (MouseX <= 1550)) PuppyWalkerDoMove(2);
-		if ((MouseX >= 1650) && (MouseX <= 1950)) PuppyWalkerDoMove(3);
+	if (MiniGameStarted && MouseYIn(350, 300) && !MiniGameEnded) {
+		if (MouseXIn(50, 300)) PuppyWalkerDoMove(0);
+		if (MouseXIn(450, 300)) PuppyWalkerDoMove(1);
+		if (MouseXIn(1250, 300)) PuppyWalkerDoMove(2);
+		if (MouseXIn(1650, 300)) PuppyWalkerDoMove(3);
 	}
 
 }

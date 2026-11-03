@@ -71,7 +71,7 @@ function PasswordResetResponse(msg) {
 function PasswordResetClick() {
 
 	// Push a recovery request to the server
-	if ((MouseX >= 800) && (MouseX <= 1200) && (MouseY >= 180) && (MouseY <= 240)) {
+	if (MouseIn(800, 180, 400, 60)) {
 		var Email = ElementValue("InputEmail");
 		if (CommonEmailIsValid(Email)) {
 			ServerSend("PasswordReset", Email);
@@ -80,7 +80,7 @@ function PasswordResetClick() {
 	}
 
 	// If we must send the reset number info to the server
-	if ((MouseX >= 675) && (MouseX <= 975) && (MouseY >= 890) && (MouseY <= 950)) {
+	if (MouseIn(675, 890, 300, 60)) {
 
 		// Make sure the passwords match
 		var AccountName = ElementValue("InputAccountName");
@@ -107,7 +107,7 @@ function PasswordResetClick() {
 	}
 
 	// Go back to the login screen
-	if ((MouseX >= 1025) && (MouseX <= 1325) && (MouseY >= 890) && (MouseY <= 950)) PasswordResetExit();
+	if (MouseIn(1025, 890, 300, 60)) PasswordResetExit();
 
 }
 

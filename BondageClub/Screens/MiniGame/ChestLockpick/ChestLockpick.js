@@ -90,7 +90,7 @@ function ChestLockpickMouseDown() {
 function ChestLockpickClick() {
 
 	// If the game is over, clicking on the bottom will end it
-	if (MiniGameEnded && (MouseX >= 0) && (MouseX <= 2000) && (MouseY >= 875) && (MouseY <= 999)) {
+	if (MiniGameEnded && MouseIn(0, 875, 2000, 125)) {
 		MiniGameEnd();
 	}
 

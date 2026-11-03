@@ -141,9 +141,7 @@ function InventoryItemNeckFuturisticCollarClickHook(data, originalFunction) {
 	 */
 	let CollarAction = 0;
 	const canUnlock = !InventoryItemHasEffect(item, "Lock", true) || DialogCanUnlock(C, item);
-	if ((MouseX >= 1885) && (MouseX <= 1975) && (MouseY >= 25) && (MouseY <= 110)) {
-		DialogLeaveFocusItem();
-	} else if (FuturisticCollarPage == 0) {
+	if (FuturisticCollarPage == 0) {
 		if (MouseIn(1125, 395, 64, 64) && canUnlock) InventoryItemNeckFuturisticCollarTogglePermission(C, item, "Collar");
 		else if (MouseIn(1125, 495, 64, 64) && canUnlock) InventoryItemNeckFuturisticCollarToggleRemotes(C, item);
 		else if (MouseIn(1125, 595, 64, 64) && canUnlock) InventoryItemNeckFuturisticCollarTogglePermission(C, item, "Chastity");

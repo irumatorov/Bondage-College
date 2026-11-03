@@ -47,7 +47,7 @@ function EmptyRun() {
  */
 function EmptyClick() {
 	for (let C = 0; C < EmptyCharacter.length; C++)
-		if ((MouseX >= 1000 - EmptyCharacter.length * 250 + C * 500 + EmptyCharacterOffset) && (MouseX < 1500 - EmptyCharacter.length * 250 + C * 500 + EmptyCharacterOffset) && (MouseY >= 0) && (MouseY < 1000))
+		if (MouseIn(1000 - EmptyCharacter.length * 250 + C * 500 + EmptyCharacterOffset, 0, 500, 1000))
 			CharacterSetCurrent(EmptyCharacter[C]);
 }
 

@@ -364,7 +364,7 @@ function HorseWalkMouseDown() {
 	if (!MiniGameStarted) return;
 
 	if (MiniGameDifficultyMode == "WhipPony") {
-		if ((MouseX >= HorseWalkDrawXPosition) && (MouseX < (HorseWalkDrawXPosition + (HorseWalkDrawYHeigh / 2))) && (MouseY >= HorseWalkDrawYPosition) && (MouseY < (HorseWalkDrawYPosition + HorseWalkDrawYHeigh))) {
+		if (MouseIn(HorseWalkDrawXPosition, HorseWalkDrawYPosition, HorseWalkDrawYHeigh / 2, HorseWalkDrawYHeigh)) {
 			if (HorseWalkDrawPony && !MiniGameEnded) {
 				HorseWalkHitPony++;
 				HorseWalkDrawPony = false;

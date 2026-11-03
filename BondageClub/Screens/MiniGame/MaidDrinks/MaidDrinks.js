@@ -316,7 +316,7 @@ function MaidDrinksKeyDown(event) {
 function MaidDrinksClick() {
 
 	// If the game is over, clicking on the image will end it
-	if (MiniGameEnded && (MouseX >= 350) && (MouseX <= 849) && (MouseY >= 0) && (MouseY <= 999))
+	if (MiniGameEnded && MouseIn(350, 0, 500, 1000))
 		MiniGameEnd();
 
 	// Only use mouse clicks on mobile

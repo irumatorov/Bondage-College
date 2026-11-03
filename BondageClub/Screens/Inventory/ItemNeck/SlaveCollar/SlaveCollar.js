@@ -158,11 +158,6 @@ function InventoryItemNeckSlaveCollarDrawHook(data, originalFunction) {
 
 /** @type {ExtendedItemScriptHookCallbacks.Click<NoArchItemData>} */
 function InventoryItemNeckSlaveCollarClickHook(data, originalFunction) {
-	// When the user exits the screen
-	if ((MouseX >= 1885) && (MouseX <= 1975) && (MouseY >= 25) && (MouseY <= 110)) {
-		DialogLeaveFocusItem();
-		return;
-	}
 
 	// Only the character owner can use the controls in that screen
 	const C = CharacterGetCurrent();
@@ -174,11 +169,11 @@ function InventoryItemNeckSlaveCollarClickHook(data, originalFunction) {
 		originalFunction();
 
 		// In regular mode, the owner can select the collar model and change the offset to get the next 8 models
-		if ((MouseX >= 1665) && (MouseX <= 1755) && (MouseY >= 25) && (MouseY <= 110)) {
+		if (MouseIn(1665, 25, 90, 90)) {
 			InventoryItemNeckSlaveCollarOffset = InventoryItemNeckSlaveCollarOffset + 8;
 			if (InventoryItemNeckSlaveCollarOffset >= InventoryItemNeckSlaveCollarTypes.length) InventoryItemNeckSlaveCollarOffset = 0;
 		}
-		if ((MouseX >= 1775) && (MouseX <= 1865) && (MouseY >= 25) && (MouseY <= 110)) {
+		if (MouseIn(1775, 25, 90, 90)) {
 			ItemColorLoad(C, item, 1090, 15, 900, 965, true).then(() => {
 				InventoryItemNeckSlaveCollarColorMode = true;
 				ItemColorOnExit(() => {
