@@ -223,7 +223,7 @@ async function CommonReadCSV(url) {
 	const TranslationPath = url.replace(".csv", "_" + TranslationLanguage + ".txt");
 
 	// Opens the file, parse it and returns the result in an Object
-	let response = await CommonFetch(url);
+	let response = await CommonFetch(url, { headers: [["accept", "text/csv"]] });
 	if (response.status !== 200) return [];
 	const text = await response.text();
 	const parsed = CommonParseCSV(text);
@@ -321,13 +321,22 @@ function CommonRequestParseRetryAfter(value) {
 /**
  * Fetch a remote resource
  *
- * @param {RequestInfo | URL} request
+ * @param {RequestInfo | URL} reqOrUrl
+ * @param {object} [options]
+ * @param {HeadersInit} [options.headers]
  * @returns {Promise<Response>}
  */
-async function CommonFetch(request) {
-	const isRequestObject = request instanceof Request;
-	const method = isRequestObject ? request.method : "GET";
-	const url = isRequestObject ? request.url : request;
+async function CommonFetch(reqOrUrl, options = undefined) {
+	/** @type {Request} */
+	let request;
+	if (reqOrUrl instanceof Request) {
+		if (options) {
+			throw new Error("can't use options and pass a request object");
+		}
+		request = reqOrUrl;
+	} else {
+		request = new Request(reqOrUrl, { headers: options?.headers ?? undefined });
+	}
 
 	for (let attempt = 0; attempt <= FETCH_MAX_RETRIES; attempt++) {
 		let retryAfter;
@@ -341,7 +350,7 @@ async function CommonFetch(request) {
 			}
 
 			if (attempt === FETCH_MAX_RETRIES) {
-				console.error(`${method} request to ${url} failed (${reply.status}) - no more retries`);
+				console.error(`${request.method} request to ${request.url} failed (${reply.status}) - no more retries`);
 				return reply;
 			}
 
@@ -355,7 +364,7 @@ async function CommonFetch(request) {
 
 		const delay = retryAfter ?? CommonRequestRetryDelay(attempt);
 		if (attempt !== FETCH_MAX_RETRIES) {
-			console.error(`${method} request to ${url} failed (${reply?.status}) - retrying in ${delay.toFixed(1)}s`);
+			console.error(`${request.method} request to ${request.url} failed (${reply?.status}) - retrying in ${delay.toFixed(1)}s`);
 		}
 		await CommonSleep(delay * 1000);
 	}

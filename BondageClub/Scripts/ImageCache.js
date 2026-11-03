@@ -156,7 +156,7 @@ class CachedImage {
 		if (store) {
 			const cached = await store.match(this.url);
 			if (!cached) {
-				response = await CommonFetch(this.url);
+				response = await CommonFetch(this.url, { headers: [["accept", "image/*"]] });
 				if (this._isImage(response))
 					await store.put(this.url, response);
 			} else if (this._isImage(cached)) {
@@ -174,12 +174,12 @@ class CachedImage {
 			} else {
 				// The stored body cannot be decoded. Drop it, and fetch again without them.
 				await store.delete(this.url);
-				response = await CommonFetch(this.url);
+				response = await CommonFetch(this.url, { headers: [["accept", "image/*"]] });
 				if (this._isImage(response))
 					await store.put(this.url, response);
 			}
 		} else {
-			response = await CommonFetch(this.url);
+			response = await CommonFetch(this.url, { headers: [["accept", "image/*"]] });
 		}
 		if (!response.ok)
 			throw new Error(`HTTP ${response.status}`, { cause: errCause });

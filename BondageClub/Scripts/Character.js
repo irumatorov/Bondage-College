@@ -1075,7 +1075,7 @@ async function CharacterLoadCSVDialog(C, info) {
 	}
 
 	// Opens the file, parse it and returns the result it to build the dialog
-	return CommonFetch(FullPath)
+	return CommonFetch(FullPath, { headers: [["accept", "text/csv"]] })
 		.then(async (response) => {
 			if (response.status !== 200) return;
 			const text = await response.text();

@@ -1180,7 +1180,7 @@ function TranslationLoadDialog(C, cb) {
 
 	// If the translation is available, we open the txt file, parse it and returns the result to build the dialog
 	CommonPromiseCatch(
-		CommonFetch(FullPath)
+		CommonFetch(FullPath, { headers: [["accept", "text/plain"]] })
 			.then(async (response) => {
 				if (response.status !== 200) return;
 				const text = await response.text();
@@ -1227,7 +1227,7 @@ function TranslationText(Text) {
 
 	// If the translation is available, we open the txt file, parse it and returns the result to build the dialog
 	CommonPromiseCatch(
-		CommonFetch(FullPath)
+		CommonFetch(FullPath, { headers: [["accept", "text/plain"]] })
 			.then(async (response) => {
 				if (response.status !== 200) return;
 				const text = await response.text();
@@ -1275,7 +1275,7 @@ function TranslationAsset(Family) {
 
 	// If the translation is available, we open the txt file, parse it and returns the result to build the dialog
 	CommonPromiseCatch(
-		CommonFetch(FullPath)
+		CommonFetch(FullPath, { headers: [["accept", "text/plain"]] })
 			.then(async (response) => {
 				if (response.status !== 200) return;
 				const text = await response.text();

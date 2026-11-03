@@ -308,7 +308,7 @@ class TextCache {
 			return Promise.resolve(CommonCSVCache[this.path]);
 		}
 		this.log("fetchCsv: fetching from server");
-		return CommonFetch(this.path)
+		return CommonFetch(this.path, { headers: [["accept", "text/csv"]] })
 			.then(async (response) => {
 				if (response.status !== 200) {
 					// We say we're loaded even though that's wrong because we want `.get()`
@@ -356,7 +356,7 @@ class TextCache {
 			return this.buildTranslations(lines, TranslationCache[translationPath]);
 		}
 		this.log(`translate: fetching translation from ${translationPath}`);
-		const response = await CommonFetch(translationPath);
+		const response = await CommonFetch(translationPath, { headers: [["accept", "text/plain"]] });
 		if (response.status === 200) {
 			this.log(`translate: parsing translation`);
 			const text = await response.text();
