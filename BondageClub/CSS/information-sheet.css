@@ -3,10 +3,11 @@
 	pointer-events: none;
 }
 
-#information-sheet-screen .screen-header [role="menuitem"],
+#information-sheet-screen .screen-header [role^="menuitem"],
 #information-sheet-screen .information-sheet-body,
 #information-sheet-screen .information-sheet-body * {
 	pointer-events: auto;
+}
 }
 
 #information-sheet-screen {
