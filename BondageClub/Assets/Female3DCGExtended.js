@@ -15504,6 +15504,15 @@ var AssetFemale3DCGExtended = {
 		}, // HeavyLatexCorset
 	}, // Corset
 	ItemTorso: {
+		ServingTray: {
+			Archetype: ExtendedArchetype.TYPED,
+			CopyConfig: { GroupName: "ItemMisc", AssetName: "ServingTray" },
+		}, // WoodenMaidTray
+		WoodenSign: {
+			Archetype: ExtendedArchetype.TEXT,
+			MaxLength: { Text: 12, Text2: 12 },
+			CopyConfig: { GroupName: "ItemMisc", AssetName: "WoodenSign" },
+		}, // WoodenSign
 		HeavyLatexCorset: {
 			Archetype: ExtendedArchetype.TYPED,
 			ChatTags: [CommonChatTags.SOURCE_CHAR, CommonChatTags.DEST_CHAR],
@@ -16072,6 +16081,15 @@ var AssetFemale3DCGExtended = {
 		}, // TentacleSuit
 	}, // ItemTorso
 	ItemTorso2: {
+		ServingTray: {
+			Archetype: ExtendedArchetype.TYPED,
+			CopyConfig: { GroupName: "ItemMisc", AssetName: "ServingTray" },
+		}, // WoodenMaidTray
+		WoodenSign: {
+			Archetype: ExtendedArchetype.TEXT,
+			MaxLength: { Text: 12, Text2: 12 },
+			CopyConfig: { GroupName: "ItemMisc", AssetName: "WoodenSign" },
+		}, // WoodenSign
 		TentacleSuit: {
 			Archetype: ExtendedArchetype.MODULAR,
 			CopyConfig: { GroupName: "ItemTorso", AssetName: "TentacleSuit" },
@@ -20395,6 +20413,11 @@ var AssetFemale3DCGExtended = {
 				{ Name: "Cookies" },
 				{ Name: "Toys" },
 			],
+			DialogPrefix: {
+				Header: "ItemMiscServingTraySelect",
+				Option: "ItemMiscServingTray",
+				Chat: "ItemMiscServingTraySet",
+			},
 		}, // WoodenMaidTray
 		TeddyBear: {
 			Archetype: ExtendedArchetype.TYPED,
