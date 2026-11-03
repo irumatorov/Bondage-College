@@ -146,14 +146,14 @@ function ChatRoomMapViewShowTeleportPadMenu(x, y, message) {
 	if (!ChatRoomMapViewTeleportPadPicking && destination && destinationIsPad && !twoWay) {
 		buttons.push(button(TextGet("TeleportPadTwoWay"), () => {
 			MapManager.Map.setTeleporterDestination(destination.X, destination.Y, { X: x, Y: y });
-			ChatRoomMapViewTeleportPadSave();
+			MapManager.Map.updateGlobalMapData();
 			ChatRoomMapViewShowTeleportPadMenu(x, y);
 		}));
 	}
 	if (!ChatRoomMapViewTeleportPadPicking && destination) {
 		buttons.push(button(TextGet("TeleportPadRemove"), () => {
 			MapManager.Map.setTeleporterDestination(x, y, null);
-			ChatRoomMapViewTeleportPadSave();
+			MapManager.Map.updateGlobalMapData();
 			ChatRoomMapViewShowTeleportPadMenu(x, y);
 		}));
 	}
@@ -217,7 +217,7 @@ function ChatRoomMapViewTeleportPadPickColor(x, y) {
 			if (save && color) {
 				MapManager.Map.setTeleporterColor(x, y, color);
 				if (partner) MapManager.Map.setTeleporterColor(partner.X, partner.Y, color);
-				ChatRoomMapViewTeleportPadSave();
+				MapManager.Map.updateGlobalMapData();
 			}
 			ChatRoomMapViewShowTeleportPadMenu(x, y);
 		},
@@ -233,16 +233,8 @@ function ChatRoomMapViewTeleportPadPick(pos) {
 	if (ChatRoomMapViewTeleportPadIndex == null) return;
 	const { X: x, Y: y } = MapIndexToCoordinates(ChatRoomMapViewTeleportPadIndex);
 	const picked = MapManager.Map.setTeleporterDestination(x, y, pos);
-	if (picked) ChatRoomMapViewTeleportPadSave();
+	if (picked) MapManager.Map.updateGlobalMapData();
 	ChatRoomMapViewShowTeleportPadMenu(x, y, picked ? undefined : TextGet("TeleportPadInvalid"));
-}
-
-/**
- * Writes a teleport pad change to the map and sends it to the room
- */
-function ChatRoomMapViewTeleportPadSave() {
-	MapManager.Map.updateGlobalMapData();
-	if (ChatRoomMapViewUpdateRoomNext == null) ChatRoomMapViewUpdateRoomNext = CommonTime() + 5000;
 }
 
 /**

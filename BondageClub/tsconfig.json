@@ -8,8 +8,7 @@
 		"incremental": true,
 		"tsBuildInfoFile": ".cache/tsc-main.tsbuildinfo",
 		"types": [],
-		"strict": true,
-		"skipLibCheck": true
+		"strict": true
 	},
 	"include": ["Scripts/**/*", "Screens/**/*", "Assets/**/*", "Backgrounds/**/*.js"],
 	"exclude": [

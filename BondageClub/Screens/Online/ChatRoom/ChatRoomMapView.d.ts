@@ -58,6 +58,8 @@ type UnpackedIndex<T extends readonly [number, ...unknown[]]> = T extends readon
 	? Y extends number ? [number, ...Rest] : T
 	: T;
 
+type MapDataIndexedArgs<args extends readonly unknown[]> = [x: number, y: number, ...args] | [index: number, ...args];
+
 type ChatRoomMapViewObjectModeType = "Tile" | "Object" | "Effect";
 
 type ChatRoomMapViewEditModeType = "" | ChatRoomMapViewObjectModeType | "TileType" | "ObjectType";
