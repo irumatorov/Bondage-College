@@ -13909,7 +13909,7 @@ var AssetFemale3DCGExtended = {
 					DrawImages: false,
 					Key: "o",
 					Options: [
-						{ Property: { SetPose: ["BaseLower"] } },
+						{},
 						{
 							Prerequisite: ["CanLegsClosed"],
 							Property: { SetPose: ["LegsClosed"] },
