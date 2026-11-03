@@ -1995,7 +1995,7 @@ function CraftingDeserialize(craftString) {
 		Description,
 		Color,
 		Private,
-		Type,
+		_Type,
 		OverridePriority,
 		ItemProperty,
 		TypeRecord,
@@ -2023,7 +2023,6 @@ function CraftingDeserialize(craftString) {
 		Lock: /** @type {AssetLockType} */(Lock),
 		Private: Private === "T",
 		ItemProperty: property,
-		Type: Type || undefined,
 		TypeRecord: TypeRecord ? /** @type {TypeRecord} */ (CommonJSONParse(TypeRecord)) : null,
 		DifficultyFactor: DifficultyFactor ? Number.parseInt(DifficultyFactor, 10) : undefined,
 		Effects: Effects ? /** @type {Partial<Record<CraftingPropertyType, number>>} */(CommonJSONParse(Effects) ?? {}) : {},
@@ -2768,16 +2767,6 @@ var CraftingValidationRecord = {
 		},
 		StatusCode: CraftingStatusType.ERROR,
 	},
-	/** @deprecated */
-	Type: {
-		Validate: function (c, a) {
-			return c.Type === undefined;
-		},
-		GetDefault: function (c, a) {
-			return undefined;
-		},
-		StatusCode: CraftingStatusType.ERROR,
-	}
 };
 
 /**
@@ -2828,9 +2817,6 @@ function CraftingValidate(Craft, asset=null, Warn=true, checkPlayerInventory=fal
 	}
 
 	// Conversions of deprecated fields
-	if (asset != null && Craft.TypeRecord == null && typeof Craft.Type === "string" && !partial) {
-		Craft.TypeRecord = ExtendedItemTypeToRecord(asset, Craft.Type);
-	}
 	if (Craft.Property !== "Normal" && CommonHas(CraftingPropertyMap, Craft.Property) && !Craft.Effects?.[Craft.Property]) {
 		Craft.Effects ??= {};
 		Craft.Effects[Craft.Property] = 1;
