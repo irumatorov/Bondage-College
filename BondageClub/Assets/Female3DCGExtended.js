@@ -11,19 +11,6 @@
  * Currently, modular and typed items are supported, and this is likely to expand in the future.
  */
 
-/** @type {ExtendedItemScriptHookCallbacks.AfterDraw<TextItemData>} */
-function AssetsItemHandheldToyHammerAfterDrawHook(
-	data,
-	originalFunction,
-	drawData,
-) {
-	const registry = /** @type {any} */ (globalThis).__BCBuilderTextHooks;
-	const handler = registry?.AssetsItemHandheldToyHammerAfterDrawHook;
-	return typeof handler === "function"
-		? handler(data, originalFunction, drawData)
-		: undefined;
-}
-
 /**
  * An object containing all extended item configurations.
  * @type {ExtendedItemMainConfig}
