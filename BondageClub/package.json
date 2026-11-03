@@ -3,7 +3,7 @@
 	"version": "1.0.0",
 	"description": "Welcome to the Bondage College!",
 	"engines": {
-		"node": ">= 24.14.1"
+		"node": ">= 26.13.0"
 	},
 	"scripts": {
 		"changelog:generate": "cd Tools/Node && node GenerateChangelog generate",
@@ -73,7 +73,7 @@
 		"@types/jsdom": "^30.0.0",
 		"@types/lodash.template": "^4.5.3",
 		"@types/minimist": "^1.2.5",
-		"@types/node": "^24.10.0",
+		"@types/node": "^26.6.5",
 		"@types/stream-counter": "^1.0.3",
 		"ansi-colors": "^4.1.1",
 		"canvas": "^3.1.0",
