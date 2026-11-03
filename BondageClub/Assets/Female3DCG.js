@@ -21263,10 +21263,8 @@ var AssetFemale3DCG = [
 			},
 			{
 				Name: "LatexHabit",
-				Audio: "TightLeatherStretch",
 				InventoryID: 409,
 				Fetish: ["Latex"],
-				BuyGroup: "LatexHabit",
 				Top: 23,
 				Left: 85,
 				Value: 30,
@@ -27290,14 +27288,13 @@ var AssetFemale3DCG = [
 				Name: "RubberMask",
 				InventoryID: 1160,
 				Fetish: ["Latex"],
-				Value: -1,
+				Value: 115,
 				DynamicGroupName: "ItemHood",
 				Left: 150,
 				Top: 20,
 				BuyGroup: "RubberMask",
 				Priority: 25,
 				Random: false,
-				AllowTighten: false,
 				Extended: true,
 				Hide: [],
 				Layer: [
@@ -62596,8 +62593,9 @@ var AssetFemale3DCG = [
 				Difficulty: 5,
 				Time: 15,
 				AllowLock: true,
+				DrawLocks: false,
 				AllowTighten: true,
-				Layer: [{ Color: ["#555555"] }],
+				Layer: [{ Name: "", Color: ["#555555"] }, AssetDefaultLockLayer],
 				HideItem: ["ItemEarsFuturisticEarphones"],
 				Hide: [
 					"Head",
@@ -62668,6 +62666,7 @@ var AssetFemale3DCG = [
 				Difficulty: 8,
 				Time: 15,
 				AllowLock: true,
+				DrawLocks: false,
 				Audio: "LockLarge",
 				Hide: [
 					"HairFront",
@@ -62700,6 +62699,7 @@ var AssetFemale3DCG = [
 					"ItemNose",
 					"ItemEars",
 				],
+				Layer: [{ Name: "" }, AssetDefaultLockLayer],
 			},
 			{
 				Name: "Paperbag",
@@ -62739,6 +62739,7 @@ var AssetFemale3DCG = [
 				Difficulty: 5,
 				Time: 15,
 				AllowLock: true,
+				DrawLocks: false,
 				AllowTighten: true,
 				Prerequisite: ["NotProtrudingFromMouth"],
 				Extended: true,
@@ -62766,6 +62767,10 @@ var AssetFemale3DCG = [
 					"ItemHead",
 					"ItemNose",
 					"ItemEars",
+				],
+				Layer: [
+					{ Name: "" },
+					{ ...AssetDefaultLockLayer, Top: 196, Left: 254 },
 				],
 			},
 			{
@@ -62845,7 +62850,6 @@ var AssetFemale3DCG = [
 					{
 						Name: "Lock",
 						LockLayer: true,
-						AllowColorize: false,
 					},
 				],
 				Alpha: [
@@ -63164,7 +63168,8 @@ var AssetFemale3DCG = [
 				Difficulty: 50,
 				Time: 15,
 				AllowLock: true,
-				Layer: [{ Color: ["#555555"] }],
+				DrawLocks: false,
+				Layer: [{ Name: "", Color: ["#555555"] }, AssetDefaultLockLayer],
 				HideItem: ["ItemEarsFuturisticEarphones"],
 				Hide: [
 					"Head",
@@ -63208,6 +63213,7 @@ var AssetFemale3DCG = [
 				Difficulty: 50,
 				Time: 15,
 				AllowLock: true,
+				DrawLocks: false,
 				HideItem: ["ItemEarsFuturisticEarphones"],
 				Hide: [
 					"HairFront",
@@ -63237,6 +63243,7 @@ var AssetFemale3DCG = [
 				Layer: [
 					{ Name: "Hair", InheritColor: "HairFront" },
 					{ Name: "Hood", Color: ["#555555"] },
+					AssetDefaultLockLayer,
 				],
 			},
 			{
@@ -63248,6 +63255,7 @@ var AssetFemale3DCG = [
 				Difficulty: 50,
 				Time: 15,
 				AllowLock: true,
+				DrawLocks: false,
 				Hide: [
 					"HairFront",
 					"FacialHair",
@@ -63285,6 +63293,7 @@ var AssetFemale3DCG = [
 					{ Name: "Hood", Color: ["#404040"] },
 					{ Name: "Collar", Color: ["#404040"] },
 					{ Name: "Snaps", AllowColorize: false },
+					AssetDefaultLockLayer,
 				],
 			},
 			{
@@ -63296,7 +63305,8 @@ var AssetFemale3DCG = [
 				Difficulty: 50,
 				Time: 15,
 				AllowLock: true,
-				Layer: [{ Color: ["#404040"] }],
+				DrawLocks: false,
+				Layer: [{ Name: "", Color: ["#404040"] }, AssetDefaultLockLayer],
 				HideItem: [
 					"HatBand1",
 					"HatBand2",
@@ -63347,7 +63357,8 @@ var AssetFemale3DCG = [
 				Time: 10,
 				Random: false,
 				AllowLock: true,
-				Layer: [{ Color: ["#585858"] }],
+				DrawLocks: false,
+				Layer: [{ Name: "", Color: ["#585858"] }, AssetDefaultLockLayer],
 				Hide: [
 					"HairFront",
 					"HairBack",
@@ -63384,7 +63395,8 @@ var AssetFemale3DCG = [
 				Time: 15,
 				Random: false,
 				AllowLock: true,
-				Layer: [{ Color: ["#404040"] }],
+				DrawLocks: false,
+				Layer: [{ Name: "", Color: ["#404040"] }, AssetDefaultLockLayer],
 				HideItem: [
 					"HatBand1",
 					"HatBand2",
@@ -63434,6 +63446,7 @@ var AssetFemale3DCG = [
 				Time: 15,
 				Random: false,
 				AllowLock: true,
+				DrawLocks: false,
 				Effect: [E.GagLight, E.BlockMouth],
 				Block: [
 					"ItemMouth",
@@ -63463,6 +63476,7 @@ var AssetFemale3DCG = [
 				Time: 15,
 				Random: false,
 				AllowLock: true,
+				DrawLocks: false,
 				Layer: [{ Color: ["#404040"] }],
 				Hide: [
 					"HairFront",
@@ -63499,7 +63513,8 @@ var AssetFemale3DCG = [
 				Difficulty: 50,
 				Time: 15,
 				AllowLock: true,
-				Layer: [{ Color: ["#404040"] }],
+				DrawLocks: false,
+				Layer: [{ Name: "", Color: ["#404040"] }, AssetDefaultLockLayer],
 				Hide: [
 					"HairFront",
 					"FacialHair",
@@ -63536,6 +63551,7 @@ var AssetFemale3DCG = [
 				Difficulty: 20,
 				Time: 15,
 				AllowLock: true,
+				DrawLocks: false,
 				Hide: [
 					"HairFront",
 					"FacialHair",
@@ -63573,6 +63589,7 @@ var AssetFemale3DCG = [
 				Layer: [
 					{ Name: "Hood", Color: ["#a5a095"] },
 					{ Name: "Text", Color: ["#ce7210"] },
+					{ ...AssetDefaultLockLayer, Left: 140 },
 				],
 			},
 			{
@@ -63687,6 +63704,7 @@ var AssetFemale3DCG = [
 				Random: false,
 				Alpha: [{ Group: ["HairFront"], Masks: [[206, 115, 88, 70]] }],
 				AllowLock: true,
+				DrawLocks: false,
 				Effect: [E.BlockMouth],
 				Block: [
 					"ItemMouth",
@@ -63701,6 +63719,7 @@ var AssetFemale3DCG = [
 					{ Name: "Lens" },
 					{ Name: "Mask" },
 					{ Name: "Edges" },
+					AssetDefaultLockLayer,
 				],
 				Tint: [{ Color: 1, Strength: 0.1 }],
 				DefaultTint: "#ccc",
@@ -63714,9 +63733,13 @@ var AssetFemale3DCG = [
 				Priority: 40,
 				Difficulty: 5,
 				Time: 15,
-				AllowLock: false,
+				AllowLock: true,
+				DrawLocks: false,
 				AllowTighten: true,
-				Layer: [{ Color: ["#404040"] }],
+				Layer: [
+					{ Name: "", Color: ["#404040"] },
+					{ ...AssetDefaultLockLayer, Left: 140, Top: 14 },
+				],
 				BuyGroup: "OpenFace",
 				Block: ["ItemEars"],
 				Hide: ["HairFront"],
@@ -63732,6 +63755,7 @@ var AssetFemale3DCG = [
 				Difficulty: 5,
 				Time: 15,
 				AllowLock: true,
+				DrawLocks: false,
 				AllowTighten: true,
 				Extended: true,
 				Prerequisite: ["NotProtrudingFromMouth"],
@@ -63755,6 +63779,7 @@ var AssetFemale3DCG = [
 				Layer: [
 					{ Name: "Original", Color: ["#404040"], AllowTypes: { f: 0 } },
 					{ Name: "Smooth", CopyLayerColor: "Original", AllowTypes: { f: 1 } },
+					AssetDefaultLockLayer,
 				],
 			},
 			{
@@ -63794,6 +63819,7 @@ var AssetFemale3DCG = [
 					{ Name: "Edges" },
 					{ Name: "Metal" },
 					{ Name: "Shine" },
+					{ ...AssetDefaultLockLayer, Left: 146 },
 				],
 			},
 			{
@@ -64041,9 +64067,7 @@ var AssetFemale3DCG = [
 				Layer: [
 					{ Name: "" },
 					{
-						Name: "Lock",
-						LockLayer: true,
-						ParentGroup: "",
+						...AssetDefaultLockLayer,
 						StyleOverride: [],
 					},
 				],
@@ -64076,9 +64100,7 @@ var AssetFemale3DCG = [
 					{ Name: "Hood" },
 					{ Name: "Collar", StyleOverride: [] },
 					{
-						Name: "Lock",
-						LockLayer: true,
-						ParentGroup: "",
+						...AssetDefaultLockLayer,
 						StyleOverride: [],
 					},
 				],
@@ -64120,11 +64142,7 @@ var AssetFemale3DCG = [
 				],
 				Layer: [
 					{ Name: "", CreateLayerTypes: ["typed"] },
-					{
-						Name: "Lock",
-						LockLayer: true,
-						AllowColorize: false,
-					},
+					AssetDefaultLockLayer,
 				],
 				Alpha: [
 					{
@@ -64139,19 +64157,12 @@ var AssetFemale3DCG = [
 			{
 				Name: "LatexHabit",
 				Audio: "TightLeatherStretch",
-				InventoryID: 409,
-				Fetish: ["Latex"],
-				BuyGroup: "LatexHabit",
-				Top: 23,
-				Left: 85,
-				Value: 30,
 				Time: 5,
 				AllowLock: true,
+				DrawLocks: false,
 				AllowTighten: true,
-				HideItem: ["ItemEarsFuturisticEarphones"],
 				Hide: [
 					"HairFront",
-					"FacialHair",
 					"HairBack",
 					"Hat",
 					"HairAccessory1",
@@ -64159,6 +64170,11 @@ var AssetFemale3DCG = [
 					"HairAccessory3",
 				],
 				Block: ["ItemEars"],
+				CopyConfig: {
+					GroupName: "Hat",
+					AssetName: "LatexHabit",
+					BuyGroup: true,
+				},
 				Layer: [
 					{ Name: "Cape", AllowTypes: { typed: 0 } },
 					{
@@ -64196,6 +64212,7 @@ var AssetFemale3DCG = [
 						CopyLayerColor: "Base",
 						AllowTypes: { typed: 1 },
 					},
+					AssetDefaultLockLayer,
 				],
 			},
 			{
@@ -64252,6 +64269,7 @@ var AssetFemale3DCG = [
 				Difficulty: 10,
 				Time: 19,
 				AllowLock: true,
+				DrawLocks: false,
 				Extended: true,
 				Top: 0,
 				Block: [
@@ -64296,6 +64314,7 @@ var AssetFemale3DCG = [
 					{ Name: "LEDs", CopyLayerColor: "GlassInside" },
 					{ Name: "Frame" },
 					{ Name: "Glass", AllowColorize: false, CreateLayerTypes: ["typed"] },
+					AssetDefaultLockLayer,
 				],
 			},
 			{
@@ -64539,9 +64558,7 @@ var AssetFemale3DCG = [
 						],
 					},
 					{
-						Name: "Lock",
-						LockLayer: true,
-						AllowColorize: false,
+						...AssetDefaultLockLayer,
 						Left: 108,
 						CreateLayerTypes: ["typed"],
 					},
@@ -64617,6 +64634,7 @@ var AssetFemale3DCG = [
 						AllowTypes: { t: 1 },
 						CopyLayerColor: "Plug",
 					},
+					{ ...AssetDefaultLockLayer, Left: 140, Top: 14 },
 				],
 			},
 			{
@@ -64956,7 +64974,6 @@ var AssetFemale3DCG = [
 						AllowTypes: { m: [11, 19] },
 						CopyLayerColor: "FillRoundMouth",
 					},
-					// { Name: "FillRoundMouthHighlight",  AllowTypes: ["m8","m16","m10","m18","m9","m17","m11","m19"], CopyLayerColor: "PanelHeadHighlight" },
 					{
 						Name: "FillShapedMouth",
 						AllowTypes: { m: [12, 20] },
@@ -64977,7 +64994,6 @@ var AssetFemale3DCG = [
 						AllowTypes: { m: [15, 23] },
 						CopyLayerColor: "FillRoundMouth",
 					},
-					// { Name: "FillShapedMouthHighlight",  AllowTypes: ["m12","m20","m14","m22","m13","m21","m15","m23"], CopyLayerColor: "PanelHeadHighlight" },
 					{
 						Name: "FillCircleMouth",
 						AllowTypes: { m: [28, 29] },
@@ -65034,13 +65050,11 @@ var AssetFemale3DCG = [
 						AllowTypes: { m: [2, 8, 9, 10, 11, 6, 16, 17, 18, 19] },
 						ColorGroup: "Linings",
 					}, // master colour for mouth lining
-					// { Name: "LiningRoundMouthHighlight",  AllowTypes: ["m2","m8","m9","m10","m11","m6","m16","m17","m18","m19"], CopyLayerColor: "PanelHeadHighlight" },
 					{
 						Name: "LiningShapedMouth",
 						AllowTypes: { m: [3, 12, 13, 14, 15, 7, 20, 21, 22, 23] },
 						CopyLayerColor: "LiningRoundMouth",
 					},
-					// { Name: "LiningShapedMouthHighlight",  AllowTypes: ["m3","m12","m13","m14","m15","m7","m20","m21","m22","m23"], CopyLayerColor: "PanelHeadHighlight" },
 					{
 						Name: "LiningCircleEye",
 						AllowTypes: { e: [24, 26, 27, 25, 28, 29] },
@@ -65130,7 +65144,7 @@ var AssetFemale3DCG = [
 				Left: 166.5,
 				Priority: 34,
 				Time: 5,
-				DrawLocks: true,
+				DrawLocks: false,
 				AllowLock: true,
 				Hide: [],
 				Block: [],
@@ -65144,6 +65158,7 @@ var AssetFemale3DCG = [
 						CopyLayerColor: "EarsUnder",
 					},
 					{ Name: "Metal", Color: ["#ADADAD"] },
+					AssetDefaultLockLayer,
 				],
 			},
 			{
@@ -65218,6 +65233,7 @@ var AssetFemale3DCG = [
 						CopyLayerColor: "Metal",
 						AllowTypes: { l: [1, 2] },
 					},
+					{ ...AssetDefaultLockLayer, Top: 0, Left: 130 },
 				],
 			},
 			{
@@ -65286,6 +65302,7 @@ var AssetFemale3DCG = [
 						Left: 162,
 						AllowTypes: { m: 1 },
 					},
+					{ ...AssetDefaultLockLayer, Top: 0, Left: 130 },
 				],
 			},
 			{
@@ -65311,7 +65328,7 @@ var AssetFemale3DCG = [
 					"HairAccessory3",
 					"Mask",
 				],
-				Effect: [E.BlockWardrobe, E.GagHeavy, E.BlockMouth, E.DeafLight],
+				Effect: [E.GagHeavy, E.BlockMouth, E.DeafLight],
 				Block: ["ItemMouth", "ItemMouth2", "ItemMouth3", "ItemNose"],
 				Layer: [
 					{ Name: "Base" },
@@ -65319,6 +65336,7 @@ var AssetFemale3DCG = [
 					{ Name: "InnerEar", Top: -1, Left: 132 },
 					{ Name: "Nose", Top: 1, Left: 134 },
 					{ Name: "Mouth", Top: 1, Left: 134 },
+					{ ...AssetDefaultLockLayer, Left: 140, Top: 14 },
 				],
 			},
 			{
@@ -65346,7 +65364,7 @@ var AssetFemale3DCG = [
 					"Hat",
 					"Mask",
 				],
-				Effect: [E.BlockWardrobe, E.GagHeavy, E.BlockMouth],
+				Effect: [E.GagHeavy, E.BlockMouth],
 				Block: ["ItemMouth", "ItemMouth2", "ItemMouth3", "ItemNose"],
 				Layer: [
 					{ Name: "Base" },
@@ -65370,6 +65388,7 @@ var AssetFemale3DCG = [
 						Left: 112,
 						CopyLayerColor: "Base",
 					},
+					{ ...AssetDefaultLockLayer, Left: 140, Top: 10 },
 				],
 			},
 			{
@@ -65426,6 +65445,7 @@ var AssetFemale3DCG = [
 						AllowTypes: { pc: 1 },
 						CopyLayerColor: "Tube",
 					},
+					{ ...AssetDefaultLockLayer, Top: 0, Left: 130 },
 				],
 			},
 			{
@@ -65438,7 +65458,13 @@ var AssetFemale3DCG = [
 				Top: 22,
 				Left: 124,
 				AllowLock: true,
-				Effect: [E.DeafTotal, E.BlindHeavy, E.BlockMouth, E.GagVeryHeavy],
+				Effect: [
+					E.DeafTotal,
+					E.BlindHeavy,
+					E.BlockMouth,
+					E.GagVeryHeavy,
+					E.BlockWardrobe,
+				],
 				DrawLocks: false,
 				Hide: [
 					"HairFront",
@@ -65455,6 +65481,7 @@ var AssetFemale3DCG = [
 					{ Name: "Base", StyleOverride: ["EchoV2"] },
 					{ Name: "EarCover" },
 					{ Name: "Lips" },
+					{ ...AssetDefaultLockLayer, Left: 140, Top: 8 },
 				],
 			},
 			{
@@ -65501,6 +65528,7 @@ var AssetFemale3DCG = [
 						Name: "Lines",
 						StyleOverride: ["EchoV2"],
 					},
+					{ ...AssetDefaultLockLayer, Left: 140, Top: 26 },
 				],
 			},
 			{
@@ -65683,20 +65711,20 @@ var AssetFemale3DCG = [
 			},
 			{
 				Name: "RubberMask",
-				InventoryID: 1160,
-				Fetish: ["Latex"],
-				Value: 115,
 				BuyGroup: "RubberMask",
 				Priority: 34,
 				Difficulty: 6,
 				Time: 10,
-				Random: false,
 				AllowLock: true,
 				DrawLocks: false,
-				Extended: true,
 				Prerequisite: ["GasMask", "NotProtrudingFromMouth"],
 				Block: [],
 				HideItem: ["MaskRubberMask"],
+				CopyConfig: {
+					GroupName: "Mask",
+					AssetName: "RubberMask",
+					BuyGroup: true,
+				},
 				Layer: [
 					{
 						Name: "Main",
@@ -66027,6 +66055,7 @@ var AssetFemale3DCG = [
 						AllowTypes: { p: 6 },
 						CopyLayerColor: "PumpkinShine2",
 					},
+					{ ...AssetDefaultLockLayer, Left: 140, Top: 0 },
 				],
 			},
 			{
@@ -66402,6 +66431,7 @@ var AssetFemale3DCG = [
 				Audio: "BalloonStretch",
 				Fetish: ["Latex", "Masochism"],
 				Block: [],
+				Layer: [{ Name: "" }, { ...AssetDefaultLockLayer, Left: 150, Top: 30 }],
 				Alpha: [
 					{
 						Group: ["Head"],
