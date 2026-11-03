@@ -325,6 +325,11 @@ interface CommonGenerateGridParameters {
 type CommonGenerateGridCallback<T> = (item: T, x: number, y: number, width: number, height: number) => boolean;
 
 /**
+ * A debounced or throttled function whose pending invocation can be dropped.
+ */
+type CommonCancellableFn<Args extends readonly unknown[], Ret> = ((this: unknown, ...args: Args) => Ret) & { cancel: () => void };
+
+/**
  * An object for holding arbitrary values with a mechanism to reset them to a default
  */
 type VariableContainer<T1, T2> = T1 & T2 & {

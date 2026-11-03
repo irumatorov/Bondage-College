@@ -1068,8 +1068,8 @@ var MapManager = (function () {
 		 * @returns {number | null}
 		 */
 		/**
-		 * @param {[x: number, y: number] | [index: number]} args
-		 * @returns {number | null}
+		 * @param {MapDataIndexedArgs<[]>} args
+		 * @return {number | null}
 		 */
 		getTileId(...args) {
 			if (!this.#_mapData) throw Error("No map loaded");
@@ -1091,8 +1091,8 @@ var MapManager = (function () {
 		 * @returns {ChatRoomMapTile | null}
 		 */
 		/**
-		 * @param {[x: number, y: number] | [index: number]} args
-		 * @returns {ChatRoomMapTile | null}
+		 * @param {MapDataIndexedArgs<[]>} args
+		 * @return {ChatRoomMapTile | null}
 		 */
 		getTile(...args) {
 			const [index] = this.unpackIndex(...args);
@@ -1117,7 +1117,7 @@ var MapManager = (function () {
 		 * @returns {boolean}
 		 */
 		/**
-		 * @template {[index: number, tile: ChatRoomMapTile | null, range?: number] | [x: number, y: number, tile: ChatRoomMapTile | null, range?: number]} T
+		 * @template {MapDataIndexedArgs<[tile: ChatRoomMapTile | null, range?: number]>} T
 		 * @param {T} args
 		 * @returns {boolean}
 		 */
@@ -1173,7 +1173,7 @@ var MapManager = (function () {
 		 * @returns {boolean}
 		 */
 		/**
-		 * @template {[index: number, tile: ChatRoomMapTile | null, range?: number] | [x: number, y: number, tile: ChatRoomMapTile | null]} T
+		 * @template {MapDataIndexedArgs<[tile: ChatRoomMapTile | null, range?: number]>} T
 		 * @param {T} args
 		 * @returns {boolean}
 		 */
@@ -1238,8 +1238,8 @@ var MapManager = (function () {
 		 * @returns {number | null}
 		 */
 		/**
-		 * @param {[x: number, y: number] | [index: number]} args
-		 * @returns {number | null}
+		 * @param {MapDataIndexedArgs<[]>} args
+		 * @return {number | null}
 		 */
 		getObjectId(...args) {
 			if (!this.#_mapData) throw Error("No map loaded");
@@ -1261,8 +1261,8 @@ var MapManager = (function () {
 		 * @returns {ChatRoomMapObject | null}
 		 */
 		/**
-		 * @param {[x: number, y: number] | [index: number]} args
-		 * @returns {ChatRoomMapObject | null}
+		 * @param {MapDataIndexedArgs<[]>} args
+		 * @return {ChatRoomMapObject | null}
 		 */
 		getObject(...args) {
 			const [index] = this.unpackIndex(...args);
@@ -1274,7 +1274,7 @@ var MapManager = (function () {
 		 * Set the object at the given coordinates
 		 * @overload
 		 * @param {number} index
-		 * @param {ChatRoomMapObject | null} object
+		 * @param {ChatRoomMapObject | null | undefined} object
 		 * @param {number} [range]
 		 * @returns {boolean}
 		 */
@@ -1282,12 +1282,12 @@ var MapManager = (function () {
 		 * @overload
 		 * @param {number} x
 		 * @param {number} y
-		 * @param {ChatRoomMapObject | null} object
+		 * @param {ChatRoomMapObject | null | undefined} object
 		 * @param {number} [range]
 		 * @returns {boolean}
 		 */
 		/**
-		 * @template {[index: number, tile: ChatRoomMapObject | null, range?: number] | [x: number, y: number, tile: ChatRoomMapObject | null, range?: number]} T
+		 * @template {MapDataIndexedArgs<[tile: ChatRoomMapObject | null | undefined, range?: number]>} T
 		 * @param {T} args
 		 * @returns {boolean}
 		 */
@@ -1380,7 +1380,7 @@ var MapManager = (function () {
 		 * @returns {boolean}
 		 */
 		/**
-		 * @template {[index: number, tile: ChatRoomMapObject | null, range?: number] | [x: number, y: number, tile: ChatRoomMapObject | null]} T
+		 * @template {MapDataIndexedArgs<[tile: ChatRoomMapObject | null, range?: number]>} T
 		 * @param {T} args
 		 * @returns {boolean}
 		 */
@@ -1407,11 +1407,25 @@ var MapManager = (function () {
 
 		/**
 		 * Checks if the object config is valid
+		 * @overload
 		 * @param {number} index - The index of the object
 		 * @param {ChatRoomMapObjectConfig["Type"]} type - The type of config
 		 * @returns {boolean}
 		 */
-		isValidObjectConfig(index, type) {
+		/**
+		 * @overload
+		 * @param {number} x
+		 * @param {number} y
+		 * @param {ChatRoomMapObjectConfig["Type"]} object
+		 * @returns {boolean}
+		 */
+		/**
+		 * @template {MapDataIndexedArgs<[type: ChatRoomMapObjectConfig["Type"]]>} T
+		 * @param {T} args
+		 * @returns {boolean}
+		 */
+		isValidObjectConfig(...args) {
+			let [index, type] = this.unpackIndex(...args);
 			const cell = MapManager.Map.getObject(index);
 			switch (type) {
 				case "Sign":
@@ -1426,7 +1440,8 @@ var MapManager = (function () {
 
 		/**
 		 * Gets where the teleport pad at the given coordinates sends to
-		 * @param {[x: number, y: number] | [index: number]} args
+		 * @template {MapDataIndexedArgs<[]>} T
+		 * @param {T} args
 		 * @return {ChatRoomMapPos | null} - null if it's not a teleport pad or it doesn't send anywhere yet
 		 */
 		getTeleporterDestination(...args) {
@@ -1439,7 +1454,8 @@ var MapManager = (function () {
 
 		/**
 		 * Sets where the teleport pad at the given coordinates sends to
-		 * @param {[x: number, y: number, destination: ChatRoomMapPos | null] | [index: number, destination: ChatRoomMapPos | null]} args
+		 * @template {MapDataIndexedArgs<[destination: ChatRoomMapPos | null]>} T
+		 * @param {T} args
 		 * @return {boolean} - false if it's not a teleport pad, or the destination is the pad itself, a wall or outside the map
 		 */
 		setTeleporterDestination(...args) {
@@ -1459,10 +1475,12 @@ var MapManager = (function () {
 
 		/**
 		 * The config of the teleport pad at the given index
-		 * @param {number} index
+		 * @template {MapDataIndexedArgs<[]>} T
+		 * @param {T} args
 		 * @return {ChatRoomMapTeleporterObjectConfig | null} - null if there's no teleport pad there
 		 */
-		#teleporterConfig(index) {
+		#teleporterConfig(...args) {
+			const [index] = this.unpackIndex(...args);
 			if (this.getObject(index)?.DefaultObjectConfig?.Type !== "Teleporter") return null;
 			const config = this.getObjectConfig(index);
 			return config?.Type === "Teleporter" ? config : null;
@@ -1470,7 +1488,8 @@ var MapManager = (function () {
 
 		/**
 		 * Whether a teleport pad sends to the given coordinates
-		 * @param {[x: number, y: number] | [index: number]} args
+		 * @template {MapDataIndexedArgs<[]>} T
+		 * @param {T} args
 		 * @return {boolean}
 		 */
 		isTeleporterDestination(...args) {
@@ -1485,7 +1504,8 @@ var MapManager = (function () {
 
 		/**
 		 * Gets the color of the teleport pad at the given coordinates, with its opacity when it's see-through
-		 * @param {[x: number, y: number] | [index: number]} args
+		 * @template {MapDataIndexedArgs<[]>} T
+		 * @param {T} args
 		 * @return {HexColor | null} - null if it's not a teleport pad or it has no color
 		 */
 		getTeleporterColor(...args) {
@@ -1495,7 +1515,8 @@ var MapManager = (function () {
 
 		/**
 		 * Sets the color of the teleport pad at the given coordinates
-		 * @param {[x: number, y: number, color: HexColor] | [index: number, color: HexColor]} args - The color, opacity included (#RRGGBBAA)
+		 * @template {MapDataIndexedArgs<[color: HexColor]>} T - The color, opacity included (#RRGGBBAA)
+		 * @param {T} args
 		 * @return {boolean} - false if it's not a teleport pad or the color isn't a color
 		 */
 		setTeleporterColor(...args) {
@@ -1551,8 +1572,8 @@ var MapManager = (function () {
 		 * @returns {ChatRoomMapObjectConfig | null}
 		 */
 		/**
-		 * @param {[x: number, y: number] | [index: number]} args
-		 * @returns {ChatRoomMapObjectConfig | null}
+		 * @param {MapDataIndexedArgs<[]>} args
+		 * @return {ChatRoomMapObjectConfig | null}
 		 */
 		getObjectConfig(...args) {
 			if (!this.#_mapData) throw Error("No map loaded");
@@ -1576,7 +1597,7 @@ var MapManager = (function () {
 		 * @returns {boolean} true if the cell config was set, false if the coordinates are out of bounds.
 		 */
 		/**
-		 * @param {[x: number, y: number, config?: ChatRoomMapObjectConfig] | [index: number, config?: ChatRoomMapObjectConfig]} args
+		 * @param {MapDataIndexedArgs<[config?: ChatRoomMapObjectConfig]>} args
 		 * @returns {boolean} true if the cell config was set, false if the coordinates are out of bounds.
 		 */
 		setObjectConfig(...args) {
@@ -1619,8 +1640,8 @@ var MapManager = (function () {
 		 * @returns {ChatRoomMapEffect[]}
 		 */
 		/**
-		 * @param {[x: number, y: number] | [index: number]} args
-		 * @returns {ChatRoomMapEffect[]}
+		 * @param {MapDataIndexedArgs<[]>} args
+		 * @return {ChatRoomMapEffect[]}
 		 */
 		getEffects(...args) {
 			if (!this.#_mapData) throw Error("No map loaded");
@@ -1667,7 +1688,7 @@ var MapManager = (function () {
 		 * @returns {boolean}
 		 */
 		/**
-		 * @template {[index: number, effect: ChatRoomMapEffect, range?: number] | [x: number, y: number, effect: ChatRoomMapEffect, range?: number]} T
+		 * @template {MapDataIndexedArgs<[effect: ChatRoomMapEffect, range?: number]>} T
 		 * @param {T} args
 		 * @returns {boolean}
 		 */
@@ -1700,7 +1721,7 @@ var MapManager = (function () {
 		 * @returns {boolean}
 		 */
 		/**
-		 * @template {[index: number, effects: ChatRoomMapEffect[], range?: number] | [x: number, y: number, effects: ChatRoomMapEffect[], range?: number]} T
+		 * @template {MapDataIndexedArgs<[effects: ChatRoomMapEffect[], range?: number]>} T
 		 * @param {T} args
 		 * @returns {boolean}
 		 */
