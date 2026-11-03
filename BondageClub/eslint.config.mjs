@@ -7,19 +7,12 @@ import sortKeysCustom from "eslint-plugin-sort-keys-custom";
 import nounsanitized from "eslint-plugin-no-unsanitized";
 import jsdoc from 'eslint-plugin-jsdoc';
 import js from "@eslint/js";
-
-import { FlatCompat } from "@eslint/eslintrc";
+import compat from "eslint-plugin-compat";
 
 import tseslint from "typescript-eslint";
 import path from "path";
 
 const __dirname = import.meta.dirname;
-
-const compat = new FlatCompat({
-	baseDirectory: __dirname,
-	recommendedConfig: js.configs.recommended,
-	allConfig: js.configs.all,
-});
 
 /** Matches tsconfig.json "include". */
 const typedFiles = [
@@ -99,6 +92,10 @@ const customRules = {
 	// Until globals are properly documented
 	"no-undef": "off",
 	"no-var": "off",
+	// `let`/`var` globals are assigned from other scripts.
+	"no-unassigned-vars": "off",
+	// ESLint 10 recommended. Existing assignments across the scripts.
+	"no-useless-assignment": "off",
 
 	"nounsanitized/property": "error",
 	"nounsanitized/method": "error",
@@ -112,6 +109,8 @@ const customRules = {
 	"jsdoc/require-yields": "off",
 	"jsdoc/reject-any-type": "off",
 	"jsdoc/ts-no-empty-object-type": "off",
+	// Same policy as @typescript-eslint/ban-ts-comment above.
+	"jsdoc/ts-ban-ts-comment": "off",
 	// This one would be nice but it doesn't like @extends
 	"jsdoc/check-tag-names": ["off", {
 			"definedTags": ["warning", "note", "extends"]
@@ -144,7 +143,7 @@ export default defineConfig([
 		files: typedFiles,
 
 		extends: [
-			...compat.extends("plugin:compat/recommended"),
+			compat.configs["flat/recommended"],
 			...tseslint.configs.recommendedTypeChecked,
 		],
 
@@ -167,7 +166,7 @@ export default defineConfig([
 		files: ["Tests/**/*.ts"],
 
 		extends: [
-			...compat.extends("plugin:compat/recommended"),
+			compat.configs["flat/recommended"],
 			...tseslint.configs.recommendedTypeChecked,
 		],
 
@@ -216,7 +215,7 @@ export default defineConfig([
 		files: ["Tools/Node/**/*.js"],
 
 		extends: [
-			...compat.extends("plugin:compat/recommended"),
+			compat.configs["flat/recommended"],
 			...tseslint.configs.recommended,
 		],
 
