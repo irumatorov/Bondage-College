@@ -1,0 +1,28 @@
+#online-profile-screen-hgroup {
+	color: black;
+}
+
+#online-profile-screen-main {
+	padding-bottom: var(--scrollbar-gutter);
+}
+
+#online-profile-screen {
+	gap: var(--half-gap);
+}
+
+#online-profile-description-input,
+#online-profile-owners-notes-input {
+	display: none;
+	width: 100%;
+	height: 100%;
+	padding: 0.25em 0.35em;
+	user-select: text;
+}
+
+#online-profile-screen[data-mode="description"] #online-profile-description-input {
+	display: block;
+}
+
+#online-profile-screen[data-mode="ownersNotes"] #online-profile-owners-notes-input {
+	display: block;
+}
