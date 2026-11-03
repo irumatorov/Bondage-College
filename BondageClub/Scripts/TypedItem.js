@@ -134,6 +134,9 @@ function TypedItemGetDrawData(asset, drawData, options, overrideMetaData={}) {
 	const height = overrideMetaData.drawImage ? 275 : 55;
 	const itemsPerPage = Math.min(standardPositions.length - 1, options.length);
 	const assetPath = AssetGetInventoryPath(asset);
+	const previewPath = asset.Group.Family === "Female3DCG" && CommonAssetIsMigrated(asset.Name, asset.DynamicGroupName)
+		? `${assetPath}/Previews`
+		: assetPath;
 
 	/** @type {ElementData<ElementMetaData.Typed>[]} */
 	const elementData = [];
@@ -148,7 +151,7 @@ function TypedItemGetDrawData(asset, drawData, options, overrideMetaData={}) {
 				position,
 				drawImage,
 				hidden: false,
-				imagePath: `${assetPath}/${options[i].Name}.png`,
+				imagePath: `${previewPath}/${options[i].Name}.png`,
 				...overrideMetaData,
 			};
 		}));

@@ -2,7 +2,8 @@ import vm from "vm";
 import fs from "fs";
 import path from "path";
 
-import { NEEDED_FILES, BASE_PATH, error, loadCSV, fromEntries, enumerate, keys, entries, errorState } from "./Common.js";
+import { NEEDED_FILES, BASE_PATH, ASSETS_PAPERDOLL_DIR, error, loadCSV, fromEntries, enumerate, keys, entries, errorState, loadDefaultPoseFolderByGroup } from "./Common.js";
+import { isManifest } from "./Common.js";
 
 // XXX: this must all be checked
 const knownMissingOverrides = new Set([
@@ -472,7 +473,7 @@ function testModularItemPropertyDisjoint(dataRecord) {
 /**
  * @param {string} dir
  * @param {Set<string>} pathSet
- * @param {(file: string) => boolean} filter
+ * @param {(file: string, filePath: string) => boolean} filter
  */
 function recursivelyListDir(dir, pathSet, filter) {
 	fs.readdirSync(dir).forEach(f => {
@@ -480,7 +481,7 @@ function recursivelyListDir(dir, pathSet, filter) {
 		const isDirectory = fs.statSync(dirPath).isDirectory();
 		if (isDirectory) {
 			recursivelyListDir(dirPath, pathSet, filter);
-		} else if (filter(f)) {
+		} else if (filter(f, dirPath)) {
 			const offset = BASE_PATH.length;
 			pathSet.add(`${dir.slice(offset)}/${f}`);
 		}
@@ -505,6 +506,11 @@ function testExtendedItemButtonImage(dataSuperRecord) {
 	/** @type {Set<string>} */
 	const availableImages = new Set();
 	recursivelyListDir(`${BASE_PATH}Screens/Inventory`, availableImages, i => i.endsWith(".png"));
+	recursivelyListDir(
+		`${BASE_PATH}Assets/Female3DCG`,
+		availableImages,
+		(fileName, filePath) => fileName.endsWith(".png") && filePath.includes("/Previews/"),
+	);
 
 	// Gather all expected image paths
 	/** @type {Set<string>} */
@@ -989,8 +995,12 @@ function testActivePose(assets, poseMap) {
  * @param {readonly Asset[]} assets
  */
 function testHasPreview(assets) {
+	const migrationManifest = loadMigrationManifest();
 	for (const asset of assets) {
-		const assetPath = `${BASE_PATH}Assets/${asset.Group.Family}/${asset.DynamicGroupName}/Preview/${asset.Name}.png`;
+		const isMigrated = assetCheckIsMigrated(migrationManifest, asset.Name, asset.DynamicGroupName);
+		const assetPath = isMigrated
+			? `${BASE_PATH}Assets/${ASSETS_PAPERDOLL_DIR}/${asset.Name}-${asset.DynamicGroupName}/Previews/${asset.Name}.png`
+			: `${BASE_PATH}Assets/${asset.Group.Family}/${asset.DynamicGroupName}/Preview/${asset.Name}.png`;
 		if (asset.Visible && asset.Group.AllowNone && !fs.existsSync(assetPath)) {
 			error(`${asset.Group.Name}:${asset.Name}: Missing preview image at "${assetPath}"`);
 		}
@@ -1056,12 +1066,74 @@ function padPoseMapping(poseMapping, poseRecord) {
 }
 
 /**
+ * @returns {ReadonlyMap<string, ReadonlySet<string>>}
+ */
+function loadMigrationManifest() {
+	const manifestPath = path.join(BASE_PATH, "Assets/Migration.json");
+	if (!fs.existsSync(manifestPath)) {
+		return new Map();
+	}
+	try {
+		const manifest = JSON.parse(fs.readFileSync(manifestPath, { encoding: "utf8" }));
+		if (!isManifest(manifest) || !manifest.assets) {
+			return new Map();
+		}
+		/** @type {Map<string, ReadonlySet<string>>} */
+		const migratedAssets = new Map();
+		for (const [assetName, manifestEntry] of Object.entries(manifest.assets)) {
+			if (manifestEntry.groups && manifestEntry.groups.length > 0) {
+				migratedAssets.set(assetName, new Set(manifestEntry.groups));
+			}
+		}
+		return migratedAssets;
+	} catch {
+		return new Map();
+	}
+}
+
+/**
+ * @param {ReadonlyMap<string, ReadonlySet<string>>} migrationManifest
+ * @param {string} assetName
+ * @param {string} groupName
+ * @returns {boolean}
+ */
+function assetCheckIsMigrated(migrationManifest, assetName, groupName) {
+	const migratedGroups = migrationManifest.get(assetName);
+	return migratedGroups?.has(groupName) ?? false;
+}
+
+/**
+ * @param {Asset} asset
+ * @param {string | null} style
+ * @param {boolean} isMigrated
+ * @param {string} [effectiveAssetName] Asset name used for migrated folders, including a parent body asset
+ * @returns {string}
+ */
+function assetCheckLayerRoot(asset, style, isMigrated, effectiveAssetName = asset.Name) {
+	const DEFAULT_STYLE = "DEFAULT_STYLE";
+	const family = asset.Group.Family;
+	if (isMigrated) {
+		const pathRoot = `${ASSETS_PAPERDOLL_DIR}/${effectiveAssetName}-${asset.DynamicGroupName}`;
+		if (style !== DEFAULT_STYLE) {
+			return `${BASE_PATH}Assets/${pathRoot}/Override/${style}/`;
+		}
+		return `${BASE_PATH}Assets/${pathRoot}/`;
+	}
+	if (style !== DEFAULT_STYLE) {
+		return `${BASE_PATH}Assets/${family}/Override/${style}/${asset.DynamicGroupName}/`;
+	}
+	return `${BASE_PATH}Assets/${family}/${asset.DynamicGroupName}/`;
+}
+
+/**
  * Check that all assets have the expected .png images.
  * @param {readonly Asset[]} assets
  * @param {Record<ExtendedArchetype, Record<string, AssetArchetypeData>>} extendedDataRecords
  * @param {Record<AssetPoseName, Pose>} poseRecord
  */
 function testAssetHasPNG(assets, extendedDataRecords, poseRecord) {
+	const migrationManifest = loadMigrationManifest();
+	const defaultPoseFolderByGroup = loadDefaultPoseFolderByGroup();
 	const expressionGroups = new Set(assets.filter(a => a.Group.AllowExpression).map(a => a.Group.Name));
 	const assetGroups = /** @type {Record<AssetGroupName, AssetGroup>} */({});
 	const assetGroupMap = /** @type {Record<AssetGroupName, { F: Set<string>, M: Set<string>, FM: Set<string> }>} */({});
@@ -1198,8 +1270,6 @@ function testAssetHasPNG(assets, extendedDataRecords, poseRecord) {
 			bodyStyles.splice(0, 0, DEFAULT_STYLE);
 
 			for (const style of bodyStyles) {
-				const styleSubpath = style !== DEFAULT_STYLE ? `Override/${style}/` : "";
-				const root = `${BASE_PATH}Assets/${asset.Group.Family}/${styleSubpath}${asset.DynamicGroupName}/`;
 				for (const color of colors) {
 					for (const expression of expressions) {
 						for (const [type, poseList] of layerTypes) {
@@ -1212,17 +1282,35 @@ function testAssetHasPNG(assets, extendedDataRecords, poseRecord) {
 								}
 
 								for (const parent of parentNames) {
+									// Placeholder groups (ArmsLeft, HandsRight, ...) store art on the parent body asset.
+									const effectiveAssetName = asset.Name || parent || "";
+									const isMigrated = assetCheckIsMigrated(
+										migrationManifest,
+										effectiveAssetName,
+										asset.DynamicGroupName,
+									);
+									const root = assetCheckLayerRoot(asset, style, isMigrated, effectiveAssetName);
+									const defaultPose = !pose && isMigrated
+										? defaultPoseFolderByGroup[asset.Group.Name]
+										: null;
+									const expressionFolder = expression
+										? expression
+										: (isMigrated && expressions.length > 1 ? "Default" : "");
 									const pngPath = (
 										root
-										+ (pose ? `${pose}/` : "")
-										+ (expression ? `${expression}/` : "")
+										+ (pose ? `${pose}/` : defaultPose ? `${defaultPose}/` : "")
+										+ (expressionFolder ? `${expressionFolder}/` : "")
 									);
-									const fileParts = [];
-									if (asset.Name) fileParts.push(asset.Name);
-									if (parent) fileParts.push(parent);
-									if (type) fileParts.push(type);
-									if (color) fileParts.push(color);
-									if (layer.Name) fileParts.push(layer.Name);
+									const fileParts = [
+										...(!isMigrated ? [asset.Name] : []),
+										...(isMigrated && !asset.Name && parent ? [] : [parent]),
+										type,
+										color,
+										layer.Name,
+									].filter((part) => part);
+									if (isMigrated && fileParts.length === 0) {
+										fileParts.push(effectiveAssetName);
+									}
 									const file = pngPath + fileParts.join("_") + ".png";
 									const key = `${asset.DynamicGroupName}:${asset.Name}:${layer.Name}`;
 									if (!fs.existsSync(file)) {
@@ -1402,7 +1490,7 @@ function sanitizeVMOutput(input) {
 	));
 }
 
-(function () {
+await (async function () {
 	const [commonFile, ...neededFiles] = NEEDED_FILES;
 
 	/** @type {Record<"warn" | "error", [src: string, ...rest: unknown[]][]>} */
@@ -1458,6 +1546,7 @@ function sanitizeVMOutput(input) {
 		};
 		return obj;
 	};
+	await context.CommonAssetMigrationLoadAsync();
 	for (const file of neededFiles) {
 		vm.runInContext(fs.readFileSync(BASE_PATH + file, { encoding: "utf-8" }), context, {
 			filename: file,

@@ -2973,3 +2973,95 @@ function CommonMax(arg0, ...args) {
 function CommonMin(arg0, ...args) {
 	return /** @type {T} */(Math.min(arg0, ...args));
 }
+
+var { CommonAssetMigrationLoadAsync, CommonAssetIsMigrated } = (() => {
+	const migrationPath = "Assets/Migration.json";
+	/** @type {ReadonlyMap<string, ReadonlySet<string>>} */
+	let migratedAssets = new Map();
+	/** @type {null | Promise<void>} */
+	let loadPromise = null;
+
+	/**
+	 * @returns {Promise<void>}
+	 */
+	async function load() {
+		if (loadPromise != null) return loadPromise;
+		loadPromise = (async () => {
+			try {
+				const response = await CommonFetch(migrationPath);
+				if (response.status !== 200) {
+					console.warn(`Asset migration manifest unavailable (HTTP ${response.status})`);
+					migratedAssets = new Map();
+					return;
+				}
+				const parsed = JSON.parse(await response.text());
+				if (!isManifest(parsed)) {
+					console.warn("Asset migration manifest failed validation");
+					migratedAssets = new Map();
+					return;
+				}
+
+				/** @type {Map<string, ReadonlySet<string>>} */
+				const nextMigratedAssets = new Map();
+				const manifestAssets = parsed.assets ?? {};
+				for (const [assetName, manifestEntry] of CommonEntries(manifestAssets)) {
+					const groups = manifestEntry.groups;
+					if (groups != null && groups.length > 0) {
+						nextMigratedAssets.set(assetName, new Set(groups));
+					} else {
+						console.warn(`Ignoring invalid migration manifest entry for asset "${assetName}"`);
+					}
+				}
+				migratedAssets = nextMigratedAssets;
+			} catch (error) {
+				console.warn("Failed to load asset migration manifest:", error);
+				migratedAssets = new Map();
+			}
+		})();
+		return loadPromise;
+	}
+
+	/**
+	 * @param {string} assetName
+	 * @param {AssetGroupName | ""} [groupName]
+	 * @returns {boolean}
+	 */
+	function isMigrated(assetName, groupName = "") {
+		const migratedGroups = migratedAssets.get(assetName);
+		if (!migratedGroups) {
+			return false;
+		}
+		if (!groupName) {
+			return true;
+		}
+		return migratedGroups.has(groupName);
+	}
+
+	/**
+	 * Return whether the value is a migration manifest.
+	 * @param {unknown} value
+	 * @returns {value is Manifest}
+	 */
+	function isManifest(value) {
+		if (!CommonIsObject(value)) return false;
+		const manifest = /** @type {Record<string, unknown>} */ (value);
+		if (manifest.version !== undefined && typeof manifest.version !== "number") return false;
+		if (manifest.assets === undefined) return true;
+		if (!CommonIsObject(manifest.assets)) return false;
+		const assets = /** @type {Record<string, unknown>} */ (manifest.assets);
+		return Object.values(assets).every((entry) => {
+			if (!CommonIsObject(entry)) return false;
+			const record = /** @type {Record<string, unknown>} */ (entry);
+			if (record.migratedAt !== undefined && typeof record.migratedAt !== "string") return false;
+			const groups = record.groups;
+			return groups === undefined || (
+				CommonIsArray(groups) && groups.every((group) => typeof group === "string")
+			);
+		});
+	}
+
+	return {
+		CommonAssetMigrationLoadAsync: load,
+		CommonAssetIsMigrated: isMigrated,
+	};
+})();

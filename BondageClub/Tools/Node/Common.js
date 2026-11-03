@@ -1,6 +1,7 @@
 /** Common utility scripts for the test suite. */
 
 import fs from "fs";
+import path from "path";
 
 /** Files needed to check the Female3DCG assets. */
 export const NEEDED_FILES = [
@@ -78,7 +79,7 @@ export const NEEDED_FILES = [
 	"Screens/Inventory/ItemMisc/MistressPadlock/MistressPadlock.js",
 	"Screens/Inventory/ItemMisc/ExclusivePadlock/ExclusivePadlock.js",
 	"Screens/Inventory/ItemNeck/PetSuitShockCollar/PetSuitShockCollar.js",
-	"Screens/Inventory/Wings/SteampunkWings/SteampunkWings.js",
+	"Assets/PaperDoll/SteampunkWings-Wings/SteampunkWings.js",
 	"Screens/Inventory/ItemFeet/NylonRope/NylonRope.js",
 	"Screens/Inventory/ItemArms/NylonRope/NylonRope.js",
 	"Screens/Inventory/ItemFeet/HempRope/HempRope.js",
@@ -104,6 +105,108 @@ export const NEEDED_FILES = [
 
 /** The base path for any BC asset/script lookup. */
 export const BASE_PATH = "../../";
+
+/** Subdirectory under Assets for asset-first migrated art. */
+export const ASSETS_PAPERDOLL_DIR = "PaperDoll";
+
+/** @type {string} */
+export const ASSETS_FEMALE3DCG_JS = "Assets/Female3DCG.js";
+
+/**
+ * @param {string} assetGroupFolder
+ * @param {...string} segments
+ * @returns {string}
+ */
+export function female3DCGMigratedFolderRel(assetGroupFolder, ...segments) {
+	return path.posix.join("Assets", ASSETS_PAPERDOLL_DIR, assetGroupFolder, ...segments);
+}
+
+/**
+ * @param {string} assetName
+ * @param {string} groupName
+ * @param {...string} segments
+ * @returns {string}
+ */
+export function female3DCGMigratedAssetRel(assetName, groupName, ...segments) {
+	return female3DCGMigratedFolderRel(`${assetName}-${groupName}`, ...segments);
+}
+
+/**
+ * @param {string} [rootPath]
+ * @returns {Record<string, string>}
+ */
+export function loadDefaultPoseFolderByGroup(rootPath = BASE_PATH) {
+	/** @type {Record<string, string>} */
+	const map = {};
+	let currentGroup = null;
+	for (const line of fs.readFileSync(path.join(rootPath, ASSETS_FEMALE3DCG_JS), { encoding: "utf8" }).split("\n")) {
+		const groupMatch = line.match(/^\t\tGroup: "([^"]+)"/);
+		if (groupMatch) {
+			currentGroup = groupMatch[1];
+			if (currentGroup === "BodyUpper") map[currentGroup] = "BaseUpper";
+			else if (currentGroup === "BodyLower") map[currentGroup] = "BaseLower";
+			continue;
+		}
+		const parentMatch = line.match(/^\t\tParentGroup: "([^"]+)"/);
+		if (!parentMatch || !currentGroup) continue;
+		if (parentMatch[1] === "BodyUpper") map[currentGroup] = "BaseUpper";
+		else if (parentMatch[1] === "BodyLower") map[currentGroup] = "BaseLower";
+	}
+	return map;
+}
+
+/**
+ * Groups that store facial expressions in subfolders.
+ * The unset expression lives in `Default/`.
+ * @param {string} [rootPath]
+ * @returns {ReadonlySet<string>}
+ */
+export function loadExpressionGroups(rootPath = BASE_PATH) {
+	/** @type {Set<string>} */
+	const groups = new Set();
+	let currentGroup = null;
+	let seenAsset = false;
+	for (const line of fs.readFileSync(path.join(rootPath, ASSETS_FEMALE3DCG_JS), { encoding: "utf8" }).split("\n")) {
+		const groupMatch = line.match(/^\t\tGroup: "([^"]+)"/);
+		if (groupMatch) {
+			currentGroup = groupMatch[1];
+			seenAsset = false;
+			continue;
+		}
+		if (/^\t\tAsset: /.test(line)) {
+			seenAsset = true;
+			continue;
+		}
+		if (!seenAsset && currentGroup && /^\t\tAllowExpression: /.test(line)) {
+			groups.add(currentGroup);
+		}
+	}
+	return groups;
+}
+
+/**
+ * Groups whose sole asset shares the group name (Emoticon, Blush, Fluids, ...).
+ * @param {string} [rootPath]
+ * @returns {ReadonlySet<string>}
+ */
+export function loadSingletonAssetGroups(rootPath = BASE_PATH) {
+	/** @type {Set<string>} */
+	const groups = new Set();
+	let currentGroup = null;
+	for (const line of fs.readFileSync(path.join(rootPath, ASSETS_FEMALE3DCG_JS), { encoding: "utf8" }).split("\n")) {
+		const groupMatch = line.match(/^\t\tGroup: "([^"]+)"/);
+		if (groupMatch) {
+			currentGroup = groupMatch[1];
+			continue;
+		}
+		const assetMatch = line.match(/^\t\tAsset: \["([^"]+)"\]/);
+		if (!assetMatch || !currentGroup) continue;
+		if (assetMatch[1] === currentGroup) {
+			groups.add(currentGroup);
+		}
+	}
+	return groups;
+}
 
 export const errorState = {
 	local: false,
@@ -136,6 +239,29 @@ export const fromEntries = /** @type {<KT extends string, VT>(list: Iterable<rea
  */
 export function isObject(obj) {
 	return obj !== null && typeof obj === "object" && !Array.isArray(obj);
+}
+
+/**
+ * @typedef {{ version?: number, assets?: Record<string, { migratedAt?: string, groups?: string[] }> }} Manifest
+ */
+
+/**
+ * Return whether the value is a migration manifest.
+ * @param {unknown} value
+ * @returns {value is Manifest}
+ */
+export function isManifest(value) {
+	if (!isObject(value)) return false;
+	if (value.version !== undefined && typeof value.version !== "number") return false;
+	if (value.assets === undefined) return true;
+	if (!isObject(value.assets)) return false;
+	return Object.values(value.assets).every((entry) => {
+		if (!isObject(entry)) return false;
+		if (entry.migratedAt !== undefined && typeof entry.migratedAt !== "string") return false;
+		return entry.groups === undefined || (
+			Array.isArray(entry.groups) && entry.groups.every((group) => typeof group === "string")
+		);
+	});
 }
 
 /**
@@ -196,14 +322,14 @@ export function parseCSV(str) {
 
 /**
  * Loads a CSV file and verifies correct column widths
- * @param {string} path Path to file, relative to BondageClub directory
+ * @param {string} filePath Path to file, relative to BondageClub directory
  * @param {number} expectedWidth Expected number of columns
  */
-export function loadCSV(path, expectedWidth) {
-	const data = parseCSV(fs.readFileSync(BASE_PATH + path, { encoding: "utf-8" }));
+export function loadCSV(filePath, expectedWidth) {
+	const data = parseCSV(fs.readFileSync(BASE_PATH + filePath, { encoding: "utf-8" }));
 	for (let line = 0; line < data.length; line++) {
 		if (data[line].length !== expectedWidth) {
-			error(`Bad width of line ${line + 1} (${data[line].length} vs ${expectedWidth}) in ${path}`);
+			error(`Bad width of line ${line + 1} (${data[line].length} vs ${expectedWidth}) in ${filePath}`);
 		}
 	}
 	return data;

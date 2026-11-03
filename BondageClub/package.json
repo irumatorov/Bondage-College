@@ -21,6 +21,7 @@
 		"assets:lint": "run-s -cn assets:prettier assets:eslint",
 		"assets:lint:fix": "prettier-eslint --write Assets/Female3DCG.js Assets/Female3DCGExtended.js",
 		"assets:check": "cd Tools/Node && node --unhandled-rejections=strict AssetCheck",
+		"assets:migrate": "cd Tools/Node && node --unhandled-rejections=strict AssetMigrate",
 		"assets:typecheck": "tsc -p Tools/Node/tsconfig-assetcheck.json",
 		"assets:posemapping": "cd Tools/Node && node --unhandled-rejections=strict PoseMapping",
 		"scripts:lint": "eslint --cache --cache-location .cache/eslint \"Scripts/**/*.js\" \"Screens/**/*.js\" \"Tools/**/*.js\" \"Backgrounds/Backgrounds.js\"",

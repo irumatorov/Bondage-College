@@ -29,23 +29,79 @@ function CommonDrawCanvasPrepare(C) {
  * @param {AssetLayer} layer - the layer of the asset.
  * @param {string} layerType - CLT layer name, e.g. typed3
  * @param {Asset} asset - target asset
+ * @param {string} [parentAssetName] - Parent asset name used as the legacy filename prefix for placeholder groups
  * @returns {string} baseURL - URL pointing to asset art to load
  */
-function AssetBaseURL(C, group, groupName, pose, layer, layerType, asset) {
+function AssetBaseURL(C, group, groupName, pose, layer, layerType, asset, parentAssetName = "") {
 	// determine what body is selected
 	const bodyStyle = /** @type {Asset} */ (InventoryGet(C, "BodyStyle")?.Asset ?? AssetGet("Female3DCG", "BodyStyle", "Original"));
 	const layerTypeNumber = parseInt(layerType.slice(5), 10);
-
-	// set base body url
-	const poseSegment = pose ? pose + "/" : "";
-	let baseURL = `Assets/${group.Family}/${groupName}/${poseSegment}`;
+	const effectiveAssetName = asset.Name || parentAssetName;
+	const migrated = CommonAssetIsMigrated(effectiveAssetName, groupName);
+	const pathRoot = migrated ? `PaperDoll/${effectiveAssetName}-${groupName}` : groupName;
+	let poseSegment = pose ? `${pose}/` : "";
+	if (!poseSegment && migrated && group.BasePose) {
+		poseSegment = `${group.BasePose}/`;
+	}
+	let baseURL = migrated
+		? `Assets/${pathRoot}/${poseSegment}`
+		: `Assets/${group.Family}/${pathRoot}/${poseSegment}`;
 	if (bodyStyle?.Layer[0].StyleOverride?.includes(groupName) || layer.StyleOverride?.includes(bodyStyle.Name)) {
 		if (!layer.CreateLayerTypesOverride?.length || layer.CreateLayerTypesOverride?.includes(layerTypeNumber)) {
-			baseURL = `Assets/${group.Family}/Override/${bodyStyle.Name}/${groupName}/${poseSegment}`;
+			if (migrated) {
+				baseURL = `Assets/${pathRoot}/Override/${bodyStyle.Name}/${poseSegment}`;
+			} else {
+				baseURL = `Assets/${group.Family}/Override/${bodyStyle.Name}/${groupName}/${poseSegment}`;
+			}
 		}
 	}
 
 	return baseURL;
+}
+
+/**
+ * Folder segment for the current expression.
+ * Migrated expression groups keep the unset expression in `Default/`.
+ * @param {Asset} asset
+ * @param {AssetGroup} group
+ * @param {AssetGroupName} groupName
+ * @param {string | null | undefined} currentExpression
+ * @param {string} parentAssetName
+ * @returns {string}
+ */
+function CommonDrawExpressionSegment(asset, group, groupName, currentExpression, parentAssetName) {
+	if (currentExpression) return `${currentExpression}/`;
+	const effectiveAssetName = asset.Name || parentAssetName;
+	if (group.HasExpression() && CommonAssetIsMigrated(effectiveAssetName, groupName)) {
+		return "Default/";
+	}
+	return "";
+}
+
+/**
+ * Constructs the URL for a layer.
+ * @param {Asset} asset
+ * @param {AssetGroupName} groupName
+ * @param {string} parentAssetName
+ * @param {string} layerType
+ * @param {string} colorSegment
+ * @param {string} layerSegment
+ * @returns {string}
+ */
+function CommonDrawLayerURL(asset, groupName, parentAssetName, layerType, colorSegment, layerSegment) {
+	const effectiveAssetName = asset.Name || parentAssetName;
+	const migrated = CommonAssetIsMigrated(effectiveAssetName, groupName);
+	const urlParts = [
+		...(!migrated ? [asset.Name] : []),
+		...(migrated && !asset.Name && parentAssetName ? [] : [parentAssetName]),
+		layerType,
+		colorSegment,
+		layerSegment,
+	].filter((c) => c);
+	if (migrated && urlParts.length === 0) {
+		urlParts.push(effectiveAssetName);
+	}
+	return urlParts.join("_") + ".png";
 }
 
 /**
@@ -86,9 +142,7 @@ function CommonDrawAppearancePrepareMaskLayers(C) {
 				item,
 				layer,
 			);
-			const expressionSegment = currentExpression
-				? currentExpression + "/"
-				: "";
+			const expressionSegment = CommonDrawExpressionSegment(asset, group, groupName, currentExpression, parentAssetName);
 			const blinkExpressionSegment = (
 				asset.OverrideBlinking ? !group.DrawingBlink : group.DrawingBlink
 			)
@@ -143,18 +197,11 @@ function CommonDrawAppearancePrepareMaskLayers(C) {
 			}
 
 			// set the base url for the body
-			let baseURL = AssetBaseURL(C, group, groupName, poseSegment, layer, layerType, asset);
-
+			let baseURL = AssetBaseURL(C, group, groupName, poseSegment, layer, layerType, asset, parentAssetName);
 			const baseURLExpression = `${baseURL}${expressionSegment}`;
 			const baseURLBlink = `${baseURL}${blinkExpressionSegment}`;
 
-			const urlParts = [
-				asset.Name,
-				parentAssetName,
-				layerType,
-				layerSegment,
-			].filter((c) => c);
-			const layerURL = urlParts.join("_") + ".png";
+			const layerURL = CommonDrawLayerURL(asset, groupName, parentAssetName, layerType, "", layerSegment);
 
 			const maskPriority = layer.TextureMask?.ApplyToAbove ?
 				-1
@@ -250,7 +297,7 @@ function CommonDrawAppearanceBuild(
 
 		// Check if we need to draw a different expression (for facial features)
 		const currentExpression = CommonDrawResolveLayerExpression(C, item, layer);
-		const expressionSegment = currentExpression ? currentExpression + "/" : "";
+		const expressionSegment = CommonDrawExpressionSegment(asset, group, groupName, currentExpression, parentAssetName);
 		const blinkExpressionSegment = (
 			asset.OverrideBlinking ? !group.DrawingBlink : group.DrawingBlink
 		)
@@ -437,8 +484,8 @@ function CommonDrawAppearanceBuild(
 				layer,
 				layerType,
 				asset,
+				parentAssetName,
 			);
-
 			// combine the baseurl with the expression and blink segments.
 			const baseURLExpression = `${baseURL}${expressionSegment}`;
 			const baseURLBlink = `${baseURL}${blinkExpressionSegment}`;
@@ -465,14 +512,7 @@ function CommonDrawAppearanceBuild(
 				}
 			}
 
-			const urlParts = [
-				asset.Name,
-				parentAssetName,
-				layerType,
-				colorSegment,
-				layerSegment,
-			].filter((c) => c);
-			const layerURL = urlParts.join("_") + ".png";
+			const layerURL = CommonDrawLayerURL(asset, groupName, parentAssetName, layerType, colorSegment, layerSegment);
 
 			// prepare mask layers for the current group
 			const maskLayer = (maskTexLayers.get(group.Name) ?? []).filter(

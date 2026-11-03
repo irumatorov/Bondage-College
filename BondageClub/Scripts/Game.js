@@ -39,6 +39,7 @@ async function GameStart(isNode=false) {
 	}
 	DrawLoad();
 	GLDrawLoad(null, false);
+	await CommonAssetMigrationLoadAsync();
 	AssetLoadAll();
 	MapDataLoad();
 	await AssetInventoryIDValidate();

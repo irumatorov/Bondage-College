@@ -430,7 +430,7 @@ var CraftingJSON = {
 						alt: asset?.Description,
 						decoding: "async",
 						loading: "lazy",
-						src: asset == null || CharacterAppearanceItemIsHidden(asset.Name, asset.DynamicGroupName) ? "./Icons/HiddenItem.png" : `./Assets/Female3DCG/${asset.DynamicGroupName}/Preview/${asset.Name}.png`,
+						src: asset == null || CharacterAppearanceItemIsHidden(asset.Name, asset.DynamicGroupName) ? "./Icons/HiddenItem.png" : `./${AssetGetPreviewPath(asset)}/${asset.Name}.png`,
 						"aria-hidden": asset == null ? "true" : undefined,
 					},
 				},

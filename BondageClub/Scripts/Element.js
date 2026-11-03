@@ -1806,10 +1806,13 @@ var ElementButton = {
 			let tooltipChildren;
 			if (typeof icon === "string" && InventoryIconIsPadlock(icon)) {
 				name = icon;
-				src = `./Assets/Female3DCG/ItemMisc/Preview/${icon}.png`;
+				const lockAsset = AssetGet("Female3DCG", "ItemMisc", icon);
+				src = lockAsset
+					? `./${AssetGetPreviewPath(lockAsset)}/${icon}.png`
+					: `./Assets/Female3DCG/ItemMisc/Preview/${icon}.png`;
 				tooltipChildren = [InterfaceTextGet("PreviewIconPadlock").replace(
 					"AssetName",
-					(AssetGet("Female3DCG", "ItemMisc", icon)?.Description ?? ""),
+					(lockAsset?.Description ?? ""),
 				)];
 			} else if (typeof icon === "string") {
 				name = icon;
@@ -2130,7 +2133,7 @@ var ElementButton = {
 
 		options ??= {};
 		options.label ??= item.Craft?.Name || asset.Description;
-		options.image ??= `./Assets/Female3DCG/${asset.DynamicGroupName}/Preview/${asset.Name}.png`;
+		options.image ??= `./${AssetGetPreviewPath(asset)}/${asset.Name}.png`;
 		options.icons = [
 			...(options.icons ?? []),
 			DialogGetFavoriteStateDetails(C ?? Player, asset)?.Icon,

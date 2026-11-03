@@ -739,21 +739,52 @@ class ImageCache {
 		let pathPos = parts.indexOf("Assets");
 		if (pathPos === -1) return;
 
-		if (parts[++pathPos] !== "Female3DCG") return;
+		const segment = parts[++pathPos];
+		if (segment === "PaperDoll") {
+			// Migrated assets live at Assets/PaperDoll/<asset>-<group>/...
+		} else if (segment !== "Female3DCG") {
+			return;
+		}
 
-		let groupName = parts[++pathPos];
-		if (groupName === "Override") {
-			// Overrides have two extra positions
+		const rootSegment = parts[++pathPos];
+		if (rootSegment === "Override") {
+			// Legacy global overrides: Override/<style>/<group-or-asset>/...
 			pathPos += 2;
-			groupName = parts[pathPos];
+		} else if (parts[pathPos + 1] === "Override") {
+			// Migrated co-located overrides: <asset>/Override/<style>/...
+			pathPos += 3;
 		}
-		let layerName = parts[++pathPos];
-		if (!layerName.endsWith(".png")) {
-			// This is a pose directory
-			layerName = parts[++pathPos];
+		const layerName = parts[parts.length - 1];
+		if (!layerName.endsWith(".png")) return;
+
+		/** @type {string} */
+		let assetName;
+		/** @type {AssetGroupName | null} */
+		let groupName = null;
+		const migratedRoot = AssetParseMigratedRoot(rootSegment);
+		if (migratedRoot != null) {
+			assetName = migratedRoot.assetName;
+			groupName = migratedRoot.groupName;
+		} else {
+			assetName = layerName.split("_")[0].replace(".png", "");
+			if (!assetName) return;
+			const groupCandidate = [
+				...parts.slice(pathPos + 1, parts.length - 1).reverse(),
+				parts[pathPos],
+			].find((part) => AssetGroupGet("Female3DCG", /** @type {AssetGroupName} */ (part)));
+			if (groupCandidate) {
+				groupName = /** @type {AssetGroupName} */ (groupCandidate);
+			}
 		}
-		const assetName = layerName.split("_")[0].replace(".png", "");
-		const wearing = Character.filter(c => c.Appearance.some(i => (i.Asset.Group.Name === groupName || i.Asset.DynamicGroupName === groupName) && i.Asset.Name === assetName ));
+
+		const wearing = Character.filter(c => c.Appearance.some((i) => (
+			i.Asset.Name === assetName
+			&& (
+				groupName == null
+				|| i.Asset.Group.Name === groupName
+				|| i.Asset.DynamicGroupName === groupName
+			)
+		)));
 		for (const char of wearing) {
 			char.MustDraw = true;
 		}

@@ -4239,7 +4239,7 @@ class _DialogCraftedMenu extends _DialogFocusMenu {
 
 		icon.innerHTML = "";
 		[
-			ElementButton._ParseImage(icon.id, `./Assets/Female3DCG/${item.Asset.DynamicGroupName}/Preview/${item.Asset.Name}.png`),
+			ElementButton._ParseImage(icon.id, `./${AssetGetPreviewPath(item.Asset)}/${item.Asset.Name}.png`),
 			ElementButton._ParseLabel(icon.id, item.Asset.Description),
 			ElementButton._ParseIcons(icon.id, [
 				DialogGetFavoriteStateDetails(C, item.Asset)?.Icon,
