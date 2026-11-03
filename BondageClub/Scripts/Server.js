@@ -1755,12 +1755,14 @@ var ServerAccountDataSyncedValidate = {
 			}
 
 			const { Type, Value } = reputation;
-			if (
-				CommonIncludes(ReputationValidReputations, Type)
-				&& CommonIsInteger(Value, -100, 100)
-			) {
-				ret.push({ Type, Value });
+			if (!ReputationConfig[Type]) {
+				continue;
 			}
+			const minValue = ReputationConfig[Type].negative ? -100 : 0;
+			ret.push({
+				Type,
+				Value: CommonClamp(Value, minValue, 100),
+			});
 		}
 		return ret;
 	},

@@ -398,6 +398,20 @@ PronounSubjectItIt,it
 ReceivedBeep,Received at
 RemoveItemWithTimer,Remove item when the lock timer runs out
 Removing,Removing...
+ReputationABDL,ABDL
+ReputationAsylumNegative,Asylum — Patient
+ReputationAsylumPositive,Asylum — Nurse
+ReputationDominantNegative,D/s – Submissive
+ReputationDominantPositive,D/s – Dominant
+ReputationGambling,Gambling Hall
+ReputationGaming,Dungeoneer
+ReputationKidnap,Kidnappers League
+ReputationLARP,LARP Battles
+ReputationMaid,Maid Sorority
+ReputationHouseAmplector,House Amplector
+ReputationHouseCorporis,House Corporis
+ReputationHouseMaiestas,House Maiestas
+ReputationHouseVincula,House Vincula
 RequireBondageLevel,Need Bondage ReqLevel
 RequirePlayer,Requires the player character
 RequireSelfBondage,Requires self-bondage ReqLevel.
