@@ -1,7 +1,23 @@
 "use strict";
 
+/** @type {Record<ReputationType, { negative?: true }>} */
+var ReputationConfig = {
+	ABDL: {},
+	Asylum: { negative: true },
+	Dominant: { negative: true },
+	Gambling: {},
+	Gaming: {},
+	Kidnap: {},
+	LARP: {},
+	Maid: {},
+	HouseAmplector: {},
+	HouseCorporis: {},
+	HouseMaiestas: {},
+	HouseVincula: {},
+};
+
 /** @type {ReputationType[]} */
-var ReputationValidReputations = ["Dominant", "Kidnap", "ABDL", "Gaming", "Maid", "LARP", "Asylum", "Gambling", "HouseMaiestas", "HouseVincula", "HouseAmplector", "HouseCorporis"];
+var ReputationValidReputations = CommonKeys(ReputationConfig);
 
 /**
  * Alters a given reputation value for the player
@@ -12,38 +28,53 @@ var ReputationValidReputations = ["Dominant", "Kidnap", "ABDL", "Gaming", "Maid"
  */
 function ReputationChange(RepType, RepValue, Push=true) {
 
-	if (ReputationValidReputations.includes(RepType)) {
-
-		// Nothing will be done for a zero change
-		RepValue = parseInt(RepValue) || 0;
-		if (RepValue != 0) {
-
-			// If the reputation already exists, we update and push it
-			for (let R = 0; R < Player.Reputation.length; R++)
-				if (Player.Reputation[R].Type == RepType) {
-					Player.Reputation[R].Value = Player.Reputation[R].Value + RepValue;
-					if (Player.Reputation[R].Value > 100) Player.Reputation[R].Value = 100;
-					if (Player.Reputation[R].Value < -100) Player.Reputation[R].Value = -100;
-					if ((Push == null) || Push) ServerPlayerReputationSync();
-					return;
-				}
-
-			// Creates the new reputation
-			var NewRep = {
-				Type: RepType,
-				Value: RepValue
-			};
-			if (NewRep.Value > 100) NewRep.Value = 100;
-			if (NewRep.Value < -100) NewRep.Value = -100;
-			Player.Reputation.push(NewRep);
-			if ((Push == null) || Push) ServerPlayerReputationSync();
-
-		}
-	}
-
-	else {
+	if (!ReputationConfig[RepType]) {
 		console.error(`Invalid reputation type "${RepType}"`);
+		return;
 	}
+	if (typeof RepValue === "string") {
+		RepValue = CommonParseInt(RepValue) ?? 0;
+	}
+
+	if (RepValue === 0) return;
+
+	const minValue = ReputationConfig[RepType].negative ? -100 : 0;
+	let rep = Player.Reputation.find(r => r.Type === RepType);
+	if (rep) {
+		rep.Value = CommonClamp(rep.Value + RepValue, minValue, 100);
+	} else {
+		Player.Reputation.push({
+			Type: RepType,
+			Value: CommonClamp(RepValue, minValue, 100),
+		});
+	}
+	if (Push) ServerPlayerReputationSync();
+}
+
+/**
+ * Get the human-readable label for a given reputation type and value
+ *
+ * Because there's a couple "mirrored" reputation, where a positive value is labelled one way,
+ * and a negative one another way, this allows getting the proper name based on the value it has.
+ *
+ * @param {ReputationType} type
+ * @param {number} value
+ * @returns {string | null}
+ */
+function ReputationLabel(type, value) {
+	/**
+	 * @param {ReputationType} t
+	 * @returns {t is "Asylum" | "Dominant"}
+	 */
+	const isDualReputation = (t) => {
+		return ReputationConfig[t].negative ?? false;
+	};
+	if (isDualReputation(type)) {
+		return value < 0 ?
+			InterfaceTextGet(`Reputation${type}Negative`)
+			: InterfaceTextGet(`Reputation${type}Positive`);
+	}
+	return InterfaceTextGet(`Reputation${type}`);
 }
 
 /**
