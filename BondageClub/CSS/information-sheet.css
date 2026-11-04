@@ -78,7 +78,7 @@
 		"traits traits relationships";
 }
 
-.information-sheet-body[data-layout="basic"] {
+.information-sheet-body[data-layout="simple"] {
 	grid-template-areas:
 		"identity identity relationships"
 		"identity identity relationships";

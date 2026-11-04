@@ -261,13 +261,13 @@ function InformationSheetContent(C) {
 /**
  * Returns the screen layout to use for the given character.
  * @param {Character} C
- * @returns {"player" | "online" | "npc" | "basic"}
+ * @returns {CharacterType}
  */
 function InformationSheetLayout(C) {
-	if (C.IsNpc()) return "npc";
-	if (C.IsPlayer()) return "player";
-	if (C.IsOnline()) return "online";
-	return "basic";
+	if (C.IsNpc()) return CharacterType.NPC;
+	if (C.IsPlayer()) return CharacterType.PLAYER;
+	if (C.IsOnline()) return CharacterType.ONLINE;
+	return CharacterType.SIMPLE;
 }
 
 /**
