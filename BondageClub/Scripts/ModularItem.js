@@ -110,11 +110,7 @@ function ModularItemInit(Data, C, Item, Push=true, Refresh=true) {
 	if (!CommonIsObject(Item.Property)) {
 		Item.Property = { TypeRecord: {} };
 	} else if (!CommonIsObject(Item.Property.TypeRecord)) {
-		if (typeof Item.Property.Type === "string") {
-			Item.Property.TypeRecord = ExtendedItemTypeToRecord(Data.asset, Item.Property.Type);
-		} else {
-			Item.Property.TypeRecord = {};
-		}
+		Item.Property.TypeRecord = {};
 	}
 
 	/** @type {TypeRecord} */

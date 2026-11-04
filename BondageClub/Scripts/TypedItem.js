@@ -572,12 +572,7 @@ function TypedItemInit({ options, name, baselineProperty, asset }, C, Item, Push
 	if (!CommonIsObject(Item.Property)) {
 		Item.Property = { TypeRecord: {} };
 	} else if (!CommonIsObject(Item.Property.TypeRecord)) {
-		const type = Item.Property[field];
-		if (typeof type === "string") {
-			Item.Property.TypeRecord = ExtendedItemTypeToRecord(asset, type);
-		} else {
-			Item.Property.TypeRecord = {};
-		}
+		Item.Property.TypeRecord = {};
 	}
 
 	/** @type {TypeRecord} */

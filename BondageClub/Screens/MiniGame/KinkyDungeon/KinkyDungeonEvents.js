@@ -178,7 +178,7 @@ let KDEventMapInventory = {
 				if (asset.Name == KDRestraint(item).Asset) {
 					KinkyDungeonPlayer.Appearance[A].Property = {
 						"Text": "PATIENT",
-						"Type": "ShortsAndStraps",
+						"TypeRecord": { typed: 2 },
 						"Block": [
 							"ItemNipples",
 							"ItemNipplesPiercings",

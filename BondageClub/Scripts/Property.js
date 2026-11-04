@@ -1198,7 +1198,6 @@ var PropertyData = {
 	TranslationY: undefined,
 	TriggerCount: undefined,
 	TriggerValues: undefined,
-	Type: undefined,
 	TypeRecord: new PropertyDataEntry("TypeRecord", undefined, {
 		compress(prop) {
 			const entries = CommonEntries(prop ?? {}).filter(([k, v]) => !!v);
