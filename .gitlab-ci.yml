@@ -5,7 +5,7 @@ check:
   stage: build
   only:
     - merge_requests
-  image: node:24
+  image: node:26
   cache:
     key:
       files:
