@@ -870,7 +870,7 @@ function LoginLoversItems() {
 	// Note that as the Slave collar isn't yet an archetypal asset, that's why it gets skipped by validation
 	if (LoversNumbers.length < 1) {
 		const Collar = InventoryGet(Player,"ItemNeck");
-		if (Collar && Collar.Property && (Collar.Asset.Name == "SlaveCollar") && (Collar.Property.Type == "LoveLeatherCollar")) {
+		if (Collar && Collar.Property && (Collar.Asset.Name == "SlaveCollar") && (Collar.Property.TypeRecord?.noarch === 21)) {
 			Collar.Property = CommonCloneDeep(InventoryItemNeckSlaveCollarTypes[0].Property);
 			Collar.Color = [...Collar.Asset.DefaultColor];
 		}

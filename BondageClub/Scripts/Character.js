@@ -2263,14 +2263,6 @@ function CharacterDecompressWardrobe(Wardrobe) {
 
 	return compressedWardrobe.map(outfit => {
 		return outfit.map(([ Name, Group, Color, Property ]) => {
-			if (typeof Property?.Type === "string" && !CommonIsObject(Property?.TypeRecord)) {
-				const asset = AssetGet("Female3DCG", Group, Name);
-				if (!asset) {
-					console.error(`unable to find ${Group}/${Name}, ignoring`);
-				} else {
-					Property.TypeRecord = ExtendedItemTypeToRecord(asset, Property.Type);
-				}
-			}
 			return { Name, Group, Color, Property };
 		}).filter(o => o);
 	});

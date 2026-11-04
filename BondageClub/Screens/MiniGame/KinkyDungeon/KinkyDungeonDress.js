@@ -772,7 +772,11 @@ function KDApplyItem(inv, tags) {
 					type = restraint.changeRenderType[key];
 				}
 			}
-			placed.Property = {Type: type, Difficulty: restraint.power, LockedBy: inv.lock || (KDGetCurse(inv) && KDCurses[KDGetCurse(inv)].lock) ? "MetalPadlock" : undefined};
+			placed.Property = {
+				TypeRecord: ExtendedItemTypeToRecord(placed.Asset, type),
+				Difficulty: restraint.power,
+				LockedBy: inv.lock || (KDGetCurse(inv) && KDCurses[KDGetCurse(inv)].lock) ? "MetalPadlock" : undefined,
+			};
 
 			/*if ((!already) && type) {
 				KinkyDungeonPlayer.FocusGroup = AssetGroupGet("Female3DCG", AssetGroup);
