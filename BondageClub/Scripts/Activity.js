@@ -413,7 +413,7 @@ function ActivityEffect(S, C, A, Z, Count=1, Asset) {
 	Count = CommonClamp(Count ?? 1, 1, Infinity);
 
 	// Calculates the next progress factor
-	var Factor = (PreferenceGetActivityFactor(C, activity.Name, (C.IsPlayer())) * 5) - 10; // Check how much the character likes the activity, from -10 to +10
+	let Factor = (PreferenceGetActivityFactor(C, activity.Name, (C.IsPlayer())) * 5) - 10; // Check how much the character likes the activity, from -10 to +10
 	Factor = Factor + (PreferenceGetZoneFactor(C, Z) * 5) - 10; // The zone used also adds from -10 to +10
 	Factor = Factor + Math.floor((Math.random() * 8)); // Random 0 to 7 bonus
 	if ((C.ID != S.ID) && (((!C.IsPlayer()) && C.IsLoverOfPlayer()) || ((C.IsPlayer()) && S.IsLoverOfPlayer()))) Factor = Factor + Math.floor((Math.random() * 8)); // Another random 0 to 7 bonus if the target is the player's lover
@@ -449,7 +449,7 @@ function ActivityEffectFlat(S, C, Amount, Z, Count=1, Asset) {
 	if ((Count == null) || (Count == undefined) || (Count == 0)) Count = 1;
 
 	// Calculates the next progress factor
-	var Factor = Amount; // Check how much the character likes the activity, from -10 to +10
+	let Factor = Amount; // Check how much the character likes the activity, from -10 to +10
 	Factor = Factor + (PreferenceGetZoneFactor(C, Z) * 5) - 10; // The zone used also adds from -10 to +10
 	Factor = Factor + ActivityFetishFactor(C) * 2; // Adds a fetish factor based on the character preferences
 	Factor = Factor + Math.round(Factor * (Count - 1) / 3); // if the action is done repeatedly, we apply a multiplication factor based on the count
@@ -534,7 +534,7 @@ function ActivitySetArousalTimer(C, Activity, Zone, Progress, Asset) {
  * @returns {void} - Nothing
  */
 function ActivityOrgasmProgressBar(X, Y) {
-	var Pos = 0;
+	let Pos = 0;
 	if ((ActivityOrgasmGameTimer != null) && (ActivityOrgasmGameTimer > 0) && (CurrentTime < Player.ArousalSettings.OrgasmTimer))
 		Pos = ((Player.ArousalSettings.OrgasmTimer - CurrentTime) / ActivityOrgasmGameTimer) * 100;
 	if (Pos < 0) Pos = 0;
@@ -860,7 +860,7 @@ function ActivityVibratorLevel(C, Level) {
  */
 function ActivityRunSelf(Source, Target, Activity, Group, Asset) {
 	if (((Player.ArousalSettings.Active == "Hybrid") || (Player.ArousalSettings.Active == "Automatic")) && Source.IsPlayer() && !Target.IsPlayer()) {
-		var Factor = (PreferenceGetActivityFactor(Player, Activity.Name, false) * 5) - 10; // Check how much the player likes the activity, from -10 to +10
+		let Factor = (PreferenceGetActivityFactor(Player, Activity.Name, false) * 5) - 10; // Check how much the player likes the activity, from -10 to +10
 		Factor = Factor + Math.floor((Math.random() * 8)); // Random 0 to 7 bonus
 		if (Target.IsLoverOfPlayer()) Factor = Factor + Math.floor((Math.random() * 8)); // Another random 0 to 7 bonus if the target is the player's lover
 		ActivitySetArousalTimer(Player, Activity, "ActivityOnOther", Factor, Asset);
@@ -1007,7 +1007,7 @@ function ActivityFetishItemFactor(C, Type) {
  * @returns {number} - The negative/positive number will have negative/positive impact on arousal
  */
 function ActivityFetishFactor(C) {
-	var Factor = 0;
+	let Factor = 0;
 	if ((C.ArousalSettings != null) && (C.ArousalSettings.Fetish != null) && (typeof C.ArousalSettings.Fetish == "string"))
 		for (let F of FetishFemale3DCG)
 			if (PreferenceGetFetishFactor(C, F.Name) != 2)

@@ -339,7 +339,7 @@ let ChatRoomResizeManager = {
 
 	// Triggered by ChatRoomResizeManager.timer at the end of a chain of resize events
 	ChatRoomResizeEventsEnd : function(){
-		var TextAreaChatLog = document.getElementById("TextAreaChatLog");
+		const TextAreaChatLog = document.getElementById("TextAreaChatLog");
 
 		if (TextAreaChatLog != null) {
 			// Scrolls to the position held before the resize events.
@@ -941,16 +941,16 @@ function ChatRoomCanBeLeashed(C) {
 function ChatRoomCanBeLeashedBy(sourceMemberNumber, C) {
 	if ((ChatRoomData && ChatRoomData.BlockCategory && ChatRoomData.BlockCategory.indexOf("Leashing") < 0) || !ChatRoomData) {
 		// Have to not be tethered, and need a leash
-		var canLeash = false;
-		var isTrapped = false;
-		var neckLock = null;
-		for (let A = 0; A < C.Appearance.length; A++)
-			if ((C.Appearance[A].Asset != null) && (C.Appearance[A].Asset.Group.Family == C.AssetFamily)) {
-				if (InventoryItemHasEffect(C.Appearance[A], "Leash", true)) {
+		let canLeash = false;
+		let isTrapped = false;
+		let neckLock = null;
+		for (const A of C.Appearance)
+			if (A.Asset?.Group?.Family == C.AssetFamily) {
+				if (InventoryItemHasEffect(A, "Leash", true)) {
 					canLeash = true;
-					if (C.Appearance[A].Asset.Group.Name == "ItemNeckRestraints")
-						neckLock = InventoryGetLock(C.Appearance[A]);
-				} else if (InventoryItemHasEffect(C.Appearance[A], "Tethered", true) || InventoryItemHasEffect(C.Appearance[A], "Mounted", true) || InventoryItemHasEffect(C.Appearance[A], "Enclose", true) || InventoryItemHasEffect(C.Appearance[A], "OneWayEnclose", true)){
+					if (A.Asset.Group.Name == "ItemNeckRestraints")
+						neckLock = InventoryGetLock(A);
+				} else if (InventoryItemHasEffect(A, "Tethered", true) || InventoryItemHasEffect(A, "Mounted", true) || InventoryItemHasEffect(A, "Enclose", true) || InventoryItemHasEffect(A, "OneWayEnclose", true)) {
 					isTrapped = true;
 				}
 			}
@@ -1626,10 +1626,10 @@ function ChatRoomUpdateDisplay() {
 		ChatRoomImpactedBySenseDep = ChatRoomCharacterDrawlist.slice();
 		ChatRoomCharacterDrawlist = [];
 		ChatRoomSenseDepBypass = true;
-		for (let CC = 0; CC < ChatRoomCharacter.length; CC++) {
-			if (ChatRoomCharacter[CC].Effect.includes("VRAvatars")) {
-				ChatRoomCharacterDrawlist.push(ChatRoomCharacter[CC]);
-				ChatRoomImpactedBySenseDep.splice(ChatRoomImpactedBySenseDep.indexOf(ChatRoomCharacter[CC]), 1);
+		for (const char of ChatRoomCharacter) {
+			if (char.Effect.includes("VRAvatars")) {
+				ChatRoomCharacterDrawlist.push(char);
+				ChatRoomImpactedBySenseDep.splice(ChatRoomImpactedBySenseDep.indexOf(char), 1);
 			}
 		}
 	} else if (Player.GetBlindLevel() > 0 && Player.GetBlindLevel() < 3 && Player.ImmersionSettings.BlindAdjacent) {
@@ -1639,17 +1639,17 @@ function ChatRoomUpdateDisplay() {
 		ChatRoomSenseDepBypass = true;
 		let PlayerIndex = -1;
 		// First find the player index
-		for (let CC = 0; CC < ChatRoomCharacter.length; CC++) {
-			if (ChatRoomCharacter[CC].IsPlayer()) {
+		for (const [CC, char] of ChatRoomCharacter.entries()) {
+			if (char.IsPlayer()) {
 				PlayerIndex = CC;
 				break;
 			}
 		}
 		// Then filter the characters
-		for (let CC = 0; CC < ChatRoomCharacter.length; CC++) {
+		for (const [CC, char] of ChatRoomCharacter.entries()) {
 			if (Math.abs(CC - PlayerIndex) <= 1) {
-				ChatRoomCharacterDrawlist.push(ChatRoomCharacter[CC]);
-				ChatRoomImpactedBySenseDep.splice(ChatRoomImpactedBySenseDep.indexOf(ChatRoomCharacter[CC]), 1);
+				ChatRoomCharacterDrawlist.push(char);
+				ChatRoomImpactedBySenseDep.splice(ChatRoomImpactedBySenseDep.indexOf(char), 1);
 			}
 		}
 	}
@@ -1886,7 +1886,7 @@ function ChatRoomStimulationMessage(Action) {
 	// We go through every stimulating item and gather their effects
 	/** @type {StimulationEventItem[]} */
 	const events = [];
-	for (let A of Player.Appearance) {
+	for (const A of Player.Appearance) {
 		// First handle single items
 		const filled = InventoryItemHasEffect(A, "FillVulva", true);
 		const plugged = InventoryItemHasEffect(A, "IsPlugged", true);
@@ -1981,7 +1981,7 @@ function ChatRoomStimulationMessage(Action) {
 		CharacterSetFacialExpression(Player, "Blush", "VeryHigh", Math.ceil(duration / 250));
 	}
 
-	var index = Math.floor(Math.random() * 3);
+	const index = Math.floor(Math.random() * 3);
 	const Dictionary = [
 		{ Tag: "AssetGroup", Text: group.Description.toLowerCase() },
 		{ Tag: "AssetName", Text: (event.item.Asset.DynamicDescription ? event.item.Asset.DynamicDescription(Player) : event.item.Asset.Description).toLowerCase() },
@@ -2151,9 +2151,9 @@ function ChatRoomUpdateOnlineBounty() {
 		let misc = InventoryGet(Player, "ItemMisc");
 		if (misc && misc.Asset && (misc.Asset.Name == "BountySuitcase" || misc.Asset.Name == "BountySuitcaseEmpty")) {
 			if (KidnapLeagueSearchFinishTime > 0 && CommonTime() > KidnapLeagueSearchFinishTime) {
-				for (let C = 0; C < ChatRoomCharacter.length; C++) {
-					if (KidnapLeagueSearchingPlayers.includes(ChatRoomCharacter[C].MemberNumber)) {
-						ServerSend("ChatRoomChat", { Content: "ReceiveSuitcaseMoney", Type: "Hidden", Target: ChatRoomCharacter[C].MemberNumber });
+				for (const C of ChatRoomCharacter) {
+					if (KidnapLeagueSearchingPlayers.includes(C.MemberNumber)) {
+						ServerSend("ChatRoomChat", { Content: "ReceiveSuitcaseMoney", Type: "Hidden", Target: C.MemberNumber });
 					}
 				}
 				if (misc.Asset.Name == "BountySuitcase") {
@@ -2175,9 +2175,9 @@ function ChatRoomUpdateOnlineBounty() {
 
 			}
 			let KidnapLeagueSearchingPlayersNew = [];
-			for (let C = 0; C < ChatRoomCharacter.length; C++) {
-				if (ChatRoomCharacter[C].CanInteract() && KidnapLeagueSearchingPlayers.includes(ChatRoomCharacter[C].MemberNumber)) {
-					KidnapLeagueSearchingPlayersNew.push(ChatRoomCharacter[C].MemberNumber);
+			for (const C of ChatRoomCharacter) {
+				if (C.CanInteract() && KidnapLeagueSearchingPlayers.includes(C.MemberNumber)) {
+					KidnapLeagueSearchingPlayersNew.push(C.MemberNumber);
 				}
 			}
 			KidnapLeagueSearchingPlayers = KidnapLeagueSearchingPlayersNew;
@@ -4046,7 +4046,7 @@ var ChatRoomMessageHandlers = [
 			// The sender out of range, strip everything that's not OOC
 			const oocRanges = SpeechGetOOCRanges(msg);
 			let newMessage = "";
-			for (let range of oocRanges) {
+			for (const range of oocRanges) {
 				newMessage += msg.substring(range.start, range.start+range.length);
 			}
 			return newMessage.length ? { msg: newMessage } : true;
@@ -4231,7 +4231,7 @@ function ChatRoomMessageDefaultMetadataExtractor(data, SenderCharacter) {
 	}
 
 	// Loop through dictionary entries and extract message metadata & collect substitutions where possible
-	for (let entry of data.Dictionary) {
+	for (const entry of data.Dictionary) {
 		if (IsSourceCharacterDictionaryEntry(entry)) {
 			const {SourceCharacter} = entry;
 			const C = Character.find((c) => c.MemberNumber === SourceCharacter);
@@ -5148,10 +5148,10 @@ async function ChatRoomSync(data) {
 
 	// Load the characters
 	ChatRoomCharacter = [];
-	for (let C = 0; C < data.Character.length; C++) {
+	for (const char of data.Character) {
 		// Treat chatroom updates from ourselves as if the updated characters had sent them
-		const sourceMemberNumber = senderNumber === Player.MemberNumber ? data.Character[C].MemberNumber : senderNumber;
-		const Char = CharacterLoadOnline(data.Character[C], sourceMemberNumber);
+		const sourceMemberNumber = senderNumber === Player.MemberNumber ? char.MemberNumber : senderNumber;
+		const Char = CharacterLoadOnline(char, sourceMemberNumber);
 		ChatRoomCharacter.push(Char);
 	}
 
@@ -5385,13 +5385,13 @@ function ChatRoomSyncSingle(data) {
 	// Sets the chat room character data
 	if (ChatRoomData == null || data == null || typeof data !== "object") return;
 	if ((data.Character == null) || (typeof data.Character !== "object")) return;
-	for (let C = 0; C < ChatRoomCharacter.length; C++)
-		if (ChatRoomCharacter[C].MemberNumber == data.Character.MemberNumber)
+	for (const [C, char] of ChatRoomCharacter.entries())
+		if (char.MemberNumber == data.Character.MemberNumber)
 			ChatRoomCharacter[C] = CharacterLoadOnline(data.Character, data.SourceMemberNumber);
 
 	// Keeps a copy of the previous version
-	for (let C = 0; C < ChatRoomData.Character.length; C++)
-		if (ChatRoomData.Character[C].MemberNumber == data.Character.MemberNumber)
+	for (const [C, char] of ChatRoomData.Character.entries())
+		if (char.MemberNumber == data.Character.MemberNumber)
 			ChatRoomData.Character[C] = data.Character;
 
 }
@@ -5563,7 +5563,7 @@ function ChatRoomSyncItem(data) {
  */
 function ChatRoomRefreshChatSettings() {
 	if (Player.ChatSettings) {
-		for (let property of CommonKeys(Player.ChatSettings))
+		for (const property of CommonKeys(Player.ChatSettings))
 			ElementSetDataAttribute("TextAreaChatLog", property, `${Player.ChatSettings[property]}`);
 
 		ChatRoomSep.UpdateDisplayNames();
@@ -5825,7 +5825,7 @@ function ChatRoomAdminAction(ActionType, Publish=true) {
  */
 function ChatRoomAdminChatAction(ActionType, Argument) {
 	if (ChatRoomPlayerIsAdmin()) {
-		var C = parseInt(Argument);
+		const C = parseInt(Argument);
 		if (!isNaN(C) && (C > 0) && (C != Player.MemberNumber))
 			ServerSend("ChatRoomAdmin", { MemberNumber: C, Action: ActionType });
 	}
@@ -5836,7 +5836,7 @@ function ChatRoomAdminChatAction(ActionType, Argument) {
  * @returns {string} - The player's current local time as a string.
  */
 function ChatRoomCurrentTime() {
-	var D = new Date();
+	const D = new Date();
 	return `${D.getHours().toString().padStart(2, "0")}:${D.getMinutes().toString().padStart(2, "0")}`;
 }
 
@@ -6460,7 +6460,7 @@ function ChatRoomSetRule(data, sender) {
 
 		// Forced Wheel of Fortune
 		if (data.Content == "OwnerRuleForceWheelFortune") {
-			for (let C of ChatRoomCharacter)
+			for (const C of ChatRoomCharacter)
 				if (C.IsOwner())
 					CharacterSetCurrent(C);
 			if (!CurrentCharacter || !CurrentCharacter.IsOwner() || !InventoryIsWorn(CurrentCharacter, "ItemDevices", "WheelFortune")) return;
@@ -6620,7 +6620,7 @@ function ChatRoomSafewordChatCommand() {
 		ChatRoomSafewordRevert();
 	else if (ServerPlayerIsInChatRoom()) {
 		/** @type {ServerChatRoomMessage} */
-		var msg = {Sender: Player.MemberNumber, Content: "SafewordDisabled", Type: "Action"};
+		const msg = {Sender: Player.MemberNumber, Content: "SafewordDisabled", Type: "Action"};
 		ChatRoomMessage(msg);
 	}
 }
@@ -6793,13 +6793,12 @@ function DialogPhotoPlayer() {
 function ChatRoomPhoto(Left, Top, Width, Height, Characters) {
 	// Temporarily remove AFK emoticons
 	let CharsToReset = [];
-	for (let CR = 0; CR < Characters.length; CR++) {
-		let C = Characters[CR];
-		let Emoticon = C.Appearance.find(A => A.Asset.Group.Name == "Emoticon");
+	for (const char of Characters) {
+		let Emoticon = char.Appearance.find(A => A.Asset.Group.Name == "Emoticon");
 		if (Emoticon && Emoticon.Property && Emoticon.Property.Expression == "Afk") {
-			CharsToReset.push(C);
+			CharsToReset.push(char);
 			Emoticon.Property.Expression = null;
-			CharacterRefresh(C, false);
+			CharacterRefresh(char, false);
 		}
 	}
 
@@ -6807,13 +6806,12 @@ function ChatRoomPhoto(Left, Top, Width, Height, Characters) {
 	CommonTakePhoto(Left, Top, Width, Height);
 
 	// Revert temporary changes
-	for (let CR = 0; CR < CharsToReset.length; CR++) {
-		let C = CharsToReset[CR];
-		const item = InventoryGet(C, "Emoticon");
+	for (const char of CharsToReset) {
+		const item = InventoryGet(char, "Emoticon");
 		if (item) {
 			item.Property.Expression = "Afk";
+			CharacterRefresh(char, false);
 		}
-		CharacterRefresh(C, false);
 	}
 }
 
@@ -6991,7 +6989,7 @@ function ChatRoomOwnerForbiddenWordCheck(Message) {
 
 	// For each word said, we check if that word is forbidden
 	let FoundWord = "";
-	for (let W of WordList)
+	for (const W of WordList)
 		if ((W != "") && (ForbiddenList.indexOf(W) >= 0)) {
 			FoundWord = W;
 			break;

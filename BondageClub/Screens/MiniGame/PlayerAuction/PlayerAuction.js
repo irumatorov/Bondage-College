@@ -16,7 +16,7 @@ var PlayerAuctionEnd = false;
  */
 function PlayerAuctionSetNextBidTime() {
 	PlayerAuctionSilenceMode = false;
-	var Rep = (200 - (ReputationGet("Dominant") * -1)) / 200;
+	const Rep = (200 - (ReputationGet("Dominant") * -1)) / 200;
 	if (PlayerAuctionBidAmount == 0) PlayerAuctionBidNextTime = CurrentTime + 3000 + (Math.random() * 3000);
 	if ((PlayerAuctionBidAmount > 0) && (PlayerAuctionBidAmount < 50)) PlayerAuctionBidNextTime = (Math.random() >= 0.12 * Rep) ? CurrentTime + 3000 + (Math.random() * 5000) : -1;
 	if ((PlayerAuctionBidAmount >= 50) && (PlayerAuctionBidAmount < 100)) PlayerAuctionBidNextTime = (Math.random() >= 0.24 * Rep) ? CurrentTime + 5000 + (Math.random() * 8000) : -1;
@@ -31,7 +31,7 @@ function PlayerAuctionSetNextBidTime() {
  * @returns {void} - Nothing
  */
 function PlayerAuctionAddCustomer(Index) {
-	var Customer = CharacterLoadNPC("NPC_Customer_" + Index.toString());
+	const Customer = CharacterLoadNPC("NPC_Customer_" + Index.toString());
 	CharacterAppearanceFullRandom(Customer);
 	if (Math.random() > 0.85) {
 		CharacterArchetypeClothes(Customer, "Mistress");
@@ -89,7 +89,7 @@ function PlayerAuctionRun() {
 
 	// If we must draw the "I bid X$" bubble
 	if ((PlayerAuctionBidTime >= CurrentTime - 3000) && (PlayerAuctionBidCurrent != -1)) {
-		var X = 800 + PlayerAuctionBidCurrent * 400;
+		const X = 800 + PlayerAuctionBidCurrent * 400;
 		DrawImage("Screens/" + CurrentModule + "/" + CurrentScreen + "/Bubble.png", X, 16);
 		DrawText(TextGet("IBid") + " " + PlayerAuctionBidAmount + "$", X + 225, 53, "Black", "Gray");
 	}

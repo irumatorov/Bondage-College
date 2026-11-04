@@ -48,12 +48,12 @@ function InventoryItemNeckFuturisticCollarDrawHook(data, originalFunction) {
 		ElementPosition("FutureCollarPasswordField", 3050, 750, 400); // Hide it off the canvas
 		ElementPosition("FutureCollarTimeField", 3050, 805, 400);
 	} else if (FuturisticCollarPage == 1 || FuturisticCollarPage == 2) {
-		var FuturisticCollarStatus = "NoItems";
-		var FuturisticCollarItems = InventoryItemNeckFuturisticCollarGetItems(C);
-		var FuturisticCollarItemsUnlockable = InventoryItemNeckFuturisticCollarGetItems(C, true);
-		var lockedItems = 0;
-		for (let I = 0; I < FuturisticCollarItems.length; I++) {
-			if (InventoryGetLock(FuturisticCollarItems[I])) {
+		let FuturisticCollarStatus = "NoItems";
+		const FuturisticCollarItems = InventoryItemNeckFuturisticCollarGetItems(C);
+		const FuturisticCollarItemsUnlockable = InventoryItemNeckFuturisticCollarGetItems(C, true);
+		let lockedItems = 0;
+		for (const futuItem of FuturisticCollarItems) {
+			if (InventoryGetLock(futuItem)) {
 				lockedItems += 1;
 			}
 		}
@@ -148,11 +148,11 @@ function InventoryItemNeckFuturisticCollarClickHook(data, originalFunction) {
 		else if (MouseIn(1125, 695, 64, 64) && canUnlock) InventoryItemNeckFuturisticCollarTogglePermission(C, item, "Arm");
 		else if (MouseIn(1125, 795, 64, 64) && canUnlock) InventoryItemNeckFuturisticCollarTogglePermission(C, item, "Leg");
 	} else if (FuturisticCollarPage == 1 || FuturisticCollarPage == 2) {
-		var FuturisticCollarItems = InventoryItemNeckFuturisticCollarGetItems(C);
-		var FuturisticCollarItemsUnlockable = InventoryItemNeckFuturisticCollarGetItems(C, true);
-		var lockedItems = 0;
-		for (let I = 0; I < FuturisticCollarItems.length; I++) {
-			if (InventoryGetLock(FuturisticCollarItems[I])) {
+		const FuturisticCollarItems = InventoryItemNeckFuturisticCollarGetItems(C);
+		const FuturisticCollarItemsUnlockable = InventoryItemNeckFuturisticCollarGetItems(C, true);
+		let lockedItems = 0;
+		for (const futuItem of FuturisticCollarItems) {
+			if (InventoryGetLock(futuItem)) {
 				lockedItems += 1;
 			}
 		}
@@ -203,7 +203,7 @@ function InventoryItemNeckFuturisticCollarClickHook(data, originalFunction) {
  */
 function InventoryItemNeckFuturisticCollarCanLock(C, LockType) {
 	// First, we check if the inventory already exists, exit if it's the case
-	var LockAsset = InventoryAvailable(Player, LockType, "ItemMisc") ? AssetGet(Player.AssetFamily, "ItemMisc", LockType) : null;
+	let LockAsset = InventoryAvailable(Player, LockType, "ItemMisc") ? AssetGet(Player.AssetFamily, "ItemMisc", LockType) : null;
 
 	// Next we check if the target player has it, but not for the mistress, owner, or lover locks
 	if (LockAsset == null && LockType != "MistressPadlock" && LockType != "FamilyPadlock" && LockType != "LoversPadlock" && LockType != "OwnerPadlock") {
@@ -474,10 +474,10 @@ function InventoryItemNeckFuturisticCollarToggleRemotes(C, Item) {
 		Item.Property.BlockRemotes = !Item.Property.BlockRemotes;
 
 		// Default the previous Property and Type to the first option if not found on the current item
-		var PreviousProperty = DialogFocusItem.Property;
+		const PreviousProperty = DialogFocusItem.Property;
 
 		// Create a new Property object based on the previous one
-		var NewProperty = { ...PreviousProperty };
+		const NewProperty = { ...PreviousProperty };
 
 
 		NewProperty.Effect = [];

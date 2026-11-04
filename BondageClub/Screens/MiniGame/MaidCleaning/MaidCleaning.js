@@ -18,7 +18,7 @@ function MaidCleaningGenerateSpots(MaxSpot) {
 	for (let S = 0; S < MaxSpot; S++) {
 
 		// Generates each spot 1 by 1
-		var NewSpot = {
+		const NewSpot = {
 			X : Math.floor(Math.random() * 1980) + 10,
 			Y : Math.floor(Math.random() * 940) + 10,
 			T : Math.floor(Math.random() * 4) + 1
@@ -34,8 +34,8 @@ function MaidCleaningGenerateSpots(MaxSpot) {
  * @returns {void} - Nothing
  */
 function MaidCleaningDrawSpots() {
-	for (let S = 0; S < MaidCleaningSpots.length; S++)
-		DrawImage("Screens/MiniGame/MaidCleaning/Spot" + MaidCleaningSpots[S].T + ".png", MaidCleaningSpots[S].X - (MaidCleaningSpotSize / 2), MaidCleaningSpots[S].Y - (MaidCleaningSpotSize / 2));
+	for (const spot of MaidCleaningSpots)
+		DrawImage("Screens/MiniGame/MaidCleaning/Spot" + spot.T + ".png", spot.X - (MaidCleaningSpotSize / 2), spot.Y - (MaidCleaningSpotSize / 2));
 }
 
 /**
@@ -45,7 +45,7 @@ function MaidCleaningDrawSpots() {
 async function MaidCleaningLoad() {
 
 	// Picks a random place to clean
-	var Room = Math.floor(Math.random() * 6);
+	const Room = Math.floor(Math.random() * 6);
 	if (Room == 0) MaidCleaningBackground = "MainHall";
 	if (Room == 1) MaidCleaningBackground = "Shibari";
 	if (Room == 2) MaidCleaningBackground = "Shop";
@@ -56,8 +56,8 @@ async function MaidCleaningLoad() {
 	// The higher the difficulty, the more spots there will be (less spots on mobile since we cannot swipe the mouse)
 	MaidCleaningPlayerX = 500;
 	MaidCleaningPlayerY = 0;
-	var Factor = (CommonIsMobile) ? 0.25 : 1;
-	var MaxSpot = 220 * Factor;
+	const Factor = (CommonIsMobile) ? 0.25 : 1;
+	let MaxSpot = 220 * Factor;
 	if (MiniGameDifficultyMode == "Normal") MaxSpot = 360 * Factor;
 	if (MiniGameDifficultyMode == "Hard") MaxSpot = 500 * Factor;
 	MaidCleaningGenerateSpots(MaxSpot);
@@ -71,7 +71,7 @@ async function MaidCleaningLoad() {
 function MaidCleaningRun() {
 
 	// The game ends in victory if everything is clean or in defeat if the time runs out
-	var Time = CommonTime();
+	const Time = CommonTime();
 	if (MiniGameRunning() && (MaidCleaningSpots.length == 0)) MaidCleaningEnd(true);
 	if (MiniGameRunning() && (Time >= MiniGameTimer)) MaidCleaningEnd(false);
 	if (MiniGameEnded && Time >= MiniGameTimer + 5000) MiniGameEnd();
@@ -125,14 +125,14 @@ function MaidCleaningDoMove() {
 		// Sets the player position
 		MaidCleaningPlayerX = MouseX - 500;
 		MaidCleaningPlayerY = MouseY - 500;
-		var Range = ((CommonIsMobile) ? (MaidCleaningSpotSize / 1.5) : (MaidCleaningSpotSize / 2));
+		const Range = ((CommonIsMobile) ? (MaidCleaningSpotSize / 1.5) : (MaidCleaningSpotSize / 2));
 
 		// If the game has started, we check the click position and remove a spot at that position
 		if (MiniGameRunning())
-			for (let S = 0; S < MaidCleaningSpots.length; S++)
-				if (MouseIn(MaidCleaningSpots[S].X - Range, MaidCleaningSpots[S].Y - Range, Range * 2, Range * 2)) {
-					if (MaidCleaningSpots[S].T == 1) MaidCleaningSpots.splice(S, 1);
-					else MaidCleaningSpots[S].T--;
+			for (const [i, spot] of MaidCleaningSpots.entries())
+				if (MouseIn(spot.X - Range, spot.Y - Range, Range * 2, Range * 2)) {
+					if (spot.T == 1) MaidCleaningSpots.splice(i, 1);
+					else spot.T--;
 					return;
 				}
 

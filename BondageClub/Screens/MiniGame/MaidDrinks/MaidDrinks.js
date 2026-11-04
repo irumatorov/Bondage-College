@@ -24,8 +24,8 @@ var MaidDrinksKeys = ["S", "D", "K", "L"];
 function MaidDrinksGenerateMove(StartTime) {
 
 	// Full the sequence
-	var CurTimer = StartTime + 3500;
-	var Seq = 0;
+	let CurTimer = StartTime + 3500;
+	let Seq = 0;
 	MaidDrinksMove = [];
 	while (Seq < MaidDrinksMaxSequence) {
 
@@ -65,7 +65,7 @@ async function MaidDrinksLoad() {
 function MaidDrinksDrawIcons() {
 
 	// Scroll the icons with time
-	var Seq = 0;
+	let Seq = 0;
 	while (Seq < MaidDrinksMove.length) {
 
 		const move = MaidDrinksMove[Seq];
@@ -252,11 +252,11 @@ function MaidDrinksMiss() {
 function MaidDrinksDoMove(MoveType) {
 
 	// Below zero is always a miss
-	var Hit = false;
+	let Hit = false;
 	if ((MoveType >= 0) && (MaidDrinksMove.length > 0)) {
 
 		// For each moves in the list
-		var Seq = 0;
+		let Seq = 0;
 		while (Seq < MaidDrinksMove.length) {
 
 			// If the move connects (good timing and good type)
@@ -328,7 +328,7 @@ function MaidDrinksClick() {
 	}
 	// If the game has started, we check the click position and send it as a move
 	else if (!MiniGameEnded) {
-		var MoveType = -1;
+		let MoveType = -1;
 		if (MouseIn(1200, 700, 200, 150)) MoveType = 0;
 		if (MouseIn(1400, 700, 200, 150)) MoveType = 1;
 		if (MouseIn(1600, 700, 200, 150)) MoveType = 2;

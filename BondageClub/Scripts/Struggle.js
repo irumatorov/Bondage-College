@@ -742,7 +742,7 @@ function StruggleStrengthHandleEvent(...args) {
 function StruggleStrengthProcess(Decrease) {
 
 	// Progress calculation
-	var P = 42 / (StruggleProgressSkill * CheatFactor("DoubleItemSpeed", 0.5)); // Regular progress, slowed by long timers, faster with cheats
+	let P = 42 / (StruggleProgressSkill * CheatFactor("DoubleItemSpeed", 0.5)); // Regular progress, slowed by long timers, faster with cheats
 	P = P * (100 / (StruggleProgress + 50));  // Faster when the dialog starts, longer when it ends
 	if (StruggleMinigameIsImpossible() && (StruggleProgress > 50) && (StruggleProgressAuto < 0)) {
 		// Beyond challenge 6, it becomes impossible after 50% progress
@@ -772,7 +772,7 @@ function StruggleStrengthProcess(Decrease) {
  * @returns {{difficulty: number; auto: number; timer: number; }} - Nothing
  */
 function StruggleStrengthGetDifficulty(C, PrevItem, NextItem) {
-	var S = 0;
+	let S = 0;
 	if ((PrevItem != null) && (C.IsPlayer())) {
 		S = S + SkillGetWithRatio(Player, "Evasion"); // Add the player evasion level (modified by the effectiveness ratio)
 		if (PrevItem.Difficulty != null) S = S - PrevItem.Difficulty; // Subtract the item difficulty (regular difficulty + player that restrained difficulty)
@@ -794,7 +794,7 @@ function StruggleStrengthGetDifficulty(C, PrevItem, NextItem) {
 	}
 
 	// Gets the standard time to do the operation
-	var Timer = 0;
+	let Timer = 0;
 	if ((PrevItem != null) && (PrevItem.Asset != null) && (PrevItem.Asset.RemoveTime != null)) Timer = Timer + PrevItem.Asset.RemoveTime; // Adds the time to remove the previous item
 	if ((NextItem != null) && (NextItem.Asset != null) && (NextItem.Asset.WearTime != null)) Timer = Timer + NextItem.Asset.WearTime; // Adds the time to add the new item
 	if (Player.IsBlind() || Player.IsSuspended()) Timer = Timer * 2; // Double the time if suspended from the ceiling or blind
@@ -805,7 +805,7 @@ function StruggleStrengthGetDifficulty(C, PrevItem, NextItem) {
 
 	// If there's a locking item, we add the time of that lock
 	if ((PrevItem != null) && (NextItem == null) && InventoryItemHasEffect(PrevItem, "Lock", true) && DialogCanUnlock(C, PrevItem)) {
-		var Lock = InventoryGetLock(PrevItem);
+		const Lock = InventoryGetLock(PrevItem);
 		if ((Lock != null) && (Lock.Asset != null) && (Lock.Asset.RemoveTime != null)) Timer = Timer + Lock.Asset.RemoveTime;
 	}
 
@@ -922,7 +922,7 @@ Game description:
 function StruggleFlexibilitySetup(C, PrevItem, NextItem) {
 
 	// Gets the required skill / challenge level based on player/rigger skill and item difficulty (0 by default is easy to struggle out)
-	var S = 0;
+	let S = 0;
 	if ((PrevItem != null) && (C.IsPlayer())) {
 		S = S + SkillGetWithRatio(Player, "Evasion"); // Add the player evasion level (modified by the effectiveness ratio)
 		if (PrevItem.Difficulty != null) S = S - PrevItem.Difficulty; // Subtract the item difficulty (regular difficulty + player that restrained difficulty)
@@ -956,7 +956,7 @@ function StruggleFlexibilitySetup(C, PrevItem, NextItem) {
 	}
 
 	// Gets the standard time to do the operation
-	var Timer = 0;
+	let Timer = 0;
 	if ((PrevItem != null) && (PrevItem.Asset != null) && (PrevItem.Asset.RemoveTime != null)) Timer = Timer + PrevItem.Asset.RemoveTime; // Adds the time to remove the previous item
 	if ((NextItem != null) && (NextItem.Asset != null) && (NextItem.Asset.WearTime != null)) Timer = Timer + NextItem.Asset.WearTime; // Adds the time to add the new item
 	if (Player.IsBlind() || Player.IsSuspended()) Timer = Timer * 2; // Double the time if suspended from the ceiling or blind
@@ -964,7 +964,7 @@ function StruggleFlexibilitySetup(C, PrevItem, NextItem) {
 
 	// If there's a locking item, we add the time of that lock
 	if ((PrevItem != null) && (NextItem == null) && InventoryItemHasEffect(PrevItem, "Lock", true) && DialogCanUnlock(C, PrevItem)) {
-		var Lock = InventoryGetLock(PrevItem);
+		const Lock = InventoryGetLock(PrevItem);
 		if ((Lock != null) && (Lock.Asset != null) && (Lock.Asset.RemoveTime != null)) Timer = Timer + Lock.Asset.RemoveTime;
 	}
 
@@ -1043,10 +1043,10 @@ function StruggleFlexibilityDraw(C) {
 function StruggleFlexibilityCheck() {
 
 	for (let RR = 0; RR < StruggleProgressFlexCircles.length; RR++) {
-		var R = StruggleProgressFlexCircles[RR];
+		const R = StruggleProgressFlexCircles[RR];
 
 		if (R.X && R.Y && R.Size) {
-			var Smod = (CommonIsMobile) ? 1.0 : 0.5;
+			const Smod = (CommonIsMobile) ? 1.0 : 0.5;
 			if (MouseIn(1485 + R.X - R.Size*Smod, 625 + R.Y - R.Size*Smod, R.Size*2*Smod, R.Size*2*Smod)) {
 				StruggleProgressFlexCircles.splice(RR,1);
 				return true;
@@ -1098,7 +1098,7 @@ function StruggleFlexibilityProcess(Decrease) {
 		return;
 
 	// Progress calculation
-	var P = 60 / (StruggleProgressSkill/3 * CheatFactor("DoubleItemSpeed", 0.5)); // Regular progress, slowed by long timers, faster with cheats
+	let P = 60 / (StruggleProgressSkill/3 * CheatFactor("DoubleItemSpeed", 0.5)); // Regular progress, slowed by long timers, faster with cheats
 
 	if (StruggleMinigameIsImpossible() && (StruggleProgress > 50) && (StruggleProgressAuto < 0)) {
 		// Beyond challenge 6, it becomes impossible after 50% progress
@@ -1112,7 +1112,6 @@ function StruggleFlexibilityProcess(Decrease) {
 	if ((StruggleProgress >= 100) && StruggleMinigameIsImpossible() && (StruggleProgressAuto < 0)) StruggleProgress = 99;
 	if (!Decrease) StruggleProgressStruggleCount += 3;
 	StruggleMinigameHandleExpression(Decrease);
-
 }
 
 ////////////////////////////STRUGGLE MINIGAME: DEXTERITY//////////////////////////////
@@ -1139,7 +1138,7 @@ Game description:
 function StruggleDexteritySetup(C, PrevItem, NextItem) {
 
 	// Gets the required skill / challenge level based on player/rigger skill and item difficulty (0 by default is easy to struggle out)
-	var S = 0;
+	let S = 0;
 	if ((PrevItem != null) && (C.IsPlayer())) {
 		S = S + SkillGetWithRatio(Player, "Evasion"); // Add the player evasion level (modified by the effectiveness ratio)
 		if (PrevItem.Difficulty != null) S = S - PrevItem.Difficulty; // Subtract the item difficulty (regular difficulty + player that restrained difficulty)
@@ -1157,7 +1156,7 @@ function StruggleDexteritySetup(C, PrevItem, NextItem) {
 			if (PrevItem.Asset.Fetish.includes("Tape")) S = S - 3; // Tape is pretty hard to unfasten
 		}
 
-		var blockedAreas = 0;
+		let blockedAreas = 0;
 
 		const armsItem = InventoryGet(C, "ItemArms");
 		if (armsItem && InventoryItemHasEffect(armsItem, "Block", true) || InventoryGroupIsBlocked(Player, "ItemArms")) {S = S - 2; blockedAreas += 1;} // Harder if arms are blocked
@@ -1182,7 +1181,7 @@ function StruggleDexteritySetup(C, PrevItem, NextItem) {
 	}
 
 	// Gets the standard time to do the operation
-	var Timer = 0;
+	let Timer = 0;
 	if ((PrevItem != null) && (PrevItem.Asset != null) && (PrevItem.Asset.RemoveTime != null)) Timer = Timer + PrevItem.Asset.RemoveTime; // Adds the time to remove the previous item
 	if ((NextItem != null) && (NextItem.Asset != null) && (NextItem.Asset.WearTime != null)) Timer = Timer + NextItem.Asset.WearTime; // Adds the time to add the new item
 	if (Player.IsBlind() || Player.IsSuspended()) Timer = Timer * 2; // Double the time if suspended from the ceiling or blind
@@ -1190,7 +1189,7 @@ function StruggleDexteritySetup(C, PrevItem, NextItem) {
 
 	// If there's a locking item, we add the time of that lock
 	if ((PrevItem != null) && (NextItem == null) && InventoryItemHasEffect(PrevItem, "Lock", true) && DialogCanUnlock(C, PrevItem)) {
-		var Lock = InventoryGetLock(PrevItem);
+		const Lock = InventoryGetLock(PrevItem);
 		if ((Lock != null) && (Lock.Asset != null) && (Lock.Asset.RemoveTime != null)) Timer = Timer + Lock.Asset.RemoveTime;
 	}
 
@@ -1217,7 +1216,7 @@ function StruggleDexterityDraw(C) {
 	DrawImageResize("Icons/Struggle/Buckle.png", 1420 + StruggleProgressDexTarget, 625, 150, 150);
 	DrawImageResize("Icons/Struggle/Player.png", 1420 + StruggleProgressDexCurrent, 625, 150, 150);
 
-	var speed = (5 + Math.max(0, -StruggleProgressAuto*7));
+	const speed = (5 + Math.max(0, -StruggleProgressAuto*7));
 
 	StruggleProgressDexCurrent += (StruggleProgressDexDirectionRight) ? speed : -speed;
 
@@ -1283,7 +1282,7 @@ function StruggleDexterityHandleEvent(EventType, _event) {
 function StruggleDexterityProcess() {
 
 	// Progress calculation
-	var P = 200 / (StruggleProgressSkill/3.5 * CheatFactor("DoubleItemSpeed", 0.5)); // Regular progress, slowed by long timers, faster with cheats
+	let P = 200 / (StruggleProgressSkill/3.5 * CheatFactor("DoubleItemSpeed", 0.5)); // Regular progress, slowed by long timers, faster with cheats
 	if ((StruggleProgressChallenge > STRUGGLE_THRESHOLD_IMPOSSIBLE) && (StruggleProgress > 50) && (StruggleProgressAuto < 0)) {
 		// Beyond challenge 6, it becomes impossible after 50% progress
 		P = P * (1 - ((StruggleProgress - 50) / 50));
@@ -1329,19 +1328,19 @@ function StruggleLockPickHandleEvent(EventType, _event) {
  * @returns {void} - Nothing
  */
 function StruggleLockPickProcess() {
-	var X = 1475;
-	var Y = 500;
-	var PinSpacing = 100;
-	var PinWidth = 200;
-	var PinHeight = 200;
-	var skill = Math.min(10, SkillGetWithRatio(Player, "LockPicking"));
-	var current_pins = StruggleLockPickSet.filter(x => x==true).length;
-	var false_set_chance = 0.75 - 0.15 * skill/10;
-	var unset_false_set_chance = 0.1 + 0.2 * skill/10;
+	const X = 1475;
+	const Y = 500;
+	const PinSpacing = 100;
+	const PinWidth = 200;
+	const PinHeight = 200;
+	const skill = Math.min(10, SkillGetWithRatio(Player, "LockPicking"));
+	const current_pins = StruggleLockPickSet.filter(x => x==true).length;
+	const false_set_chance = 0.75 - 0.15 * skill/10;
+	const unset_false_set_chance = 0.1 + 0.2 * skill/10;
 	if (current_pins < StruggleLockPickSet.length && (LogValue("FailedLockPick", "LockPick") ?? 0) < CurrentTime)
 		for (let P = 0; P < StruggleLockPickSet.length; P++) {
 			if (!StruggleLockPickSet[P]) {
-				var XX = X - PinWidth/2 + (0.5-StruggleLockPickSet.length/2 + P) * PinSpacing;
+				const XX = X - PinWidth/2 + (0.5-StruggleLockPickSet.length/2 + P) * PinSpacing;
 				if (MouseIn(XX + PinSpacing/2, Y - PinHeight, PinSpacing, PinWidth+PinHeight)) {
 					if (StruggleLockPickProgressCurrentTries < StruggleLockPickProgressMaxTries) {
 
@@ -1375,7 +1374,7 @@ function StruggleLockPickProcess() {
 							}
 							if (incrementTries) StruggleLockPickProgressCurrentTries += 1;
 						}
-						var order = Math.max(0, StruggleLockPickOrder.indexOf(P)-current_pins)/Math.max(1, StruggleLockPickSet.length-current_pins) * (0.25+0.75*skill/10); // At higher skills you can see which pins are later in the order
+						const order = Math.max(0, StruggleLockPickOrder.indexOf(P)-current_pins)/Math.max(1, StruggleLockPickSet.length-current_pins) * (0.25+0.75*skill/10); // At higher skills you can see which pins are later in the order
 						StruggleLockPickOffsetTarget[P] = (StruggleLockPickSet[P] || StruggleLockPickSetFalse[P]) ? PinHeight : PinHeight*(0.1+0.8*order);
 
 						if (StruggleLockPickProgressCurrentTries == StruggleLockPickProgressMaxTries && StruggleLockPickSet.filter(x => x==false).length > 0 ) {
@@ -1402,13 +1401,13 @@ function StruggleLockPickProcess() {
  */
 function StruggleLockPickDraw(C) {
 	// Place where to draw the pins
-	var X = 1475;
-	var Y = 500;
-	var PinSpacing = 100;
-	var PinWidth = 200;
-	var PinHeight = 200;
+	const X = 1475;
+	const Y = 500;
+	const PinSpacing = 100;
+	const PinWidth = 200;
+	const PinHeight = 200;
 	for (let P = 0; P < StruggleLockPickSet.length; P++) {
-		var XX = X - PinWidth/2 + (0.5-StruggleLockPickSet.length/2 + P) * PinSpacing;
+		const XX = X - PinWidth/2 + (0.5-StruggleLockPickSet.length/2 + P) * PinSpacing;
 
 		if (StruggleLockPickOffset[P] < StruggleLockPickOffsetTarget[P]) {
 
@@ -1516,13 +1515,13 @@ function StruggleLockPickDraw(C) {
 	} else {
 		if ( Player.ArousalSettings && (Player.ArousalSettings.Active != "Inactive" && Player.ArousalSettings.Active != "NoMeter") && Player.ArousalSettings.Progress > 20 && StruggleLockPickProgressCurrentTries < StruggleLockPickProgressMaxTries && StruggleLockPickProgressCurrentTries > 0) {
 			if (CurrentTime > StruggleLockPickArousalTick) {
-				var arousalmaxtime = 2.6 - 2.0*Player.ArousalSettings.Progress/100;
+				const arousalmaxtime = 2.6 - 2.0*Player.ArousalSettings.Progress/100;
 				if (StruggleLockPickArousalTick - CurrentTime > CurrentTime + StruggleLockPickArousalTickTime*arousalmaxtime) {
 					StruggleLockPickArousalTick = CurrentTime + StruggleLockPickArousalTickTime*arousalmaxtime; // In case it gets set out way too far
 				}
-				var totalSet = StruggleLockPickSet.filter(x => x==true).length + StruggleLockPickSetFalse.filter(x => x==true).length;
+				const totalSet = StruggleLockPickSet.filter(x => x==true).length + StruggleLockPickSetFalse.filter(x => x==true).length;
 				if (StruggleLockPickArousalTick > 0 && totalSet > 0) {
-					var RealUnsetChance = StruggleLockPickSet.filter(x => x==true).length / (totalSet);
+					const RealUnsetChance = StruggleLockPickSet.filter(x => x==true).length / (totalSet);
 					if (Math.random() < RealUnsetChance) {
 						if (StruggleLockPickSet.filter(x => x==true).length > 0) {
 							if (StruggleLockPickSet.filter(x => x==true).length < StruggleLockPickSet.length) {
@@ -1557,10 +1556,10 @@ function StruggleLockPickDraw(C) {
 
 					StruggleLockPickArousalText = InterfaceTextGet("LockPickArousal");
 				}
-				var arousalmod = (0.3 + Math.random()*0.7) * (arousalmaxtime); // happens very often at 100 arousal
+				const arousalmod = (0.3 + Math.random()*0.7) * (arousalmaxtime); // happens very often at 100 arousal
 				StruggleLockPickArousalTick = CurrentTime + StruggleLockPickArousalTickTime * arousalmod;
 			}
-			var alpha = "10";
+			let alpha = "10";
 			if (StruggleLockPickArousalTick - CurrentTime < 1000) alpha = "70";
 			else if (StruggleLockPickArousalTick - CurrentTime < 2000) alpha = "50";
 			else if (StruggleLockPickArousalTick - CurrentTime < 3000) alpha = "30";
@@ -1580,7 +1579,7 @@ function StruggleLockPickDraw(C) {
  * @returns {string} - The appropriate dialog option
  */
 function StruggleLockPickProgressGetOperation(C, Item) {
-	var lock = InventoryGetLock(Item);
+	const lock = InventoryGetLock(Item);
 	if ((Item != null && lock != null)) {
 		if (lock.Asset.Name == "CombinationPadlock" || lock.Asset.Name == "PasswordPadlock") return InterfaceTextGet("Decoding");
 		if (Item.Asset.Name.indexOf("Futuristic") >= 0 || Item.Asset.Name.indexOf("Interactive") >= 0) return InterfaceTextGet("Hacking");
@@ -1600,15 +1599,15 @@ function StruggleLockPickSetup(C, Item) {
 	StruggleLockPickArousalText = "";
 	StruggleLockPickArousalTick = 0;
 
-	var lock = Item && InventoryGetLock(Item);
-	var LockRating = 1;
-	var LockPickingImpossible = false;
+	const lock = Item && InventoryGetLock(Item);
+	let LockRating = 1;
+	let LockPickingImpossible = false;
 	if (Item != null && lock) {
 		// Gets the lock rating
-		var BondageLevel = Item.Difficulty - Item.Asset.Difficulty;
+		const BondageLevel = Item.Difficulty - Item.Asset.Difficulty;
 
 		// Gets the required skill / challenge level based on player/rigger skill and item difficulty (0 by default is easy to pick)
-		var S = 0;
+		let S = 0;
 		S = S + SkillGetWithRatio(Player, "LockPicking"); // Add the player evasion level (modified by the effectiveness ratio)
 		if (lock.Asset.PickDifficulty && lock.Asset.PickDifficulty > 0) {
 			S = S - lock.Asset.PickDifficulty; // Subtract the item difficulty (regular difficulty + player that restrained difficulty)
@@ -1665,7 +1664,7 @@ function StruggleLockPickSetup(C, Item) {
 		}
 
 		// Gets the number of pins on the lock
-		var NumPins = 4;
+		let NumPins = 4;
 		if (LockRating >= 6) NumPins += 2; // 6 pins for the intricate lock
 		if (LockRating >= 8) NumPins += 1; // 7 pins for the exclusive lock
 		if (LockRating >= 10) NumPins += 1; // 8 pins for the high security lock
@@ -1696,8 +1695,8 @@ function StruggleLockPickSetup(C, Item) {
 		/* Randomize array in-place using Durstenfeld shuffle algorithm */
 		// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 		for (var i = StruggleLockPickOrder.length - 1; i > 0; i--) {
-			var j = Math.floor(Math.random() * (i + 1));
-			var temp = StruggleLockPickOrder[i];
+			const j = Math.floor(Math.random() * (i + 1));
+			const temp = StruggleLockPickOrder[i];
 			StruggleLockPickOrder[i] = StruggleLockPickOrder[j];
 			StruggleLockPickOrder[j] = temp;
 		}
@@ -1732,7 +1731,7 @@ function StruggleLockPickSetup(C, Item) {
 
 		// At 4 pins we have a base of 16 tries, with 10 maximum permutions possible
 		// At 10 pins we have a base of 40-30 tries, with 55 maximum permutions possible
-		var NumTries = Math.max(Math.floor(NumPins * (1.5 - 0.3*BondageLevel/10)),
+		const NumTries = Math.max(Math.floor(NumPins * (1.5 - 0.3*BondageLevel/10)),
 			Math.ceil(NumPins * (3.25 - BondageLevel/10) - Math.max(0, (StruggleLockPickProgressChallenge + BondageLevel/2)*1.5)));
 			// negative skill of 1 subtracts 2 from the normal lock and 4 from 10 pin locks,
 			// negative skill of 6 subtracts 12 from all locks

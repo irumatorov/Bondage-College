@@ -1066,7 +1066,7 @@ function TranslationEnabled() {
  * @returns {boolean} - Returns TRUE if a translation is available for the given file
  */
 function TranslationAvailable(FullPath) {
-	var FileName = FullPath.trim().toUpperCase();
+	const FileName = FullPath.trim().toUpperCase();
 	for (let L = 0; L < TranslationDictionary.length; L++)
 		if (TranslationDictionary[L].LanguageCode == TranslationLanguage)
 			for (let F = 0; F < TranslationDictionary[L].Files.length; F++)
@@ -1215,7 +1215,7 @@ function TranslationText(Text) {
 	if (!TranslationEnabled()) return;
 
 	// Finds the full path of the translation file to use
-	var FullPath = "Screens/" + CurrentModule + "/" + CurrentScreen + "/Text_" + CurrentScreen + "_" + TranslationLanguage + ".txt";
+	const FullPath = "Screens/" + CurrentModule + "/" + CurrentScreen + "/Text_" + CurrentScreen + "_" + TranslationLanguage + ".txt";
 
 	// If the translation file is already loaded, we translate from it
 	if (TranslationCache[FullPath]) {
@@ -1263,7 +1263,7 @@ function TranslationAsset(Family) {
 	if (!TranslationEnabled()) return;
 
 	// Finds the full path of the translation file to use
-	var FullPath = "Assets/" + Family + "_" + TranslationLanguage + ".txt";
+	const FullPath = "Assets/" + Family + "_" + TranslationLanguage + ".txt";
 
 	// If the translation file is already loaded, we translate from it
 	if (TranslationCache[FullPath]) {
@@ -1310,6 +1310,6 @@ function TranslationSwitchLanguage(languageCode) {
  * @returns {void} - Nothing
  */
 function TranslationLoad() {
-	var L = /** @type {ServerChatRoomLanguage | "TW"} */(localStorage.getItem("BondageClubLanguage"));
+	const L = /** @type {ServerChatRoomLanguage | "TW"} */(localStorage.getItem("BondageClubLanguage"));
 	if (L != null) TranslationLanguage = L;
 }

@@ -51,8 +51,8 @@ function InventoryItemDevicesLuckyWheelg0LoadHook(data, originalFunction) {
 	originalFunction();
 	if (!DialogFocusItem) return;
 	const texts = (DialogFocusItem.Property?.Texts ?? []);
-	for (let num = 0; num < texts.length; num++) {
-		const input = ElementCreateInput(`LuckyWheelText${num}`, "input", texts[num], ItemDevicesLuckyWheelMaxTextLength);
+	for (const [i, text] of texts.entries()) {
+		const input = ElementCreateInput(`LuckyWheelText${i}`, "input", text, ItemDevicesLuckyWheelMaxTextLength);
 		if (input) {
 			input.pattern = DynamicDrawTextInputPattern;
 			input.addEventListener("change", InventoryItemDevicesLuckyWheelUpdate);
@@ -75,10 +75,10 @@ function InventoryItemDevicesLuckyWheelg0DrawHook(data, originalFunction) {
 	let top = ItemDevicesLuckyWheelRowTop;
 	let left = ItemDevicesLuckyWheelRowLeft;
 	const texts = (DialogFocusItem.Property?.Texts ?? []);
-	for (let num = 0; num < texts.length; num++) {
-		let topRow = (num % (ItemDevicesLuckyWheelMaxTexts / 2) * ItemDevicesLuckyWheelRowHeight);
-		let leftCol = Math.floor(num / (ItemDevicesLuckyWheelMaxTexts / 2)) * ItemDevicesLuckyWheelRowLength;
-		ElementPosition(`LuckyWheelText${num}`, left + leftCol, top + topRow, 300);
+	for (const [i] of texts.entries()) {
+		let topRow = (i % (ItemDevicesLuckyWheelMaxTexts / 2) * ItemDevicesLuckyWheelRowHeight);
+		let leftCol = Math.floor(i / (ItemDevicesLuckyWheelMaxTexts / 2)) * ItemDevicesLuckyWheelRowLength;
+		ElementPosition(`LuckyWheelText${i}`, left + leftCol, top + topRow, 300);
 	}
 
 	const disabledAdd = texts.length >= ItemDevicesLuckyWheelMaxTexts;

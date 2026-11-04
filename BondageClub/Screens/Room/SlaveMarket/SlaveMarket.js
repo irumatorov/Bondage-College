@@ -146,7 +146,7 @@ function SlaveMarketVisitRoom() {
  * @returns {SafePromise<void>}
  */
 async function SlaveMarketTrainingStart() {
-	var Intro = Math.floor(Math.random() * 6);
+	let Intro = Math.floor(Math.random() * 6);
 	SlaveMarketSlaveToTrain = CharacterLoadNPC("NPC_SlaveMarket_SlaveToTrain");
 	SlaveMarketSlaveToTrain.Stage = (Intro * 100).toString();
 	SlaveMarketSlaveToTrain.ExpectedTraining = Intro % 3;

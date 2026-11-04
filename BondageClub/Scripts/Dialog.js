@@ -2733,7 +2733,7 @@ function DialogChangeItemColor(C, Color) {
 	if (!Player.CanInteract() || Player.IsBlind() || !C.FocusGroup) return;
 
 	// If the item is locked, make sure the player could unlock it before swapping colors
-	var Item = InventoryGet(C, C.FocusGroup.Name);
+	const Item = InventoryGet(C, C.FocusGroup.Name);
 	if (Item == null) return;
 	if (InventoryItemHasEffect(Item, "Lock", true) && !DialogCanUnlock(C, Item)) return;
 

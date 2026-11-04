@@ -196,7 +196,7 @@ function CollegeDetentionInviteToPrivateRoom(Role="None") {
 	CollegeDetentionDressBack();
 
 	/** @type {ItemBundle[]} */
-	var ItemsToEarn = [];
+	const ItemsToEarn = [];
 	ItemsToEarn.push({Name: "Ribbons2", Group: "HairAccessory1"});
 	ItemsToEarn.push({Name: "Ribbons2", Group: "HairAccessory3"});
 	ItemsToEarn.push({Name: "RegularSleepingPill", Group: "ItemMouth"});

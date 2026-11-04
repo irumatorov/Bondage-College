@@ -40,7 +40,7 @@ function NPCTraitGenerate(C) {
 	while (C.Trait.length == 0) {
 		for (let T = 0; T < NPCTrait.length; T++)
 			if (Math.random() >= 0.3) {
-				var NewTrait = {
+				const NewTrait = {
 					Name: NPCTrait[T][Math.floor(Math.random() * 2)],
 					Value: Math.floor(Math.random() * 100) + 1
 				};
@@ -72,8 +72,8 @@ function NPCTraitReverse(Trait) {
  */
 function NPCTraitGetOptionValue(TraitSpec, Trait) {
 	if ((TraitSpec != null) && (Trait != null)) {
-		var Value = 0;
-		var DialogTrait = TraitSpec.split("|");
+		let Value = 0;
+		let DialogTrait = TraitSpec.split("|");
 		for (let T = 0; T < DialogTrait.length; T++) {
 			const traitName = /** @type {NPCTraitType} */ (DialogTrait[T].trim());
 			for (let N = 0; N < Trait.length; N++)
@@ -227,7 +227,7 @@ function NPCEventAdd(C, EventName, EventValue) {
 			C.Event[E].Value = EventValue;
 			return;
 		}
-	var NewEvent = {
+	const NewEvent = {
 		Name: EventName,
 		Value: EventValue
 	};
@@ -270,7 +270,7 @@ function NPCEventGet(C, EventName) {
  * @returns {number} - Delay required for the event.
  */
 function NPCLongEventDelay(C) {
-	var T = NPCTraitGet(C, "Serious");
+	const T = NPCTraitGet(C, "Serious");
 	if (T > 0) return MS_PER_WEEK;
 	if (T < 0) return MS_PER_DAY;
 	return 259200000;
@@ -282,7 +282,7 @@ function NPCLongEventDelay(C) {
  * @returns {number} - Delay required for the lover event.
  */
 function NPCLongLoverEventDelay(C) {
-	var T = NPCTraitGet(C, "Horny");
+	const T = NPCTraitGet(C, "Horny");
 	if (T > 0) return MS_PER_WEEK;
 	if (T < 0) return 2419200000;
 	return 1209600000;

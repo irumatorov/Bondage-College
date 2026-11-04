@@ -144,23 +144,23 @@ function LoginDrawCredits() {
 	LoginCreditsPosition += (TimerRunInterval * 60) / 1000;
 	if (LoginCreditsPosition > LoginCredits.length * 25 || LoginCreditsPosition < 0) LoginCreditsPosition = 0;
 	MainCanvas.font = "30px Arial";
-	for (let C = 0; C < LoginCredits.length; C++) {
+	for (const [i, credit] of LoginCredits.entries()) {
 
 		// Sets the Y position (it scrolls from bottom to top)
-		var Y = 800 - Math.floor(LoginCreditsPosition * 2) + (C * 50);
+		const Y = 800 - Math.floor(LoginCreditsPosition * 2) + (i * 50);
 
 		// Draw the text if it's in drawing range
 		if ((Y > 0) && (Y <= 999)) {
 
 			// The "CreditTypeRepeat" starts scrolling again, other credit types are translated
-			var Cred = LoginCredits[C][0].trim();
+			const Cred = credit[0].trim();
 			if (Cred == "CreditTypeRepeat") {
 				LoginCreditsPosition = 0;
 				return;
 			} else {
 				if (Cred.startsWith("CreditType")) DrawText(TextGet(Cred), 320, Y, "white");
 				else {
-					if (Cred.indexOf("|") == -1) DrawText(Cred, 320, Y, "white");
+					if (!Cred.includes("|")) DrawText(Cred, 320, Y, "white");
 					else {
 						DrawText(Cred.substring(0, Cred.indexOf("|")), 180, Y, "white");
 						DrawText(Cred.substring(Cred.indexOf("|") + 1, 1000), 460, Y, "white");
@@ -913,11 +913,13 @@ function LoginCheatItems() {
  * @returns {void} Nothing
  */
 function LoginValideBuyGroups() {
-	for (let A = 0; A < Asset.length; A++)
-		if ((Asset[A].BuyGroup != null) && InventoryAvailable(Player, Asset[A].Name, Asset[A].Group.Name))
-			for (let B = 0; B < Asset.length; B++)
-				if ((Asset[B] != null) && (Asset[B].BuyGroup != null) && (Asset[B].BuyGroup == Asset[A].BuyGroup) && !InventoryAvailable(Player, Asset[B].Name, Asset[B].Group.Name))
-					InventoryAdd(Player, Asset[B].Name, Asset[B].Group.Name, false);
+	for (const A of Asset) {
+		if (A.BuyGroup == null || !InventoryAvailable(Player, A.Name, A.Group.Name)) continue;
+		for (const B of Asset) {
+			if (B.BuyGroup == null || B.BuyGroup != A.BuyGroup || InventoryAvailable(Player, B.Name, B.Group.Name)) continue;
+			InventoryAdd(Player, B.Name, B.Group.Name, false);
+		}
+	}
 }
 
 /**
@@ -1186,15 +1188,15 @@ function LoginSetupPlayer(C) {
 	PrivateCharacter.push(Player);
 	let shouldSyncPrivate = false;
 	if (C.PrivateCharacter != null)
-		for (let P = 0; P < C.PrivateCharacter.length; P++)
-			shouldSyncPrivate = PrivateLoadCharacter(C.PrivateCharacter[P]) || shouldSyncPrivate;
+		for (const P of C.PrivateCharacter)
+			shouldSyncPrivate = PrivateLoadCharacter(P) || shouldSyncPrivate;
 	if (shouldSyncPrivate) {
 		ServerPrivateCharacterSync();
 	}
 	SarahSetStatus();
 
 	// Fixes a few items
-	var InventoryBeforeFixes = InventoryStringify(Player);
+	const InventoryBeforeFixes = InventoryStringify(Player);
 	LoginFixOwner();
 	LoginValidCollar();
 	LoginMistressItems();

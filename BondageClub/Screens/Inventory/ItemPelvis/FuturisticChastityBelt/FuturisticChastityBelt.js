@@ -25,9 +25,9 @@ function InventoryFuturisticChastityBeltCheckPunish(Item) {
 		&& StruggleProgressPrevItem != null
 		&& StruggleProgressStruggleCount > 0
 	) {
-		var inFocus = false;
-		for (var Z = 0; Z < InventoryItemPelvisFuturisticChastityBeltTamperZones.length; Z++)
-			if (Player.FocusGroup.Name == InventoryItemPelvisFuturisticChastityBeltTamperZones[Z])
+		let inFocus = false;
+		for (const zone of InventoryItemPelvisFuturisticChastityBeltTamperZones)
+			if (Player.FocusGroup.Name == zone)
 				inFocus = true;
 
 		if (inFocus) {
@@ -145,9 +145,9 @@ function AssetsItemPelvisFuturisticChastityBeltScriptTrigger(C, Item, ShockType,
 
 /** @type {ExtendedItemCallbacks.ScriptDraw<FuturisticChastityBeltPersistentData>} */
 function AssetsItemPelvisFuturisticChastityBeltScriptDraw(data) {
-	var persistentData = data.PersistentData();
+	const persistentData = data.PersistentData();
 	/** @type {ItemProperties} */
-	var property = (data.Item.Property = data.Item.Property || {});
+	const property = (data.Item.Property = data.Item.Property || {});
 	if (typeof persistentData.UpdateTime !== "number") persistentData.UpdateTime = CommonTime() + 4000;
 	if (typeof persistentData.LastMessageLen !== "number") persistentData.LastMessageLen = (ChatRoomLastMessage) ? ChatRoomLastMessage.length : 0;
 	if (typeof property.NextShockTime !== "number") property.NextShockTime = 0;
@@ -160,7 +160,7 @@ function AssetsItemPelvisFuturisticChastityBeltScriptDraw(data) {
 			persistentData.LastMessageLen = (ChatRoomLastMessage) ? ChatRoomLastMessage.length : 0;
 		}
 
-		var timeToNextRefresh = 950;
+		const timeToNextRefresh = 950;
 		persistentData.UpdateTime = CommonTime() + timeToNextRefresh;
 		AnimationRequestRefreshRate(data.C, 5000 - timeToNextRefresh);
 		AnimationRequestDraw(data.C);

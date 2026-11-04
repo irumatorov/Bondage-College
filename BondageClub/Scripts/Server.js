@@ -869,7 +869,7 @@ function ServerPlayerAppearanceSync() {
 	// Creates a big parameter string of every appearance items and sends it to the server
 	if (Player.AccountName != "") {
 		/** @type {ServerAccountUpdateRequest} */
-		var D = {};
+		const D = {};
 		D.AssetFamily = Player.AssetFamily;
 		D.Appearance = ServerAppearanceBundle(Player.Appearance);
 		ServerAccountUpdate.QueueData(D, true);
@@ -886,7 +886,8 @@ function ServerPrivateCharacterSync() {
 	const D = { PrivateCharacter: [] };
 	for (let ID = 1; ID < PrivateCharacter.length; ID++) {
 		const privateChar = PrivateCharacter[ID];
-		var C = {
+		if (privateChar.IsPlayer()) continue;
+		const C = {
 			Name: privateChar.Name,
 			Love: privateChar.Love ?? 0,
 			Title: privateChar.Title,

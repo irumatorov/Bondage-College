@@ -71,16 +71,14 @@ async function PrivateBedLoad() {
 	}
 
 	// Strips the NPC or put her in lingerie with random odds
-	for (let C of PrivateBedCharacter)
-		if (C.IsNpc()) {
-			C.PrivateBedAppearance = CharacterAppearanceStringify(C);
-			if (C.CanInteract()) {
-				CharacterNaked(C);
-				if (Math.random() > 0.5) InventoryWear(C, CommonGetRandomItemFromList(["Bandeau1", "BondageBra1", "HarnessBra1", "CorsetBikini1", "CuteBikini1", "SexyBikini1", "FishnetBikini1", "FrameBra1", "FrameBra2", "FullLatexBra", "HeartTop", "LatexBra1", "LeatherBreastBinder", "LeatherStrapBra1", "HarnessBra2", "SexyBikini2", "SexyBikiniBra1", "OuvertPerl1", "Ribbons", "Bustier1", "SexyBeachBra1", "StarHarnessBra", "Bra10"]), "Bra", "Default");
-				if (Math.random() > 0.7) InventoryWear(C, CommonGetRandomItemFromList(["Stockings1", "Stockings2", "Pantyhose2", "Stockings4", "Socks6", "LatexSocks1", "Pantyhose1"]), "Socks", "Default");
-			}
-		}
-
+	for (let C of PrivateBedCharacter) {
+		if (!C.IsNpc()) continue;
+		C.PrivateBedAppearance = CharacterAppearanceStringify(C);
+		if (!C.CanInteract()) continue;
+		CharacterNaked(C);
+		if (Math.random() > 0.5) InventoryWear(C, CommonGetRandomItemFromList(["Bandeau1", "BondageBra1", "HarnessBra1", "CorsetBikini1", "CuteBikini1", "SexyBikini1", "FishnetBikini1", "FrameBra1", "FrameBra2", "FullLatexBra", "HeartTop", "LatexBra1", "LeatherBreastBinder", "LeatherStrapBra1", "HarnessBra2", "SexyBikini2", "SexyBikiniBra1", "OuvertPerl1", "Ribbons", "Bustier1", "SexyBeachBra1", "StarHarnessBra", "Bra10"]), "Bra", "Default");
+		if (Math.random() > 0.7) InventoryWear(C, CommonGetRandomItemFromList(["Stockings1", "Stockings2", "Pantyhose2", "Stockings4", "Socks6", "LatexSocks1", "Pantyhose1"]), "Socks", "Default");
+	}
 }
 
 /**
@@ -145,23 +143,23 @@ function PrivateBedRun() {
 		if (PrivateBedActivityMustRefresh) {
 			PrivateBedActivityMustRefresh = false;
 			PrivateBedActivityList = [];
-			for (let A of ActivityFemale3DCG)
-				if ((A.Name != null) && !A.Name.includes("Item") && !A.Name.includes("Reverse") && !A.Name.includes("Inject") && !A.Name.includes("Penetrate") && !A.Name.includes("Penis") && !A.Name.includes("Pussy") && (A.MaxProgress != null) && (A.MaxProgress > 0))
-					if ((A.Prerequisite == null) || !A.Prerequisite.includes("UseTongue") || !Player.IsGagged())
-						if ((A.Prerequisite == null) || !A.Prerequisite.includes("UseMouth") || !Player.IsGagged())
-							if ((A.Prerequisite == null) || !A.Prerequisite.includes("IsGagged") || Player.IsGagged())
-								if ((A.Prerequisite == null) || !A.Prerequisite.includes("IsGagged") || Player.IsGagged())
-									PrivateBedActivityList.push(A.Name);
+			for (let A of ActivityFemale3DCG) {
+				if (["Item", "Reverse", "Inject", "Penetrate", "Penis", "Pussy"].some(prefix => A.Name?.includes(prefix))) continue;
+				if (!A.MaxProgress || A.MaxProgress <= 0) continue;
+				if (["UseTongue", "UseMouth"].some(prerequisite => A.Prerequisite?.includes(prerequisite)) && Player.IsGagged()) continue;
+				if (A.Prerequisite?.includes("IsGagged") && !Player.IsGagged()) continue;
+				PrivateBedActivityList.push(A.Name);
+			}
 		}
 
 		// For each possible activities
-		for (let A = PrivateBedActivityList.length - 1; A >= 0; A--) {
-			let X = 20 + ((A % 9) * 91);
-			let Y = 20 + Math.floor(A / 9) * 91;
-			DrawRect(X, Y, 90, 90, (MouseIn(X, Y, 90, 90) && !CommonIsMobile) ? "Cyan" : ((PrivateBedActivityList[A] == PrivateBedActivity) ? "#AAFFAA" : "White"));
+		for (const [i, activity] of PrivateBedActivityList.entries()) {
+			let X = 20 + ((i % 9) * 91);
+			let Y = 20 + Math.floor(i / 9) * 91;
+			DrawRect(X, Y, 90, 90, (MouseIn(X, Y, 90, 90) && !CommonIsMobile) ? "Cyan" : (activity == PrivateBedActivity ? "#AAFFAA" : "White"));
 			DrawEmptyRect(X, Y, 91, 91, "Black", 2);
-			DrawImageResize("Icons/Activity/" + PrivateBedActivityList[A] + ".png", X + 2, Y + 2, 87, 87);
-			if (MouseIn(X, Y, 90, 90)) DrawButtonHover(X, Y, 90, 90, ActivityDictionaryText("Activity" + PrivateBedActivityList[A]));
+			DrawImageResize("Icons/Activity/" + activity + ".png", X + 2, Y + 2, 87, 87);
+			if (MouseIn(X, Y, 90, 90)) DrawButtonHover(X, Y, 90, 90, ActivityDictionaryText("Activity" + activity));
 		}
 
 	}
@@ -176,16 +174,15 @@ function PrivateBedRun() {
 			if (MouseIn(C.PrivateBedLeft + 60, C.PrivateBedTop + 400, 80, 100) && !C.ArousalZoom) { DrawEmptyRect(C.PrivateBedLeft + 60, C.PrivateBedTop + 400, 80, 100, "Cyan", 3); break; }
 			if (MouseIn(C.PrivateBedLeft + 50, C.PrivateBedTop + 615, 100, 100) && C.ArousalZoom) { DrawEmptyRect(C.PrivateBedLeft + 50, C.PrivateBedTop + 615, 100, 100, "Cyan", 3); break; }
 			if (MouseIn(C.PrivateBedLeft + 100, C.PrivateBedTop, 300, C.HeightRatio * 1000)) {
-				for (let A = 0; A < AssetGroup.length; A++) {
-					const group = AssetGroup[A];
-					if (group.IsItem() && group.Zone != null && AssetActivitiesForGroup("Female3DCG", group.Name).length)
-						for (let Z = 0; Z < group.Zone.length; Z++)
-							if ((group.Zone[Z][0] >= 100) && (group.Zone[Z][0] < 400)) {
-								let Color = "#FF000040";
-								if (ActivityCanBeDone(C, PrivateBedActivity, group.Name) && !InventoryGroupIsBlocked(C, group.Name, true)) Color = "#00FF0040";
-								if (MouseIn(group.Zone[Z][0] + C.PrivateBedLeft, group.Zone[Z][1] + C.PrivateBedTop, group.Zone[Z][2], group.Zone[Z][3])) Color = (Color == "#FF000040") ? "Red" : "Cyan";
-								DrawEmptyRect(group.Zone[Z][0] + C.PrivateBedLeft, group.Zone[Z][1] + C.PrivateBedTop, group.Zone[Z][2], group.Zone[Z][3], Color, 3);
-							}
+				for (const group of AssetGroup) {
+					if (!group.IsItem() || group.Zone == null || !AssetActivitiesForGroup("Female3DCG", group.Name).length) continue;
+					for (const zone of group.Zone) {
+						if (zone[0] < 100 || zone[0] >= 400) continue;
+						let Color = "#FF000040";
+						if (ActivityCanBeDone(C, PrivateBedActivity, group.Name) && !InventoryGroupIsBlocked(C, group.Name, true)) Color = "#00FF0040";
+						if (MouseIn(zone[0] + C.PrivateBedLeft, zone[1] + C.PrivateBedTop, zone[2], zone[3])) Color = (Color == "#FF000040") ? "Red" : "Cyan";
+						DrawEmptyRect(zone[0] + C.PrivateBedLeft, zone[1] + C.PrivateBedTop, zone[2], zone[3], Color, 3);
+					}
 				}
 				break;
 			}
@@ -376,16 +373,16 @@ function PrivateBedClick() {
 		if (MouseIn(C.PrivateBedLeft + 50, C.PrivateBedTop + 615, 100, 100) && C.ArousalZoom) { C.ArousalZoom = false; return; }
 
 		// If we click in an arousal zone, we can trigger that activity
-		if (MouseIn(C.PrivateBedLeft, C.PrivateBedTop, 500, C.HeightRatio * 1000))
-			for (let A = 0; A < AssetGroup.length; A++) {
-				const group = AssetGroup[A];
-				if (group.IsItem() && group.Zone != null && AssetActivitiesForGroup("Female3DCG", group.Name).length)
-					if (ActivityCanBeDone(C, PrivateBedActivity, group.Name) && !InventoryGroupIsBlocked(C, group.Name, true))
-						for (let Z = 0; Z < group.Zone.length; Z++)
-							if ((group.Zone[Z][0] >= 100) && (group.Zone[Z][0] < 400))
-								if (MouseIn(group.Zone[Z][0] + C.PrivateBedLeft, group.Zone[Z][1] + C.PrivateBedTop, group.Zone[Z][2], group.Zone[Z][3]))
-									return PrivateBedActivityStart(Player, C, group, PrivateBedActivity);
+		if (!MouseIn(C.PrivateBedLeft, C.PrivateBedTop, 500, C.HeightRatio * 1000)) continue;
+		for (const group of AssetGroup) {
+			if (!group.IsItem() || group.Zone == null || !AssetActivitiesForGroup("Female3DCG", group.Name).length) continue;
+			if (!ActivityCanBeDone(C, PrivateBedActivity, group.Name) || InventoryGroupIsBlocked(C, group.Name, true)) continue;
+			for (const zone of group.Zone) {
+				if (zone[0] < 100 || zone[0] >= 400) continue;
+				if (MouseIn(zone[0] + C.PrivateBedLeft, zone[1] + C.PrivateBedTop, zone[2], zone[3]))
+					return PrivateBedActivityStart(Player, C, group, PrivateBedActivity);
 			}
+		}
 	}
 
 }

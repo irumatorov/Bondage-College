@@ -57,8 +57,8 @@ function TimerToString(T) {
  * @returns {string} - The time string in the HH:MM format
  */
 function TimerHourToString(T) {
-	var M = T.getMinutes().toString();
-	var H = T.getHours().toString();
+	let M = T.getMinutes().toString();
+	const H = T.getHours().toString();
 	if (M.length == 1) M = "0" + M;
 	return H + ":" + M;
 }
@@ -308,7 +308,7 @@ function TimerProcess() {
 
 							// Adds the fetish value to the factor
 							if (Factor >= 0) {
-								var Fetish = ActivityFetishFactor(Character[C]);
+								const Fetish = ActivityFetishFactor(Character[C]);
 								if (Fetish > 0) Factor = Factor + Math.ceil(Fetish / 3);
 								if (Fetish < 0) Factor = Factor + Math.floor(Fetish / 3);
 							}
@@ -371,12 +371,12 @@ function TimermsToTime(s) {
 	}
 
 	// Returns the formatted value
-	var ms = s % 1000;
+	const ms = s % 1000;
 	s = (s - ms) / 1000;
-	var secs = s % 60;
+	const secs = s % 60;
 	s = (s - secs) / 60;
-	var mins = s % 60;
-	var hrs = (s - mins) / 60;
+	const mins = s % 60;
+	const hrs = (s - mins) / 60;
 	return pad(hrs) + ':' + pad(mins) + ':' + pad(secs);
 
 }

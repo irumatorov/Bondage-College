@@ -413,7 +413,7 @@ function GameMagicBattleAddChatLog(Msg, Source, Target, Data, Color) {
 	if ((Data != null) && (Data.Time != null)) Msg = Msg.replace("SpellTime", (Data.Time / 1000).toString());
 
 	// Adds the message and scrolls down unless the user has scrolled up
-	var div = document.createElement("div");
+	const div = document.createElement("div");
 	div.setAttribute('class', 'ChatMessage ChatMessageServerMessage');
 	div.setAttribute('data-time', ChatRoomCurrentTime());
 	if ((Color != null) && (Color != "")) div.style.color = Color;
@@ -624,7 +624,7 @@ function GameMagicBattleDrawCharacter(C, X, Y, Zoom) {
 		if (Player.CanTalk() && (GameMagicBattleGetStatus() == "Running")) {
 			if (C.MemberNumber == Player.MemberNumber) {
 				MainCanvas.font = CommonGetFont(72);
-				let Time = Math.ceil((GameMagicBattleTurnTimer - TimerGetTime()) / 1000);
+				const Time = Math.ceil((GameMagicBattleTurnTimer - TimerGetTime()) / 1000);
 				let Color = "#00FF00";
 				if (Time <= 15) Color = "#FFFF00";
 				if (Time <= 6) Color = "#FF0000";

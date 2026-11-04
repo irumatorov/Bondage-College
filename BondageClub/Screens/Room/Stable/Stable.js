@@ -83,7 +83,7 @@ async function StableLoad() {
 	// Give items to the player in case they completed the exam before they were added
 	if (StablePlayerIsExamTrainer() || StablePlayerIsExamPony()) {
 		/** @type {ItemBundle[]} */
-		var ItemsToEarn = [];
+		const ItemsToEarn = [];
 		ItemsToEarn.push({Name: "PonyBoots", Group: "Shoes"});
 		ItemsToEarn.push({Name: "HarnessPonyBits", Group: "ItemMouth"});
 		InventoryAddMany(Player, ItemsToEarn);
@@ -251,7 +251,7 @@ function StablePlayerGetTrainingLesson() {
 		StableTrainer.CurrentDialog = DialogFind(StableTrainer, "StableTrainingEndIntro");
 		StableTrainer.Stage = "StableTrainingEnd";
 	} else {
-		var TrainSelection = Math.random() * (10 + SkillGetLevel(Player, "Dressage"));
+		const TrainSelection = Math.random() * (10 + SkillGetLevel(Player, "Dressage"));
 		if (TrainSelection < 3) {
 			StableTrainer.CurrentDialog = DialogFind(StableTrainer, "StableTrainingGallopIntro");
 			StableTrainer.Stage = "StableTrainingGallop";
@@ -312,8 +312,8 @@ function StablePlayerGetTrainingLesson() {
 function StablePlayerTrainingGallop(Behavior) {
 	StablePlayerTrainingLessons++;
 	StablePlayerTrainingBehavior += Behavior;
-	var StableDressage = SkillGetLevel(Player, "Dressage");
-	var StableDifficulty = 3;
+	const StableDressage = SkillGetLevel(Player, "Dressage");
+	const StableDifficulty = 3;
 	SkillProgress(Player, "Dressage", StableDifficulty * 5);
 	if ((Math.random() * StableDifficulty) < StableDressage) {
 		StablePlayerTrainingBehavior += 2;
@@ -344,8 +344,8 @@ function StablePlayerTrainingGallop(Behavior) {
 function StablePlayerTrainingWalk(Behavior) {
 	StablePlayerTrainingLessons++;
 	StablePlayerTrainingBehavior += Behavior;
-	var StableDressage = SkillGetLevel(Player, "Dressage");
-	var StableDifficulty = 6;
+	const StableDressage = SkillGetLevel(Player, "Dressage");
+	const StableDifficulty = 6;
 	SkillProgress(Player, "Dressage", StableDifficulty * 5);
 	if ((Math.random() * StableDifficulty) < StableDressage) {
 		StablePlayerTrainingBehavior += 2;
@@ -376,8 +376,8 @@ function StablePlayerTrainingWalk(Behavior) {
 function StablePlayerTrainingDance(Behavior) {
 	StablePlayerTrainingLessons++;
 	StablePlayerTrainingBehavior += Behavior;
-	var StableDressage = SkillGetLevel(Player, "Dressage");
-	var StableDifficulty = 9;
+	const StableDressage = SkillGetLevel(Player, "Dressage");
+	const StableDifficulty = 9;
 	SkillProgress(Player, "Dressage", StableDifficulty * 5);
 	if ((Math.random() * StableDifficulty) < StableDressage) {
 		StablePlayerTrainingBehavior += 2;
@@ -445,8 +445,8 @@ async function StablePlayerTrainingHurdlesEnd() {
  */
 function StablePlayerTrainingTreadmill(Behavior) {
 	StablePlayerTrainingBehavior += Behavior;
-	var StableDressage = SkillGetLevel(Player, "Dressage");
-	var StableDifficulty = 6;
+	const StableDressage = SkillGetLevel(Player, "Dressage");
+	const StableDifficulty = 6;
 	SkillProgress(Player, "Dressage", StableDifficulty * 5);
 	StableGenericProgressStart((StableDifficulty + StableDressage) * 20, StableDressage, StableDressage, "Screens/Room/Stable/treadmill.png", "HorseStable", StableTrainer, null, "StableTrainingPass", "StableTrainingPassIntro", "StableTrainingFail", "StableTrainingFailIntro", 2, "Treadmill");
 	StablePlayerTrainingLessons += 2;
@@ -459,8 +459,8 @@ function StablePlayerTrainingTreadmill(Behavior) {
  */
 function StablePlayerTrainingStrongTreadmill(Behavior) {
 	StablePlayerTrainingBehavior += Behavior;
-	var StableDressage = SkillGetLevel(Player, "Dressage");
-	var StableDifficulty = 2;
+	const StableDressage = SkillGetLevel(Player, "Dressage");
+	const StableDifficulty = 2;
 	InventoryWear(Player, "LeatherBelt", "ItemLegs");
 	SkillProgress(Player, "Dressage", (StableDifficulty + 6) * 10);
 	StableGenericProgressStart((StableDifficulty + StableDressage) * 20, StableDressage - 6, StableDressage, "Screens/Room/Stable/treadmill.png", "HorseStable", StableTrainer, null, "StableTrainingPass", "StableTrainingPassIntro", "StableTrainingFail", "StableTrainingFailIntro", 2, "Treadmill");
@@ -474,8 +474,8 @@ function StablePlayerTrainingStrongTreadmill(Behavior) {
  */
 function StablePlayerTrainingCarriage(Behavior) {
 	StablePlayerTrainingBehavior += Behavior;
-	var StableDressage = SkillGetLevel(Player, "Dressage");
-	var StableDifficulty = 9;
+	const StableDressage = SkillGetLevel(Player, "Dressage");
+	const StableDifficulty = 9;
 	SkillProgress(Player, "Dressage", StableDifficulty * 5);
 	StableGenericProgressStart((StableDifficulty + StableDressage) * 20, StableDressage, StableDressage, "Screens/Room/Stable/horsecarriage.png", "HorseStable", StableTrainer, null, "StableTrainingPass", "StableTrainingPassIntro", "StableTrainingFail", "StableTrainingFailIntro", 2, "Carriage");
 	StablePlayerTrainingLessons += 2;
@@ -488,8 +488,8 @@ function StablePlayerTrainingCarriage(Behavior) {
  */
 function StablePlayerTrainingStrongCarriage(Behavior) {
 	StablePlayerTrainingBehavior += Behavior;
-	var StableDressage = SkillGetLevel(Player, "Dressage");
-	var StableDifficulty = 3;
+	const StableDressage = SkillGetLevel(Player, "Dressage");
+	const StableDifficulty = 3;
 	InventoryWear(Player, "LeatherBelt", "ItemLegs");
 	SkillProgress(Player, "Dressage", (StableDifficulty + 6) * 10);
 	StableGenericProgressStart((StableDifficulty + StableDressage) * 20, StableDressage - 6, StableDressage, "Screens/Room/Stable/horsecarriage.png", "HorseStable", StableTrainer, null, "StableTrainingPass", "StableTrainingPassIntro", "StableTrainingFail", "StableTrainingFailIntro", 2, "Carriage");
@@ -503,8 +503,8 @@ function StablePlayerTrainingStrongCarriage(Behavior) {
  */
 function StablePlayerTrainingRace(Behavior) {
 	StablePlayerTrainingBehavior += Behavior;
-	var StableDressage = SkillGetLevel(Player, "Dressage");
-	var StableDifficulty = 9;
+	const StableDressage = SkillGetLevel(Player, "Dressage");
+	const StableDifficulty = 9;
 	SkillProgress(Player, "Dressage", StableDifficulty * 5);
 	StableGenericProgressStart((StableDifficulty + StableDressage) * 20, StableDressage, StableDressage + 1, "Screens/Room/Stable/treadmill.png", "HorseStable", StableTrainer, StablePony, "StableTrainingPass", "StableTrainingPassIntro", "StableTrainingFail", "StableTrainingFailIntro", 2, "Treadmill");
 	StablePlayerTrainingLessons += 2;
@@ -517,8 +517,8 @@ function StablePlayerTrainingRace(Behavior) {
  */
 function StablePlayerTrainingStrongRace(Behavior) {
 	StablePlayerTrainingBehavior += Behavior;
-	var StableDressage = SkillGetLevel(Player, "Dressage");
-	var StableDifficulty = 9;
+	const StableDressage = SkillGetLevel(Player, "Dressage");
+	const StableDifficulty = 9;
 	SkillProgress(Player, "Dressage", StableDifficulty * 5);
 	StableGenericProgressStart((StableDifficulty + StableDressage) * 20, StableDressage, StableDressage + 3, "Screens/Room/Stable/treadmill.png", "HorseStable", StableTrainer, StablePony, "StableTrainingPass", "StableTrainingPassIntro", "StableTrainingFail", "StableTrainingFailIntro", 2, "Treadmill");
 	StablePlayerTrainingLessons += 2;
@@ -573,7 +573,7 @@ function StablePlayerTrainingPass(Behavior) {
 	if (StablePlayerTrainingBehavior <= 0) {
 		StableCheckEquipment();
 	} else {
-		var PassSelection = Math.random() * 7;
+		const PassSelection = Math.random() * 7;
 		if (PassSelection < 1) {
 			StablePlayerTrainingBehavior -= 2;
 			StableTrainer.CurrentDialog = DialogFind(StableTrainer, "StableTrainingPettingIntro");
@@ -618,7 +618,7 @@ function StablePlayerTrainingFail(Behavior) {
 	if (StablePlayerTrainingBehavior >= 0) {
 		StableCheckEquipment();
 	} else {
-		var FailSelection = Math.random() * 8;
+		const FailSelection = Math.random() * 8;
 		if (FailSelection < 1) {
 			StablePlayerTrainingBehavior += 2;
 			StableTrainer.CurrentDialog = DialogFind(StableTrainer, "StableTrainingFailPopsIntro");
@@ -783,14 +783,14 @@ async function StablePlayerExamHurdlesEnd() {
 }
 
 function StablePlayerExamRace() {
-	var StableDressage = SkillGetLevel(Player, "Dressage");
-	var StableDifficulty = 9;
+	const StableDressage = SkillGetLevel(Player, "Dressage");
+	const StableDifficulty = 9;
 	SkillProgress(Player, "Dressage", StableDifficulty * 5);
 	StableGenericProgressStart((StableDifficulty + StableDressage) * 20, StableDressage, StableDressage + 2, "Screens/Room/Stable/treadmill.png", "HorseStable", StableTrainer, StablePony, "StableExamDressage", "StableExamDressageIntro", "StableExamFail", "StableExamFailIntro", 2, "Treadmill");
 }
 
 function StablePlayerExamDressage() {
-	var StableDressage = SkillGetLevel(Player, "Dressage");
+	const StableDressage = SkillGetLevel(Player, "Dressage");
 	SkillProgress(Player, "Dressage", 50);
 	if ((Math.random() * 6) < (StableDressage - 5)) {
 		StableTrainer.CurrentDialog = DialogFind(StableTrainer, "StableExamPassIntro");
@@ -886,7 +886,7 @@ function StablePonyWearEquipment() {
 	StablePonyPass = false;
 	StablePonyFail = false;
 	StableWearPonyEquipment(StablePony);
-	var PonyBehavior = Math.random();
+	const PonyBehavior = Math.random();
 	if (PonyBehavior < 0.4) {
 		StablePony.CurrentDialog = DialogFind(StablePony, "StablePonyCheckEquipmentWait");
 		StablePonyPass = true;
@@ -992,7 +992,7 @@ function StablePlayerStartTExam() {
 }
 
 function StablePlayerTExamKnow() {
-	var StableDressage = SkillGetLevel(Player, "Dressage");
+	const StableDressage = SkillGetLevel(Player, "Dressage");
 	SkillProgress(Player, "Dressage", 50);
 	if ((Math.random() * 6) < (StableDressage - 5)) {
 		StableTrainer.CurrentDialog = DialogFind(StableTrainer, "StableExamTWhipIntro");
@@ -1131,11 +1131,11 @@ function StableGenericDrawProgress() {
 		DrawButton(1750, 25, 225, 75, "Cancel", "White");
 		StableProgress = StableProgress + StableProgressAuto;
 		if (StableProgress < 0) StableProgress = 0;
-		var StableGenericPlayerPosition = (1700 * StableProgress/100) + 50;
+		const StableGenericPlayerPosition = (1700 * StableProgress/100) + 50;
 
 		StableSecondProgress = StableSecondProgress + StableSecondProgressAuto;
 		if (StableSecondProgress < 0) StableSecondProgress = 0;
-		var StableGenericSecondPosition = (1700 * StableSecondProgress/100) + 50;
+		const StableGenericSecondPosition = (1700 * StableSecondProgress/100) + 50;
 
 
 		if (StableProgressSecondCharacter == null) {
@@ -1295,7 +1295,7 @@ function StableDoActivity(Activity) {
 	}
 
 	//result 2d6 + Skill - Difficulty, min 0 max 10
-	var StablePerformance = Math.floor(Math.random() * 6) + 1;
+	let StablePerformance = Math.floor(Math.random() * 6) + 1;
 	StablePerformance += (Math.floor(Math.random() * 6)) + 1;
 	StablePerformance += SkillGetLevel(Player, "Dressage");
 	StablePerformance -= StableDifficulty;

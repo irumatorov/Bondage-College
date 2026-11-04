@@ -543,7 +543,7 @@ function NurseryPlayerSkillsAmnesia() {
 	const Modifier = SkillGetModifier(Player, "Evasion");
 	SkillSetModifier(Player, "Evasion", Modifier - 1, MS_PER_HOUR);
 	/** @type {ItemBundle[]} */
-	var ItemsToEarn = [];
+	const ItemsToEarn = [];
 	ItemsToEarn.push({Name: "RegressedMilk", Group: "ItemMouth"});
 	ItemsToEarn.push({Name: "RegressedMilk", Group: "ItemMouth2"});
 	ItemsToEarn.push({Name: "RegressedMilk", Group: "ItemMouth3"});

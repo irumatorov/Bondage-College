@@ -11,7 +11,7 @@ function AssetsFaceMarkingsFaceWritingsAfterDrawHook(data, originalFunction, {
 	const Height = 65;
 	const Width = 200;
 	const TempCanvas = AnimationGenerateTempCanvas(C, A, Width, Height);
-	var offset; // we need a bit of offset for lower lines to follow the face shape when writing on cheeks
+	let offset; // we need a bit of offset for lower lines to follow the face shape when writing on cheeks
 
 	/** @type {DynamicDrawOptions} */
 	const drawOptions = {

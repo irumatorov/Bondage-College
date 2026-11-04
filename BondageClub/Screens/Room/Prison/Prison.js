@@ -379,7 +379,7 @@ function PrisonCuffsRelief() {
 function PrisonMaidLightTorture() {
 	PrisonMaidIsAngry = true;
 	PrisonMaid.Stage = "PrisonerTortured";
-	var torture = Math.random() * 4;
+	const torture = Math.random() * 4;
 	if (torture < 1) {
 		PrisonMaid.CurrentDialog = DialogFind(PrisonMaid, "PrisonMaidTortureFondleButt");
 	} else if (torture < 2) {
@@ -397,7 +397,7 @@ function PrisonMaidLightTorture() {
 function PrisonMaidHevyTorture() {
 	PrisonMaidIsAngry = true;
 	PrisonMaid.Stage = "PrisonerTortured";
-	var torture = Math.random() * 5;
+	const torture = Math.random() * 5;
 	if (torture < 1) {
 		PrisonMaid.CurrentDialog = DialogFind(PrisonMaid, "PrisonMaidTortureWhipping");
 	} else if (torture < 2) {
@@ -669,7 +669,7 @@ function PrisonWantedPlayer() {
  * @returns {SafePromise<void>}
  */
 async function PrisonMeetPoliceIntro(RoomBackground) {
-	var aggressive = PrisonWantedPlayer() >= 4;
+	const aggressive = PrisonWantedPlayer() >= 4;
 
 	await CommonSetScreen("Room", "Prison");
 	PrisonBackground = RoomBackground; //"MainHall","Gambling","HorseStable"

@@ -304,8 +304,8 @@ function ShibariPayForTraining(SkillType) {
 	if (Player.Money - ShibariTrainingPrice < 0) return;
 
 	// Raises the actual progress by 25 to 50%, can gain a level
-	var L = SkillGetLevelReal(Player, SkillType);
-	var P = SkillGetProgress(Player, SkillType) + 250 + Math.round(Math.random() * 250);
+	let L = SkillGetLevelReal(Player, SkillType);
+	let P = SkillGetProgress(Player, SkillType) + 250 + Math.round(Math.random() * 250);
 	if (P >= SkillProgressMax) {
 		L++;
 		P = 0;

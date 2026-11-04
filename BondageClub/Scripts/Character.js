@@ -601,7 +601,7 @@ function CharacterCreate(CharacterAssetFamily, Type, CharacterID) {
 				return loves;
 			}
 
-			for (let L of this.Lovership) {
+			for (const L of this.Lovership) {
 				if (typeof L.MemberNumber === "number") {
 					// Anything with a MemberNumber is a relationship with an online character, so properties should be fine
 					loves.push(L);
@@ -1403,17 +1403,16 @@ function CharacterLoadOnline(data, SourceMemberNumber) {
 			if ((Char.Description != data.Description) || (Char.Title != data.Title) || (Char.Nickname != data.Nickname) || (Char.LabelColor != data.LabelColor) || (ChatRoomData?.Character == null))
 				Refresh = true;
 			else
-				for (let C = 0; C < ChatRoomData.Character.length; C++)
-					if (ChatRoomData.Character[C].ID == data.ID)
-						if (ChatRoomData?.Character[C]?.Appearance?.length != data.Appearance?.length)
+				for (const char of ChatRoomData.Character)
+					if (char.ID == data.ID)
+						if (char.Appearance?.length != data.Appearance?.length)
 							Refresh = true;
 						else
-							for (let A = 0; A < (data.Appearance?.length ?? 0) && !Refresh; A++) {
-								const Old = ChatRoomData?.Character[C]?.Appearance?.[A];
-								const New = data.Appearance?.[A];
-								if ((New?.Name !== Old?.Name) || (New?.Group !== Old?.Group) || JSON.stringify(New?.Color) !== JSON.stringify(Old?.Color)) Refresh = true;
-								else if ((New?.Property != null) && (Old?.Property != null) && (JSON.stringify(New?.Property) !== JSON.stringify(Old.Property))) Refresh = true;
-								else if (((New?.Property != null) && (Old?.Property == null)) || ((New?.Property == null) && (Old?.Property != null))) Refresh = true;
+							for (const [A, newApp] of (data.Appearance ?? []).entries()) {
+								const Old = char.Appearance?.[A];
+								if ((newApp?.Name !== Old?.Name) || (newApp?.Group !== Old?.Group) || JSON.stringify(newApp?.Color) !== JSON.stringify(Old?.Color)) Refresh = true;
+								else if ((newApp?.Property != null) && (Old?.Property != null) && (JSON.stringify(newApp?.Property) !== JSON.stringify(Old.Property))) Refresh = true;
+								else if (((newApp?.Property != null) && (Old?.Property == null)) || ((newApp?.Property == null) && (Old?.Property != null))) Refresh = true;
 							}
 
 		// Flags "refresh" if the ownership or lovership or inventory or blockitems or limiteditems has changed
@@ -1953,7 +1952,7 @@ function CharacterRandomUnderwear(C) {
 
 	// Generate random undies at a random color
 	/** @type {"" | BCColor} */
-	var Color = "";
+	let Color = "";
 	for (const G of AssetGroup)
 		if ((G.Category == "Appearance") && G.Underwear && (G.IsDefault || (Math.random() < 0.2))) {
 			if (Color == "") Color = CommonRandomItemFromList("Default", G.ColorSchema);
@@ -2059,7 +2058,7 @@ function CharacterReleaseTotal(C, refresh=true) {
  * @returns {number} - Active bonus amount for the bonus type
  */
 function CharacterGetBonus(C, BonusType) {
-	var Bonus = 0;
+	let Bonus = 0;
 	for (let I = 0; I < C.Inventory.length; I++)
 		if ((C.Inventory[I].Asset != null) && (C.Inventory[I].Asset.Bonus != null) && (C.Inventory[I].Asset.Bonus == BonusType))
 			Bonus++;
@@ -2075,8 +2074,8 @@ function CharacterGetBonus(C, BonusType) {
 function CharacterFullRandomRestrain(C, Ratio, Refresh) {
 
 	// Sets the ratio depending on the parameter
-	var RatioRare = 0.75;
-	var RatioNormal = 0.25;
+	let RatioRare = 0.75;
+	let RatioNormal = 0.25;
 	if (Ratio != null) {
 		if (Ratio.trim().toUpperCase() == "FEW") { RatioRare = 1; RatioNormal = 0.5; }
 		if (Ratio.trim().toUpperCase() == "LOT") { RatioRare = 0.5; RatioNormal = 0; }
@@ -2224,7 +2223,7 @@ function CharacterGetCurrent() {
  */
 function CharacterCompressWardrobe(Wardrobe) {
 	if (CommonIsArray(Wardrobe) && (Wardrobe.length > 0)) {
-		var CompressedWardrobe = [];
+		const CompressedWardrobe = [];
 		for (const outfit of Wardrobe) {
 			/** @type {WardrobeItemBundle[]} */
 			const Arr = [];
@@ -2465,7 +2464,7 @@ function CharacterGetClumsiness(C) {
  * @returns {boolean} - If a hook was applied or removed
  */
 function CharacterCheckHooks(C, IgnoreHooks) {
-	var refresh = false;
+	let refresh = false;
 	if (C && C.DrawAppearance) {
 		if (!IgnoreHooks && Player.Effect.includes("VRAvatars") && C.Effect.includes("HideRestraints")) {
 			// Then when that character enters the virtual world, register a hook to strip out restraint layers (if needed):

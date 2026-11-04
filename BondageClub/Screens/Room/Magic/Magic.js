@@ -81,8 +81,8 @@ function MagicAssistantIsntDressRestrain() { return (MagicShowIsState(8) && !Mag
  * @returns {boolean} - - Returns true, if the required number of items is reached or exceeded, false otherwise
  */
 function MagicRestrainMinItem(C, MinItem) {
-	var CurItem = 0;
-	var GagApplied = false;
+	let CurItem = 0;
+	let GagApplied = false;
 	for (let E = 0; E < C.Appearance.length; E++) {
 		if ((C.Appearance[E].Asset.Group.Name == "ItemMouth") || (C.Appearance[E].Asset.Group.Name == "ItemMouth2") || (C.Appearance[E].Asset.Group.Name == "ItemMouth3")) {
 			GagApplied = true;
@@ -172,8 +172,8 @@ function MagicTrickChangeDressesBack() {
  */
 function MagicAssistantDress() {
 	CharacterNaked(MagicAssistant);
-	var ColorList = /** @type {const} */(["Default", "#aa8080", "#8080aa", "#aaaa80", "#aa80aa", "#cc3333", "#33cc33", "#3333cc", "#cccc33", "#33cccc", "#cc33cc"]);
-	var Color = CommonRandomItemFromList(null, ColorList);
+	const ColorList = /** @type {const} */(["Default", "#aa8080", "#8080aa", "#aaaa80", "#aa80aa", "#cc3333", "#33cc33", "#3333cc", "#cccc33", "#33cccc", "#cc33cc"]);
+	const Color = CommonRandomItemFromList(null, ColorList);
 	InventoryWear(MagicAssistant, "BunnyEars1", "HairAccessory1");
 	InventoryWear(MagicAssistant, "BunnyCollarCuffs", "Cloth");
 	InventoryWear(MagicAssistant, "BunnySuit", "Bra", Color);
@@ -197,7 +197,7 @@ function MagicShowStart() {
  * @returns {void} - Nothing
  */
 function MagicShowIncomeAdd() {
-	var I = (MagicTrickCounter < 10) ? MagicTrickCounter : 10;
+	const I = (MagicTrickCounter < 10) ? MagicTrickCounter : 10;
 	MagicShowIncome = MagicShowIncome + I;
 }
 
@@ -276,7 +276,7 @@ function MagicSelectTrick() {
  * @returns {void} - Nothing
  */
 function MagicTrickChangeBinds() {
-	var T = ((Math.random() < 0.5) ? Player : MagicAssistant);
+	const T = ((Math.random() < 0.5) ? Player : MagicAssistant);
 	MagicRestrainCopyTransfer(MagicPerformer, T);
 	MagicPerformer.AllowItem = false;
 	if (T == Player) {
@@ -369,7 +369,7 @@ function MagicTrickBoxWaterCell() {
  * @returns {void} - Nothing
  */
 function MagicTrickGetCoin() {
-	var MagicMoney = Math.floor(Math.random() * 6) + 1;
+	const MagicMoney = Math.floor(Math.random() * 6) + 1;
 	MagicPerformer.CurrentDialog = MagicPerformer.CurrentDialog.replace("REPLACEMONEY", CharacterMoneyFormat(MagicMoney));
 	CharacterChangeMoney(Player, MagicMoney);
 }
@@ -404,7 +404,7 @@ function MagicSongGwendoyn() {
  * @returns {void} - Nothing
  */
 function MagicSongBadGirl() {
-	var MagicMoney = Math.floor(Math.random() * 6) + 6;
+	const MagicMoney = Math.floor(Math.random() * 6) + 6;
 	MagicAssistant.CurrentDialog = MagicAssistant.CurrentDialog.replace("REPLACEMONEY", CharacterMoneyFormat(MagicMoney));
 	CharacterChangeMoney(Player, MagicMoney);
 	MagicShowState = 4;
@@ -470,9 +470,9 @@ function MagicRestrainCopyTransfer(FromC, ToC) {
 	MagicRestrainRemove(ToC);
 
 	// Adds all appearance assets from the first character to the second
-	for (var A = 0; A < FromC.Appearance.length; A++) {
-		if ((FromC.Appearance[A].Asset != null) && (MagicRestraintList.indexOf(FromC.Appearance[A].Asset.Group.Name) >= 0)) {
-			InventoryWear(ToC, FromC.Appearance[A].Asset.Name, FromC.Appearance[A].Asset.Group.Name);
+	for (const A of FromC.Appearance) {
+		if ((A.Asset != null) && (MagicRestraintList.includes(A.Asset.Group.Name))) {
+			InventoryWear(ToC, A.Asset.Name, A.Asset.Group.Name);
 		}
 	}
 

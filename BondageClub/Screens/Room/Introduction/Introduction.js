@@ -173,7 +173,7 @@ function IntroductionClearZone() {
  */
 function IntroductionGetBasicItems() {
 	/** @type {ItemBundle[]} */
-	var ItemsToEarn = [];
+	const ItemsToEarn = [];
 	ItemsToEarn.push({Name: "NylonRope", Group: "ItemFeet"});
 	ItemsToEarn.push({Name: "NylonRope", Group: "ItemLegs"});
 	ItemsToEarn.push({Name: "NylonRope", Group: "ItemArms"});
@@ -233,7 +233,7 @@ function IntroductionCompleteRescue() {
  */
 function IntroductionJobDone() {
 	CharacterChangeMoney(Player, 120);
-	var NextDay = Math.floor(CurrentTime / (24 * 60 * 60 * 1000)) + 1;
+	const NextDay = Math.floor(CurrentTime / (24 * 60 * 60 * 1000)) + 1;
 	LogAdd("DailyJobDone", "Introduction", NextDay * 24 * 60 * 60 * 1000);
 	IntroductionJobCurrent = null;
 }
@@ -247,7 +247,7 @@ function IntroductionJobAvailable(JobName) {
 	if (LogQuery("DailyJobDone", "Introduction")) return false;
 	if ((JobName.startsWith("Dom")) && (ReputationGet("Dominant") <= -50)) return false;
 	if ((JobName.startsWith("Sub")) && (ReputationGet("Dominant") >= 50)) return false;
-	var Day = Math.floor(CurrentTime / (24 * 60 * 60 * 1000));
+	const Day = Math.floor(CurrentTime / (24 * 60 * 60 * 1000));
 	if (Day % (IntroductionJobList.length / 2) != IntroductionJobList.indexOf(JobName) % (IntroductionJobList.length / 2)) return false;
 	return true;
 }
@@ -274,7 +274,7 @@ function IntroductionJobStart(JobName, JobCount) {
 	IntroductionJobCount = JobCount;
 	IntroductionJobParam = undefined;
 	if (JobName == "DomLock") {
-		var Day = Math.floor(CurrentTime / (24 * 60 * 60 * 1000));
+		const Day = Math.floor(CurrentTime / (24 * 60 * 60 * 1000));
 		IntroductionJobParam = IntroductionJobLockList[Day % IntroductionJobLockList.length];
 	}
 	if (JobName == "SubActivity") IntroductionJobParam = "100";
@@ -301,7 +301,7 @@ function IntroductionJobGiveUp() {
  */
 function IntroductionJobLockType() {
 	if (!IntroductionJobParam) return;
-	var Item = CommonIncludes(IntroductionJobLockList, IntroductionJobParam) ? AssetGet(Player.AssetFamily, "ItemMisc", IntroductionJobParam) : null;
+	const Item = CommonIncludes(IntroductionJobLockList, IntroductionJobParam) ? AssetGet(Player.AssetFamily, "ItemMisc", IntroductionJobParam) : null;
 	if (Item != null) IntroductionMaid.CurrentDialog = DialogFind(IntroductionMaid, "JobLockType").replace("LockType", Item.Description);
 }
 

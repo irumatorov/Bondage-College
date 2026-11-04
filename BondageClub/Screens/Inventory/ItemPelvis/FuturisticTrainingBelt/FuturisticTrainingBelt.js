@@ -393,8 +393,8 @@ function InventoryFuturisticTrainingBeltCheckPunishSpeech(Item, LastTime) {
 				let words =  Item.Property.PunishRequiredSpeechWord.split(",");
 				if (gagLevel < 8) {
 					let pass = false;
-					for (let W = 0; W <  words.length; W++) {
-						let checkWord = words[W].replace(/[\p{P} ~+=^$|\\<>`]+/ugm, "").toUpperCase();
+					for (const word of words) {
+						let checkWord = word.replace(/[\p{P} ~+=^$|\\<>`]+/ugm, "").toUpperCase();
 						if (msgTruncated.includes(checkWord)) {pass = true; break;}
 					}
 					if (!pass) return { name: "RequiredSpeech" };
@@ -409,8 +409,8 @@ function InventoryFuturisticTrainingBeltCheckPunishSpeech(Item, LastTime) {
 				let triggerRegex;
 
 				if (gagLevel < 8) {
-					for (let W = 0; W <  words.length; W++) {
-						let checkWord = words[W].replace(/[\p{P} ~+=^$|\\<>`]+/ugm, "").toUpperCase();
+					for (const word of words) {
+						let checkWord = word.replace(/[\p{P} ~+=^$|\\<>`]+/ugm, "").toUpperCase();
 
 						if (nonLatinCharRegex.test(checkWord)) {
 							triggerRegex = new RegExp(checkWord);
@@ -688,7 +688,7 @@ function AssetsItemPelvisFuturisticTrainingBeltScriptStateMachine(data, drawData
 
 /** @type {ExtendedItemScriptHookCallbacks.ScriptDraw<VibratingItemData, FuturisticTrainingBeltPersistentData>} */
 function AssetsItemPelvisFuturisticTrainingBeltScriptDrawHook(data, originalFunction, drawData) {
-	var persistentData = drawData.PersistentData();
+	const persistentData = drawData.PersistentData();
 	/** @type {ItemProperties} */
 	const property = (drawData.Item.Property = drawData.Item.Property || {});
 	if (typeof persistentData.UpdateTime !== "number") persistentData.UpdateTime = CommonTime() + 4000;
@@ -714,7 +714,7 @@ function AssetsItemPelvisFuturisticTrainingBeltScriptDrawHook(data, originalFunc
 			persistentData.LastMessageLen = (ChatRoomLastMessage) ? ChatRoomLastMessage.length : 0;
 		}
 
-		var timeToNextRefresh = 950;
+		const timeToNextRefresh = 950;
 		persistentData.UpdateTime = CommonTime() + timeToNextRefresh;
 		AnimationRequestRefreshRate(drawData.C, 5000 - timeToNextRefresh);
 		AnimationRequestDraw(drawData.C);

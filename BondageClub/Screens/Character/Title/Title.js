@@ -64,17 +64,17 @@ function TitleGet(C) {
 
 	// If we find a title that we must force, we set it and return it
 	if (C.IsPlayer())
-		for (let T = 0; T < TitleList.length; T++)
-			if (TitleList[T].Requirement() && (TitleList[T].Force != null) && TitleList[T].Force)
-				return TitleSet(TitleList[T].Name);
+		for (const title of TitleList)
+			if (title.Requirement() && title.Force != null && title.Force)
+				return TitleSet(title.Name);
 
 	// No title or other character titles aren't validated
 	if (!C.Title || (C.Title == "None")) return "None";
 	if (!C.IsPlayer()) return C.Title;
 
 	// If we find a valid title, we return it
-	for (let T = 0; T < TitleList.length; T++)
-		if ((C.Title == TitleList[T].Name) && TitleList[T].Requirement())
+	for (const title of TitleList)
+		if (C.Title == title.Name && title.Requirement())
 			return C.Title;
 
 	// If the title is invalid, we set it to none
@@ -100,8 +100,8 @@ function TitleGetName(title) {
  */
 function TitleIsForced(Title) {
 	if (!Title || (Title == "None")) return false;
-	for (let T = 0; T < TitleList.length; T++)
-		if ((Title == TitleList[T].Name) && (TitleList[T].Force != null) && TitleList[T].Force)
+	for (const title of TitleList)
+		if (Title == title.Name && title.Force != null && title.Force)
 			return true;
 	return false;
 }
@@ -113,8 +113,8 @@ function TitleIsForced(Title) {
  */
 function TitleIsEarned(Title) {
 	if (!Title || (Title == "None")) return false;
-	for (let T = 0; T < TitleList.length; T++)
-		if ((Title == TitleList[T].Name) && (TitleList[T].Earned != null) && TitleList[T].Earned)
+	for (const title of TitleList)
+		if (Title == title.Name && title.Earned != null && title.Earned)
 			return true;
 	return false;
 }

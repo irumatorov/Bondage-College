@@ -535,7 +535,7 @@ function SarahTransferSophieToRoom(Love) {
 	if (SarahShackled()) SarahUnlock();
 	SarahSophieLeaveRoom();
 	/** @type {ItemBundle[]} */
-	var ItemsToEarn = [];
+	const ItemsToEarn = [];
 	ItemsToEarn.push({Name: "LeatherCuffs", Group: "ItemArms"});
 	ItemsToEarn.push({Name: "Baguette", Group: "ItemHandheld"});
 	InventoryAddMany(Player, ItemsToEarn);
@@ -584,7 +584,7 @@ function SarahSophiePreparePunishCharacter(C) {
 	InventoryWear(C, "LeatherCuffs", "ItemArms");
 	InventoryWear(C, "LeatherBelt", "ItemFeet");
 	InventoryWear(C, "LeatherBelt", "ItemLegs");
-	var Cuffs = InventoryGet(C, "ItemArms");
+	const Cuffs = InventoryGet(C, "ItemArms");
 	if (Cuffs) {
 		TypedItemSetOptionByName(C, Cuffs, "Wrist");
 		CharacterRefresh(C);
@@ -654,7 +654,7 @@ function SarahSophieOrgasmGame(Factor) {
 	}
 
 	// Gets the number of tries the player must hold to win (hard if Amanda plays, easy if only Sarah plays)
-	var WinCount = 5;
+	let WinCount = 5;
 	if (SarahAmandaIsInside()) WinCount = 7;
 	if (SarahIsInside() && !SarahAmandaIsInside()) WinCount = 3;
 

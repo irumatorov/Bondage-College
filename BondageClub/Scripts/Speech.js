@@ -130,7 +130,7 @@ function SpeechTransformDialog(C, text) {
 function sfc32(a, b, c, d) {
 	return function() {
 		a >>>= 0; b >>>= 0; c >>>= 0; d >>>= 0;
-		var t = (a + b) | 0;
+		let t = (a + b) | 0;
 		a = b ^ b >>> 9;
 		b = c + (c << 3) | 0;
 		c = (c << 21 | c >>> 11);
@@ -730,7 +730,7 @@ function SpeechTransformBabyTalk(text) {
 	let transformed = "";
 	const oocRanges = SpeechGetOOCRanges(text);
 	for (let charIdx = 0; charIdx < text.length; charIdx++) {
-		var char = text.charAt(charIdx).toLowerCase();
+		const char = text.charAt(charIdx).toLowerCase();
 		inOOC = SpeechIndexInOocRange(charIdx, oocRanges);
 		if (inOOC) {
 			transformed += text.charAt(charIdx);

@@ -1851,7 +1851,7 @@ function ChatSearchAutoJoinRoom() {
 			const room = ChatSearchResult[R];
 			if (room.Name === Player.LastChatRoom.Name && room.Game == "") {
 				if (room.MemberCount < room.MemberLimit) {
-					var RoomName = room.Name;
+					const RoomName = room.Name;
 					roomFound = true;
 					ChatSearchJoin(RoomName);
 					break;

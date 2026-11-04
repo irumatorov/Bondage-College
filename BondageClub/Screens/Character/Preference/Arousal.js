@@ -9,15 +9,15 @@ function PreferenceSubscreenArousalLoad() {
 	// Prepares the activity list
 	PreferenceArousalActivityList = [];
 	if (Player.AssetFamily == "Female3DCG")
-		for (let A = 0; A < ActivityFemale3DCG.length; A++)
-			PreferenceArousalActivityList.push(ActivityFemale3DCG[A].Name);
+		for (const A of ActivityFemale3DCG)
+			PreferenceArousalActivityList.push(A.Name);
 	PreferenceArousalActivityIndex = 0;
 
 	// Prepares the fetish list
 	PreferenceArousalFetishList = [];
 	if (Player.AssetFamily == "Female3DCG")
-		for (let A = 0; A < FetishFemale3DCG.length; A++)
-			PreferenceArousalFetishList.push(FetishFemale3DCG[A].Name);
+		for (const A of FetishFemale3DCG)
+			PreferenceArousalFetishList.push(A.Name);
 	PreferenceArousalFetishIndex = 0;
 }
 
