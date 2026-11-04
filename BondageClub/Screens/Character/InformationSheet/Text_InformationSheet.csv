@@ -3,7 +3,7 @@ Nickname,Nickname:
 Title,Title:
 Pronouns,Pronouns:
 MemberNumber,Member Number:
-NoMemberNumber,-
+NoMemberNumber,—
 Relationships,Significant others
 YourRelations,Your relations
 Lover,Lover:
@@ -41,7 +41,7 @@ ReputationHouseVinculaPositive,House Vincula
 ReputationHouseAmplectorPositive,House Amplector
 ReputationHouseCorporisPositive,House Corporis
 DifficultyTitle,difficulty
-DifficultyDaysTillCanChange, - Can change again in NumberOfDays day(s)
+DifficultyDaysTillCanChange, — Can change again in NumberOfDays day(s)
 DifficultyLevel0,Roleplay
 DifficultyLevel1,Regular
 DifficultyLevel2,Hardcore
