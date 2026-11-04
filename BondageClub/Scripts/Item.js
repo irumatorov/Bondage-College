@@ -160,14 +160,6 @@ var AppearanceItem = {
  */
 let ItemPropertiesDummy = null;
 
-// TODO: R134
-/**
- * Enables R134-style compression while still in R132/R133
- * @private
- * @deprecated will be removed as of R134
- */
-var _ItemPropertiesR134Compression = false;
-
 /**
  * Copy and extract all {@link ItemBundle.Property} keys from the passed item, returning them in addition to all extended item options associated with the item's current state
  * @param {Item} item The item whose properties are to be extracted
