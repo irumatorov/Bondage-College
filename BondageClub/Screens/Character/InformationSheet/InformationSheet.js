@@ -9,7 +9,33 @@ var InformationSheetBackground = "Sheet";
 var InformationSheetSelection = null;
 /** @type {ScreenSpecifier | null} */
 var InformationSheetReturnScreen = null;
-var InformationSheetSecondScreen = false;
+
+const InformationSheetIDs = Object.freeze({
+	screen: "information-sheet-screen",
+	exit: "information-sheet-exit",
+	title: "information-sheet-title",
+	preference: "information-sheet-preference",
+	friendList: "information-sheet-friend-list",
+	profile: "information-sheet-profile",
+	ownersNotes: "information-sheet-owners-notes",
+	tooltip: "information-sheet-tooltip",
+	portrait: "information-sheet-portrait",
+	allowedInteractions: "information-sheet-allowed-interactions",
+});
+
+const InformationSheetLoverStages = /** @type {const} */({
+	0: "Dating",
+	1: "Engaged",
+	2: "Married",
+});
+
+/**
+ * Skill rows whose modifier can expire while the sheet is open.
+ * @type {{ type: SkillType, value: HTMLElement, modifier: HTMLElement }[]}
+ */
+let InformationSheetSkillWatches = [];
+/** @type {number} */
+let InformationSheetSkillRefreshAt = 0;
 
 /**
  * Loads the Information Sheet, cache the sub screens
@@ -26,52 +52,24 @@ async function InformationSheetLoad() {
 
 	const C = InformationSheetSelection;
 
-	if (!C.IsPlayer()) return;
+	InformationSheetSkillWatches = [];
 
-	const dropdownOptions = Object.values(AllowedInteractions)
-		.map((e) => /** @type {Omit<HTMLOptions<"option">, "tag">} */({
-			attributes: {
-				value: e.toString(),
-				label: TextGet("AllowedInteraction" + e.toString()),
-				selected: e === Player.AllowedInteractions
-			}
-		}));
+	const screen = ElementDOMScreen.getTemplate(InformationSheetIDs.screen, {
+		menubarButtons: InformationSheetMenuButtons(C),
+		mainContent: [InformationSheetContent(C)],
+		parent: document.body,
+	});
+
+	const menu = ElementWrap(`${InformationSheetIDs.screen}-menu`);
+	menu?.setAttribute("aria-orientation", "vertical");
+	menu?.setAttribute("data-direction", "ltr");
 
 	ElementCreate({
-		tag: "label",
-		attributes: {
-			id: "AllowedInteractions-dropdown-container",
-			for: "AllowedInteractions-dropdown"
-		},
-		style: {
-			display: "grid",
-			"grid-template-rows": "max-content max-content",
-			"grid-template-columns": "auto",
-			"gap": "var(--gap)"
-		},
-		children: [
-			{
-				tag: "span",
-				attributes: { id: "AllowedInteractions-dropdown-label" },
-				children: [TextGet("AllowedInteractions")],
-				style: { "user-select": "none" }
-			},
-			ElementDropdown.Create("AllowedInteractions-dropdown", dropdownOptions, function (ev) {
-				ev.preventDefault();
-				if (this.value in Object.values(AllowedInteractions) === false) return;
-				Player.AllowedInteractions = /** @type {AllowedInteractions} */ (CommonParseInt(this.value));
-				if (Player.GetDifficulty() >= Difficulty.EXTREME) LoginExtremeItemSettings(Player.AllowedInteractions === AllowedInteractions.Everyone);
-
-				const P = {
-					ItemPermission: Player.AllowedInteractions,
-					AllowedInteractions: Player.AllowedInteractions,
-					...ServerPackItemPermissions(Player.PermissionItems),
-				};
-				ServerAccountUpdate.QueueData(P);
-			})
-		],
-		parent: document.body
+		tag: "div",
+		attributes: { id: InformationSheetIDs.tooltip, role: "tooltip", hidden: true },
+		parent: screen,
 	});
+	InformationSheetSkillRefreshAt = CurrentTime + 1000;
 }
 
 /**
@@ -82,371 +80,26 @@ async function InformationSheetLoad() {
 function InformationSheetRun() {
 	const C = InformationSheetSelection;
 	if (!C) return;
-	const CurrentTitle = TitleGet(C);
 
-	// Draw the character base values
-	DrawCharacter(C, 50, 50, 0.9);
-	MainCanvas.textAlign = "left";
-
-	const spacing = 55;
-	const spacingLarge = 75;
-	let currentY = 125;
-
-	DrawTextFit(TextGet("Name") + " " + C.Name, 550, currentY, 450, "Black", "Gray");
-	currentY += spacing;
-	if (C.Name !== CharacterNickname(C)) {
-		DrawTextFit(TextGet("Nickname") + " " + CharacterNickname(C), 550, currentY, 450, "Black", "Gray");
-		currentY += spacing;
-	}
-	if (CurrentTitle !== "None") {
-		DrawTextFit(TextGet("Title") + " " + TitleGetName(CurrentTitle), 550, currentY, 450, TitleIsForced(CurrentTitle) ? "Red" : TitleIsEarned(CurrentTitle) ? "#0000BF" : "Black", "Gray");
-		currentY += spacing;
-	}
-	if (C.MemberNumber != null) {
-		DrawTextFit(TextGet("MemberNumber") + " " + C.MemberNumber.toString(), 550, currentY, 450, "Black", "Gray");
-		currentY += spacing;
-	}
-	DrawTextFit(TextGet("Pronouns") + " " + CharacterPronounDescription(C), 550, currentY, 450, "Black", "Gray");
-
-	currentY += spacingLarge;
-
-	if ((C.IsPlayer() || C.IsOnline()) && C.Creation !== undefined) {
-		const memberLabel = TextGet(C.IsBirthday() ? "Birthday" : "MemberFor");
-		const creationFormatted = CommonFormatDurationRange(CurrentTime, C.Creation, { showFull: true, includeYears: true, includeMonths: true, includeDays: true });
-		const memberForLabel = `${memberLabel} ${creationFormatted}`;
-		DrawTextFit(memberForLabel, 550, currentY, 450, (C.IsBirthday() ? "Blue" : "Black"), "Gray");
-		const y = currentY;
-		if (MouseIn(550, y - 20, 450, 40)) {
-			const createdDate = new Date(C.Creation).toLocaleString(undefined, {
-				dateStyle: "medium",
-				timeStyle: "short",
-			});
-			const createdDayDuration = CommonFormatDurationRange(CurrentTime, C.Creation, { showFull: true });
-
-			DrawHoverElements.push(() => {
-				DrawButtonHover(550, y - 20, 450, 40, `${createdDate} – ${createdDayDuration}`);
-			});
-		}
-		currentY += spacing;
-
-		if (C.IsPlayer()) {
-			let moneyLine = TextGet("Money") + ` $${C.Money}`;
-			DrawTextFit(moneyLine, 550, currentY, 450, "Black", "Gray");
-			currentY += spacing;
-		}
-	} else if (C.IsNpc()) {
-		const friendshipDate = NPCEventGet(C, "PrivateRoomEntry");
-
-		const friendshipDurationFormatted = CommonFormatDurationRange(CurrentTime, friendshipDate, { showFull: true, includeYears: true, includeMonths: true, includeDays: true });
-		const friendsFor = `${TextGet("FriendsFor")} ${friendshipDurationFormatted}`;
-		DrawTextFit(friendsFor, 550, currentY, 450, "Black", "Gray");
-		const y = currentY;
-		if (MouseIn(550, y - 20, 450, 40)) {
-			const friendshipStartDate = new Date(NPCEventGet(C, "PrivateRoomEntry")).toLocaleString(undefined, {
-				dateStyle: "medium",
-				timeStyle: "short",
-			});
-			const friendshipDayDuration = CommonFormatDurationRange(CurrentTime, friendshipDate, { showFull: true });
-			DrawHoverElements.push(() => {
-				DrawButtonHover(550, y - 20, 450, 40, `${friendshipStartDate} — ${friendshipDayDuration}`);
-			});
-		}
-		currentY += spacing;
-
-		const Love = C.Love ?? 0;
-		let relationshipQualifier = "";
-		if (Love >= 100) relationshipQualifier = "RelationshipPerfect";
-		else if (Love >= 75) relationshipQualifier = "RelationshipGreat";
-		else if (Love >= 50) relationshipQualifier = "RelationshipGood";
-		else if (Love >= 25) relationshipQualifier = "RelationshipFair";
-		else if (Love > -25) relationshipQualifier = "RelationshipNeutral";
-		else if (Love > -50) relationshipQualifier = "RelationshipPoor";
-		else if (Love > -75) relationshipQualifier = "RelationshipBad";
-		else if (Love > -100) relationshipQualifier = "RelationshipHorrible";
-		else relationshipQualifier = "RelationshipAtrocious";
-
-		let loveLine = TextGet("Relationship") + " " + Love.toString() + " " + TextGet(relationshipQualifier);
-		DrawTextFit(loveLine, 550, currentY, 450, "Black", "Gray");
-		currentY += spacing;
-	}
-	currentY += spacingLarge;
-
-	// For the current player or an online player
-	if (C.IsPlayer() || C.IsOnline()) {
-
-		// Shows the difficulty level
-		let difficultyLine = `${TextGet("DifficultyLevel" + C.GetDifficulty())} ${TextGet("DifficultyTitle")}`;
-		if (C.IsPlayer()) {
-			const DifficultyChangeMaxDelay = 7;
-			const LastChangeTime = typeof C.Difficulty?.LastChange === "number" ? C.Difficulty.LastChange : C.Creation;
-			const DaysSinceLastChange = Math.floor((CurrentTime - LastChangeTime) / MS_PER_DAY);
-			const RemainingDays = DaysSinceLastChange >= DifficultyChangeMaxDelay ? 0 : DifficultyChangeMaxDelay - DaysSinceLastChange;
-			difficultyLine += TextGet("DifficultyDaysTillCanChange").replace("NumberOfDays", RemainingDays.toString());
-		}
-		DrawTextFit(difficultyLine, 550, currentY, 450, "Black", "Gray");
-		currentY += spacing;
-
-		// Shows the owner
-		if (!C.IsOwned()) {
-			DrawTextFit(TextGet("Unowned"), 550, currentY, 450, "Black", "Gray");
-			currentY += spacing;
-		}
-		if (C.IsOwned() && C.IsOwned() != "ggts") {
-			const stageText = C.IsFullyOwned() ? "Collared" : "Trial";
-			const ownedDate = C.OwnedSinceMs();
-
-			const ownerStageLabel = `${TextGet(`${stageText}By`)} ${C.OwnerName()}${C.OwnerNumber() !== -1 ? ` (${C.OwnerNumber()})` : ""}`;
-			DrawTextFit(ownerStageLabel, 550, currentY, 450, "Black", "Gray");
-			currentY += spacing;
-			if (C.OwnedSinceMs() > 0) {
-				const ownedDurationFormatted = CommonFormatDurationRange(CurrentTime, ownedDate, { showFull: true, includeYears: true, includeMonths: true, includeDays: true });
-				const ownerDurationLabel = `${TextGet("For")} ${ownedDurationFormatted}`;
-				DrawTextFit(ownerDurationLabel, 550, currentY, 450, "Black", "Gray");
-				const y = currentY;
-				if (MouseIn(550, y - 20, 450, 40)) {
-					const ownedStartDate = new Date(C.OwnedSinceMs()).toLocaleString(undefined, {
-						dateStyle: "medium",
-						timeStyle: "short",
-					});
-					const ownedDayDuration = CommonFormatDurationRange(CurrentTime, ownedDate, { showFull: true });
-					DrawHoverElements.push(() => {
-						DrawButtonHover(550, y - 20, 450, 40, `${ownedStartDate} — ${ownedDayDuration}`);
-					});
-				}
-				currentY += spacing;
-			}
-		}
-
-		currentY = 800;
-
-		// Shows the member number and online permissions for other online players
-
-		if (C.IsOnline()) {
-			DrawTextFit(TextGet("AllowedInteractions"), 550, currentY, 450, "Black", "Gray");
-			currentY += spacing;
-			DrawTextFit(TextGet("AllowedInteraction" + C.AllowedInteractions.toString()), 550, currentY, 450, "Black", "Gray");
-			currentY += spacing;
-		}
-	}
-
-	// Draw the buttons on the right side
-	MainCanvas.textAlign = "center";
-	DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
-	if (C.IsPlayer()) {
-		if (!TitleIsForced(CurrentTitle)) DrawButton(1815, 190, 90, 90, "", "White", "Icons/Title.png");
-		DrawButton(1815, 305, 90, 90, "", "White", "Icons/Preference.png");
-		DrawButton(1815, 420, 90, 90, "", "White", "Icons/FriendList.png");
-		DrawButton(1815, 535, 90, 90, "", "White", "Icons/Introduction.png");
-		if (C.HasOwnerNotes())
-			DrawButton(1715, 535, 90, 90, "", "White", "Icons/Management.png");
-		DrawButton(1815, 765, 90, 90, "", "White", "Icons/Next.png");
-	} else if (C.IsOnline()) {
-		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Introduction.png");
-		if (C.HasOwnerNotes() || C.IsFullyOwnedByPlayer())
-			DrawButton(1715, 190, 90, 90, "", "White", "Icons/Management.png");
-		DrawButton(1815, 765, 90, 90, "", "White", "Icons/Next.png");
-	}
-
-	// Draw the second screen for reputation & skills
-	MainCanvas.textAlign = "left";
-	if (InformationSheetSecondScreen) return InformationSheetSecondScreenRun();
-
-	// For player and online characters, we show the lover list (NPC or online)
-	if ((C.IsPlayer() || C.IsOnline()) && C.GetLovership().length > 0) {
-		const stageQualifier = Object.freeze({
-			0: "Dating",
-			1: "Engaged",
-			2: "Married",
-		});
-		DrawText(TextGet("Relationships"), 1200, 125, "Black", "Gray");
-		const lovership = C.GetLovership();
-		if (lovership.length < 1) DrawText(TextGet("None"), 1200, 200, "Black", "Gray");
-		for (let [L, lover] of lovership.entries()) {
-			const loveStart = lover.Start ?? 0;
-			const stageText = stageQualifier[lover.Stage ?? 0];
-			const relationStageLabel = `${TextGet(`${stageText}With`)} ${lover.Name}${lover.MemberNumber ? ` (${lover.MemberNumber})` : ""}`;
-			DrawTextFit(relationStageLabel, 1200, 200 + L * 150, 600, "Black", "Gray");
-			const relationDurationLabel = `${TextGet("For")} ${CommonFormatDurationRange(CurrentTime, loveStart, { showFull: true, includeYears: true, includeMonths: true, includeDays: true })}`;
-			DrawTextFit(relationDurationLabel, 1200, 260 + L * 150, 600, "Black", "Gray");
-			const hoverY = 260 + L * 150 - 20;
-			if (MouseIn(1200, hoverY, 600, 40)) {
-				const relationStartDate = new Date(loveStart).toLocaleString(undefined, {
-					dateStyle: "medium",
-					timeStyle: "short",
-				});
-				const relationDurationLabelShort = CommonFormatDurationRange(CurrentTime, loveStart, { showFull: true });
-
-				DrawHoverElements.push(() => {
-					DrawButtonHover(1200, hoverY, 450, 40, `${relationStartDate} – ${relationDurationLabelShort}`);
-				});
-			}
-		}
-	} else if (C.IsNpc()) {
-		const stageQualifier = Object.freeze({
-			0: "Dating",
-			1: "Engaged",
-			2: "Married",
-		});
-		// For NPC characters, shows the lover, owner & traits
-		const lovership = C.GetLovership();
-		const playerLove = lovership.find(l => l.MemberNumber === Player.MemberNumber);
-
-		if (!C.LoverName() && !playerLove) {
-			DrawText(`${TextGet("Lover")} ${TextGet("None")}`, 550, currentY, "Black", "Gray");
-			currentY += spacing;
-		}
-		if (playerLove) {
-			const stageText = stageQualifier[playerLove.Stage ?? 0];
-			const loveStart = playerLove.Start ?? 0;
-
-			const loverStageLabel = `${TextGet(`${stageText}With`)} ${C.LoverName()}`;
-			DrawText(loverStageLabel, 550, currentY, "Black", "Gray");
-			currentY += spacing;
-			const loverDurationLabel = `${TextGet("For")} ${CommonFormatDurationRange(CurrentTime, loveStart, { showFull: true, includeYears: true, includeMonths: true, includeDays: true })}`;
-			DrawText(loverDurationLabel, 550, currentY, "Black", "Gray");
-			const y = currentY - 20;
-			if (MouseIn(550, y, 450, 40))
-				DrawHoverElements.push(() => {
-					const loverStartDate = new Date(loveStart).toLocaleString(undefined, {
-						dateStyle: "medium",
-						timeStyle: "short",
-					});
-					const loverDurationTooltip = `${loverStartDate} – ${CommonFormatDurationRange(CurrentTime, loveStart, { showFull: true })}`;
-					DrawButtonHover(550, y, 450, 40, loverDurationTooltip);
-				});
-			currentY += spacing;
-		}
-
-		if (!C.IsOwned()) {
-			DrawText(`${TextGet("Owner")} ${TextGet("None")}`, 550, currentY, "Black", "Gray");
-			currentY += spacing;
-		} else if (C.IsOwned()) {
-			const ownedDate = C.OwnedSinceMs();
-
-			const stageText = C.IsFullyOwned() ? "Collared" : "Trial";
-			const ownedByLabel = `${TextGet(`${stageText}By`)} ${C.OwnerName()}`;
-			DrawText(ownedByLabel, 550, currentY, "Black", "Gray");
-			currentY += spacing;
-			const ownedDurationFormatted = CommonFormatDurationRange(CurrentTime, ownedDate, { showFull: true, includeYears: true, includeMonths: true, includeDays: true });
-			const ownedStageLabel = `${TextGet(`For`)} ${ownedDurationFormatted}`;
-			DrawText(ownedStageLabel, 550, currentY, "Black", "Gray");
-			const y = currentY - 20;
-			if (MouseIn(550, y, 450, 40)) {
-				const ownedStartDate = new Date(C.OwnedSinceMs()).toLocaleString(undefined, {
-					dateStyle: "medium",
-					timeStyle: "short",
-				});
-				const ownedDayDuration = CommonFormatDurationRange(CurrentTime, ownedDate, { showFull: true });
-				DrawHoverElements.push(() => {
-					DrawButtonHover(550, y, 450, 40, `${ownedStartDate} – ${ownedDayDuration}`);
-				});
-			}
-			currentY += spacing;
-		}
-		DrawText(TextGet("Trait"), 1000, 125, "Black", "Gray");
-
-		// After one week we show the traits, after two weeks we show the level
-		if (CurrentTime >= NPCEventGet(C, "PrivateRoomEntry") * CheatFactor("AutoShowTraits", 0) + MS_PER_WEEK) {
-			let Pos = 0;
-			for (const trait of C.Trait ?? []) {
-				DrawText(TextGet("Trait" + ((trait.Value > 0) ? trait.Name : NPCTraitReverse(trait.Name))) + " " + ((CurrentTime >= NPCEventGet(C, "PrivateRoomEntry") * CheatFactor("AutoShowTraits", 0) + 1209600000) ? Math.abs(trait.Value).toString() : "??"), 1000, 200 + Pos * 75, "Black", "Gray");
-				Pos++;
-			}
-		} else DrawText(TextGet("TraitUnknown"), 1000, 200, "Black", "Gray");
-
-	}
-	MainCanvas.textAlign = "center";
-
-}
-
-/**
- * Display the second part of the information sheet for reputation & skills
- * @returns {void} - Nothing
- */
-function InformationSheetSecondScreenRun() {
-	const C = InformationSheetSelection;
-	if (!C) return;
-	// For current player and online characters
-	if (C.IsPlayer() || C.IsOnline()) {
-		const lineHeight = 55;
-		// Draw the reputation section
-		DrawText(TextGet("Reputation"), 1000, 125, "Black", "Gray");
-		let pos = 0;
-		for (let R = 0; R < C.Reputation.length; R++)
-			if (C.Reputation[R].Value != 0) {
-				const label = ReputationLabel(C.Reputation[R].Type, C.Reputation[R].Value);
-				if (!label) continue;
-				DrawText(`${label}: ${Math.abs(C.Reputation[R].Value)}`, 1000, 200 + pos * lineHeight, "Black", "Gray");
-				pos++;
-			}
-		if (pos == 0) DrawText(TextGet("ReputationNone"), 1000, 200, "Black", "Gray");
-
-		// Draw the skill section
-		DrawText(TextGet("Skill"), 1425, 125, "Black", "Gray");
-		if (!C.IsPlayer()) {
-			DrawText(TextGet("Unknown"), 1425, 200, "Black", "Gray");
-		} else {
-			let skillLine = 0;
-			if (C.Skill.length == 0) {
-				DrawText(TextGet("SkillNone"), 1425, 200, "Black", "Gray");
-			} else {
-				for (const type of SkillValidSkills) {
-					const name = TextGet(`Skill${type}`);
-					const level = SkillGetLevel(C, type);
-					const progress = SkillGetProgress(C, type);
-					if (level === 0 && progress === 0) continue;
-					const ratio = SkillGetRatio(C, type);
-					const modifier = SkillGetModifier(C, type);
-					const duration = SkillGetModifierDuration(C, type);
-
-					const skillText = `${name} ${level} (${progress / 10}%)`;
-					const color = ratio !== 1 ? "Red" : "Black";
-					DrawText(skillText, 1425, 200 + skillLine * lineHeight, color, "Gray");
-					skillLine++;
-					if (modifier && modifier !== 0) {
-						/** @type {CommonSubtituteSubstitution[]} */
-						const subst = [
-							["ABS", (modifier > 0 ? "+" : "-")],
-							["VAL", modifier.toString()],
-							["DURATION", TimermsToTime(duration)],
-						];
-						const modifierColor = modifier > 0 ? "Green" : "Red";
-						const modifierText = CommonStringSubstitute(TextGet("SkillModifier"), subst);
-						DrawText(modifierText, 1440, 200 + skillLine * lineHeight, modifierColor, "Gray");
-						skillLine++;
-					}
-				}
-			}
-		}
-	}
-	MainCanvas.textAlign = "center";
-
+	const portrait = /** @type {null | HTMLCanvasElement} */ (ElementWrap(InformationSheetIDs.portrait));
+	if (!portrait) return;
+	const ctx = portrait.getContext("2d");
+	if (!ctx) return;
+	ctx.clearRect(0, 0, portrait.width, portrait.height);
+	DrawCharacter(C, 0, 0, 1, true, ctx);
+	if (C.IsPlayer()) InformationSheetRefreshSkills(C);
 }
 
 /**
  * Handles the click events on the screen
  * @type {MouseEventListener}
  */
-function InformationSheetClick() {
-	const C = InformationSheetSelection;
-	if (!C) return;
-	if (MouseIn(1815, 75, 90, 90)) InformationSheetExit();
-	if (C.IsPlayer()) {
-		if (MouseIn(1815, 190, 90, 90) && !TitleIsForced(TitleGet(C))) CommonSetScreen("Character", "Title");
-		if (MouseIn(1815, 305, 90, 90)) CommonSetScreen("Character", "Preference");
-		if (MouseIn(1815, 420, 90, 90)) CommonSetScreen("Character", "FriendList");
-		if (MouseIn(1815, 535, 90, 90)) OnlineProfileStart("description");
-		if (MouseIn(1715, 535, 90, 90) && C.HasOwnerNotes()) {
-			OnlineProfileStart("ownersNotes");
-		}
-		if (MouseIn(1815, 765, 90, 90)) InformationSheetSecondScreen = !InformationSheetSecondScreen;
-	} else if (C.IsOnline()) {
-		if (MouseIn(1815, 190, 90, 90)) OnlineProfileStart("description");
-		if (MouseIn(1715, 190, 90, 90) && (C.HasOwnerNotes() || C.IsFullyOwnedByPlayer())) {
-			OnlineProfileStart("ownersNotes");
-		}
-		if (MouseIn(1815, 765, 90, 90)) InformationSheetSecondScreen = !InformationSheetSecondScreen;
-	}
+function InformationSheetClick() {}
+
+function InformationSheetResize() {
+	if (!InformationSheetSelection || !ElementWrap(InformationSheetIDs.screen)) return;
+	InformationSheetHideTooltip();
+	ElementPositionFixed(InformationSheetIDs.screen, 50, 70, 1900, 870);
 }
 
 /**
@@ -454,7 +107,6 @@ function InformationSheetClick() {
  * @type {ScreenExitHandler}
  */
 function InformationSheetExit() {
-	InformationSheetSecondScreen = false;
 	if (InformationSheetReturnScreen) {
 		CommonSetScreen(...InformationSheetReturnScreen);
 	}
@@ -462,7 +114,9 @@ function InformationSheetExit() {
 }
 
 function InformationSheetUnload() {
-	ElementRemove("AllowedInteractions-dropdown-container");
+	InformationSheetHideTooltip();
+	InformationSheetSkillWatches = [];
+	ElementRemove(InformationSheetIDs.screen);
 }
 
 /**
@@ -478,12 +132,894 @@ function InformationSheetLoadCharacter(C) {
 	CommonSetScreen("Character", "InformationSheet");
 }
 
-function InformationSheetResize() {
-	if (!InformationSheetSelection) return;
-	const C = InformationSheetSelection;
-	if (C.IsPlayer()) {
-		ElementSetPosition("AllowedInteractions-dropdown-container", 550, 800);
-		ElementSetSize("AllowedInteractions-dropdown", 600);
-		ElementSetFontSize("AllowedInteractions-dropdown-container", "auto");
+/**
+ * Generate menu buttons for the given character.
+ * @param {Character} C
+ * @returns {HTMLElement[]}
+ */
+function InformationSheetMenuButtons(C) {
+	/** @type {HTMLElement[]} */
+	const buttons = [
+		InformationSheetMenuButton(InformationSheetIDs.exit, InformationSheetExit, "Icons/Exit.png", TextGet("MenuExit")),
+	];
+
+	if (!C.IsPlayer() && !C.IsOnline()) {
+		return buttons;
 	}
+
+	if (C.IsPlayer()) {
+		if (!TitleIsForced(TitleGet(C))) {
+			buttons.push(InformationSheetMenuButton(
+				InformationSheetIDs.title,
+				() => { CommonSetScreen("Character", "Title"); },
+				"Icons/Title.png",
+				TextGet("MenuTitle"),
+			));
+		}
+		buttons.push(
+			InformationSheetMenuButton(
+				InformationSheetIDs.preference,
+				() => { CommonSetScreen("Character", "Preference"); },
+				"Icons/Preference.png",
+				TextGet("MenuPreference"),
+			),
+			InformationSheetMenuButton(
+				InformationSheetIDs.friendList,
+				() => { CommonSetScreen("Character", "FriendList"); },
+				"Icons/FriendList.png",
+				TextGet("MenuFriendList"),
+			),
+		);
+	}
+
+	buttons.push(
+		InformationSheetMenuButton(
+			InformationSheetIDs.profile,
+			() => OnlineProfileStart("description"),
+			"Icons/Introduction.png",
+			TextGet("MenuProfile"),
+		)
+	);
+	if (C.HasOwnerNotes() || C.IsFullyOwnedByPlayer()) {
+		buttons.push(
+			InformationSheetMenuButton(
+				InformationSheetIDs.ownersNotes,
+				() => OnlineProfileStart("ownersNotes"),
+				"Icons/Management.png",
+				TextGet("MenuOwnersNotes")
+			)
+		);
+	}
+
+	return buttons;
+}
+
+/**
+ * @param {string} id
+ * @param {(this: HTMLButtonElement, ev: PointerEvent) => void} onClick
+ * @param {string} image
+ * @param {string} tooltip
+ * @param {readonly string[]} [classList]
+ * @returns {HTMLButtonElement}
+ */
+function InformationSheetMenuButton(id, onClick, image, tooltip, classList) {
+	return ElementButton.Create(id, onClick, {
+		image,
+		tooltip,
+		tooltipPosition: "left",
+		role: "menuitem",
+	}, {
+		button: { classList: classList ? [...classList] : [] },
+	});
+}
+
+/**
+ * Generate DOM elements for the screen's contents.
+ * @param {Character} C
+ * @returns {HTMLDivElement}
+ */
+function InformationSheetContent(C) {
+	/** @type {HTMLElement[]} */
+	const sections = [
+		ElementCreate({
+			tag: "div",
+			classList: ["information-sheet-identity-slot"],
+			children: [InformationSheetIdentitySection(C)],
+		}),
+		ElementCreate({
+			tag: "div",
+			classList: ["information-sheet-relations-slot"],
+			children: [
+				InformationSheetOwnerSection(C),
+				InformationSheetRelationshipSection(C),
+			],
+		}),
+	];
+	if (C.IsPlayer()) sections.push(InformationSheetSkillSection(C), InformationSheetPermissionsSection());
+	if (C.IsPlayer() || C.IsOnline()) sections.push(InformationSheetReputationSection(C));
+	if (C.IsNpc()) sections.push(InformationSheetTraitSection(C));
+
+	return ElementCreate({
+		tag: "div",
+		classList: ["information-sheet"],
+		children: [
+			{
+				tag: "canvas",
+				classList: ["information-sheet-portrait"],
+				attributes: { id: "information-sheet-portrait", "aria-hidden": true, width: "500", height: "1000" },
+			},
+			{
+				tag: "div",
+				classList: ["information-sheet-body"],
+				dataAttributes: { layout: InformationSheetLayout(C) },
+				children: sections,
+			},
+		],
+	});
+}
+
+/**
+ * Returns the screen layout to use for the given character.
+ * @param {Character} C
+ * @returns {CharacterType}
+ */
+function InformationSheetLayout(C) {
+	if (C.IsNpc()) return CharacterType.NPC;
+	if (C.IsPlayer()) return CharacterType.PLAYER;
+	if (C.IsOnline()) return CharacterType.ONLINE;
+	return CharacterType.SIMPLE;
+}
+
+/**
+ * @param {Character} C
+ * @returns {HTMLElement}
+ */
+function InformationSheetIdentitySection(C) {
+	/** @type {HTMLElement[]} */
+	const facts = [
+		...InformationSheetFact(TextGet("Name"), C.Name, null, true),
+	];
+	if (C.Name !== CharacterNickname(C)) {
+		facts.push(...InformationSheetFact(TextGet("Nickname"), CharacterNickname(C), null, true));
+	}
+
+	const title = TitleGet(C);
+	if (title !== "None") {
+		const titleClass = (() => {
+			if (TitleIsForced(title)) return "information-sheet-title-forced";
+			if (TitleIsEarned(title)) return "information-sheet-title-earned";
+			return null;
+		})();
+		facts.push(...InformationSheetFact(TextGet("Title"), TitleGetName(title), titleClass, true));
+	}
+	if (C.MemberNumber != null) {
+		facts.push(...InformationSheetFact(TextGet("MemberNumber"), C.MemberNumber.toString(), null, true));
+	}
+	facts.push(...InformationSheetFact(TextGet("Pronouns"), CharacterPronounDescription(C)));
+
+	/** @type {HTMLElement[]} */
+	const notes = [];
+	if (C.IsPlayer()) {
+		facts.push(...InformationSheetFact(TextGet("Money"), `$${C.Money.toLocaleString(TranslationLanguage)}`));
+		notes.push(InformationSheetDuration(
+			TextGet(C.IsBirthday() ? "Birthday" : "MemberFor"),
+			C.Creation,
+			C.IsBirthday() ? ["information-sheet-birthday"] : [],
+		));
+		notes.push(InformationSheetDifficulty(C));
+	} else if (C.IsOnline()) {
+		if (C.Creation != null) {
+			notes.push(InformationSheetDuration(
+				TextGet(C.IsBirthday() ? "Birthday" : "MemberFor"),
+				C.Creation,
+				C.IsBirthday() ? ["information-sheet-birthday"] : [],
+			));
+		}
+		notes.push(InformationSheetDifficulty(C));
+		facts.push(...InformationSheetFact(
+			TextGet("AllowedInteractions"),
+			TextGet("AllowedInteraction" + C.AllowedInteractions.toString()),
+		));
+	} else if (C.IsNpc()) {
+		notes.push(InformationSheetDuration(TextGet("FriendsFor"), NPCEventGet(C, "PrivateRoomEntry")));
+	}
+
+	return ElementCreate({
+		tag: "div",
+		classList: ["information-sheet-identity", "information-sheet-panel"],
+		children: [
+			{
+				tag: "dl",
+				classList: ["information-sheet-facts"],
+				children: facts,
+			},
+			...notes,
+		],
+	});
+}
+
+/**
+ * @param {string} label
+ * @param {string} value
+ * @param {string | null} [valueClass]
+ * @param {boolean} [copy]
+ * @returns {[HTMLElement, HTMLElement]}
+ */
+function InformationSheetFact(label, value, valueClass, copy = false) {
+	return [
+		ElementCreate({ tag: "dt", children: [label] }),
+		ElementCreate({
+			tag: "dd",
+			classList: valueClass ? [valueClass] : [],
+			children: [copy ? InformationSheetCopy(value) : value],
+		}),
+	];
+}
+
+/**
+ * Copies the value on press.
+ * @param {string} text
+ * @returns {HTMLSpanElement}
+ */
+function InformationSheetCopy(text) {
+	return ElementCreate({
+		tag: "span",
+		classList: ["information-sheet-copy"],
+		eventListeners: {
+			click(ev) {
+				ev.preventDefault();
+				CommonClipboardWrite(text);
+			},
+		},
+		children: [text],
+	});
+}
+
+/**
+ * @param {Character} C
+ * @returns {HTMLParagraphElement}
+ */
+function InformationSheetDifficulty(C) {
+	let text = `${TextGet("DifficultyLevel" + C.GetDifficulty())} ${TextGet("DifficultyTitle")}`;
+	if (C.IsPlayer()) {
+		const maxDelay = 7;
+		const lastChange = typeof C.Difficulty.LastChange === "number" ? C.Difficulty.LastChange : C.Creation;
+		const daysSince = Math.floor((CurrentTime - lastChange) / MS_PER_DAY);
+		const remaining = daysSince >= maxDelay ? 0 : maxDelay - daysSince;
+		text += TextGet("DifficultyDaysTillCanChange").replace("NumberOfDays", remaining.toString());
+	}
+	return ElementCreate({
+		tag: "p",
+		classList: ["information-sheet-note"],
+		children: [text],
+	});
+}
+
+/**
+ * @param {string} label
+ * @param {number} start
+ * @param {readonly string[]} [classList]
+ * @returns {HTMLParagraphElement}
+ */
+function InformationSheetDuration(label, start, classList) {
+	const formatted = CommonFormatDurationRange(CurrentTime, start, {
+		showFull: true,
+		includeYears: true,
+		includeMonths: true,
+		includeDays: true,
+	});
+	const line = ElementCreate({
+		tag: "p",
+		classList: ["information-sheet-since", ...(classList ?? [])],
+		children: [`${label} ${formatted}`],
+	});
+	if (start > 0) InformationSheetHover(line, InformationSheetTimestampTooltip(start));
+	return line;
+}
+
+/**
+ * @param {number} start
+ * @returns {string}
+ */
+function InformationSheetTimestampTooltip(start) {
+	const startDate = new Date(start).toLocaleString(undefined, {
+		dateStyle: "medium",
+		timeStyle: "short",
+	});
+	const precise = CommonFormatDurationRange(CurrentTime, start, { showFull: true });
+	return `${startDate} — ${precise}`;
+}
+
+/**
+ * @param {HTMLElement} host
+ * @param {string} text
+ */
+function InformationSheetHover(host, text) {
+	host.classList.add("information-sheet-hover");
+	host.addEventListener("pointerenter", () => InformationSheetShowTooltip(host, text));
+	host.addEventListener("pointerleave", InformationSheetHideTooltip);
+}
+
+/**
+ * @param {HTMLElement} anchor
+ * @param {string} text
+ */
+function InformationSheetShowTooltip(anchor, text) {
+	const tip = ElementWrap(InformationSheetIDs.tooltip);
+	if (!tip) return;
+	tip.textContent = text;
+	tip.removeAttribute("hidden");
+	tip.style.setProperty("left", "0px");
+	tip.style.setProperty("top", "0px");
+
+	const anchorRect = anchor.getBoundingClientRect();
+	const tipRect = tip.getBoundingClientRect();
+	const margin = 8;
+	let left = anchorRect.left;
+	let top = anchorRect.bottom + 6;
+	if (left + tipRect.width > window.innerWidth - margin) {
+		left = Math.max(margin, window.innerWidth - tipRect.width - margin);
+	}
+	if (top + tipRect.height > window.innerHeight - margin) {
+		top = Math.max(margin, anchorRect.top - tipRect.height - 6);
+	}
+	tip.style.setProperty("left", `${left}px`);
+	tip.style.setProperty("top", `${top}px`);
+}
+
+function InformationSheetHideTooltip() {
+	const tip = ElementWrap(InformationSheetIDs.tooltip);
+	if (!tip) return;
+	tip.textContent = "";
+	tip.setAttribute("hidden", true);
+}
+
+/**
+ * @param {Character} C
+ * @returns {HTMLElement}
+ */
+function InformationSheetOwnership(C) {
+	if (!C.IsOwned()) {
+		return ElementCreate({
+			tag: "p",
+			classList: ["information-sheet-owner"],
+			children: [TextGet("Unowned")],
+		});
+	}
+
+	const stageText = C.IsFullyOwned() ? "Collared" : "Trial";
+	const ownerNumber = C.OwnerNumber();
+	const since = C.OwnedSinceMs();
+	return ElementCreate({
+		tag: "div",
+		classList: ["information-sheet-ownership"],
+		children: [
+			{
+				tag: "p",
+				classList: ["information-sheet-owner"],
+				children: [
+					`${TextGet(`${stageText}By`)} `,
+					InformationSheetCopy(C.OwnerName()),
+					ownerNumber !== -1 ? " (" : null,
+					ownerNumber !== -1 ? InformationSheetCopy(ownerNumber.toString()) : null,
+					ownerNumber !== -1 ? ")" : null,
+				],
+			},
+			since > 0 ? InformationSheetDuration(TextGet("For"), since) : null,
+		],
+	});
+}
+
+/**
+ * @param {string} titleKey
+ * @param {readonly HTMLElement[]} entries
+ * @param {string} [emptyKey]
+ * @param {string} [area]
+ * @param {boolean} [scroll]
+ * @returns {HTMLElement}
+ */
+function InformationSheetSection(titleKey, entries, emptyKey = "None", area, scroll = true) {
+	return ElementCreate({
+		tag: "section",
+		classList: [
+			"information-sheet-column",
+			"information-sheet-panel",
+			scroll ? "scroll-box" : null,
+			area ? `information-sheet-area-${area}` : null,
+		],
+		eventListeners: scroll ? {
+			scroll: InformationSheetHideTooltip,
+		} : {},
+		children: [
+			{ tag: "h3", children: [TextGet(titleKey)] },
+			...(entries.length ? entries : [/** @type {HTMLOptions<"p">} */({
+				tag: "p",
+				classList: ["information-sheet-empty"],
+				children: [TextGet(emptyKey)],
+			})]),
+		],
+	});
+}
+
+/**
+ * @param {Character} C
+ * @returns {HTMLElement}
+ */
+function InformationSheetOwnerSection(C) {
+	return InformationSheetSection("Owner", [InformationSheetOwnership(C)], "Unowned", undefined, false);
+}
+
+/**
+ * @param {Character} C
+ * @returns {HTMLElement}
+ */
+function InformationSheetRelationshipSection(C) {
+	/** @type {HTMLElement[]} */
+	const entries = [];
+
+	if (C.IsNpc()) {
+		entries.push(InformationSheetAffection(C.Love ?? 0));
+		const playerLove = C.GetLovership().find((lover) => lover.MemberNumber === Player.MemberNumber);
+		if (playerLove) {
+			entries.push(InformationSheetLoverEntry(C.LoverName() || playerLove.Name, playerLove.Stage, playerLove.Start ?? 0));
+		} else if (!C.LoverName()) {
+			entries.push(ElementCreate({
+				tag: "p",
+				classList: ["information-sheet-empty"],
+				children: [`${TextGet("Lover")} ${TextGet("None")}`],
+			}));
+		}
+	} else {
+		for (const lover of C.GetLovership()) {
+			entries.push(InformationSheetLoverEntry(lover.Name, lover.Stage, lover.Start ?? 0, lover.MemberNumber));
+		}
+	}
+
+	const titleKey = C.IsNpc() ?  "YourRelations" : "Relationships";
+
+	return InformationSheetSection(titleKey, entries);
+}
+
+/**
+ * @param {string} name
+ * @param {0 | 1 | 2 | undefined} stage
+ * @param {number} start
+ * @param {number} [memberNumber]
+ * @returns {HTMLElement}
+ */
+function InformationSheetLoverEntry(name, stage, start, memberNumber) {
+	const stageKey = InformationSheetLoverStages[stage ?? 0];
+	return ElementCreate({
+		tag: "article",
+		classList: ["information-sheet-entry"],
+		children: [
+			{
+				tag: "p",
+				classList: ["information-sheet-entry-title"],
+				children: [
+					`${TextGet(`${stageKey}With`)} `,
+					InformationSheetCopy(name),
+					memberNumber != null ? " (" : null,
+					memberNumber != null ? InformationSheetCopy(memberNumber.toString()) : null,
+					memberNumber != null ? ")" : null,
+				],
+			},
+			start > 0 ? InformationSheetDuration(TextGet("For"), start) : null,
+		],
+	});
+}
+
+/**
+ * @param {number} love
+ * @returns {string}
+ */
+function InformationSheetLoveQualifier(love) {
+	if (love >= 100) return "RelationshipPerfect";
+	if (love >= 75) return "RelationshipGreat";
+	if (love >= 50) return "RelationshipGood";
+	if (love >= 25) return "RelationshipFair";
+	if (love > -25) return "RelationshipNeutral";
+	if (love > -50) return "RelationshipPoor";
+	if (love > -75) return "RelationshipBad";
+	if (love > -100) return "RelationshipHorrible";
+	return "RelationshipAtrocious";
+}
+
+/**
+ * @param {number} love
+ * @returns {HTMLDivElement}
+ */
+function InformationSheetAffection(love) {
+	return InformationSheetTextStat(
+		"",
+		`${love} ${TextGet(InformationSheetLoveQualifier(love))}`,
+		[InformationSheetBimeter(love, 100)],
+		["information-sheet-entry"],
+	);
+}
+
+/**
+ * Zero sits on the center line. Negative values grow left, positive values grow right.
+ * @param {number} value
+ * @param {number} max
+ * @param {readonly string[]} [classList]
+ * @param {string} [color]
+ * @returns {HTMLDivElement}
+ */
+function InformationSheetBimeter(value, max, classList, color) {
+	const magnitude = Math.min(max, Math.abs(value));
+	const pct = max > 0 ? magnitude / max * 50 : 0;
+	return ElementCreate({
+		tag: "div",
+		classList: ["information-sheet-bimeter", ...(classList ?? [])],
+		attributes: { "aria-hidden": true },
+		children: [
+			{
+				tag: "span",
+				classList: ["information-sheet-bimeter-fill"],
+				dataAttributes: { sign: value < 0 ? "negative" : "positive" },
+				style: { width: `${pct}%`, "background-color": color },
+			},
+			{ tag: "span", classList: ["information-sheet-bimeter-axis"] },
+		],
+	});
+}
+
+/**
+ * @param {PlayerCharacter} C
+ * @returns {HTMLElement}
+ */
+function InformationSheetSkillSection(C) {
+	/** @type {HTMLElement[]} */
+	const entries = [];
+	for (const type of SkillValidSkills) {
+		if (SkillGetLevelReal(C, type) === 0 && SkillGetProgress(C, type) === 0) continue;
+		entries.push(InformationSheetSkill(C, type));
+	}
+	return InformationSheetSection("Skill", entries, "SkillNone", "skills");
+}
+
+/**
+ * @param {PlayerCharacter} C
+ * @param {SkillType} type
+ * @returns {HTMLDivElement}
+ */
+function InformationSheetSkill(C, type) {
+	const real = SkillGetLevelReal(C, type);
+	const progress = SkillGetProgress(C, type);
+	const ratio = SkillGetRatio(C, type);
+	const modifier = SkillGetModifier(C, type);
+	const value = ElementCreate({
+		tag: "span",
+		classList: ["information-sheet-stat-value"],
+		children: [InformationSheetSkillValue(C, type)],
+	});
+
+	/** @type {HTMLElement | null} */
+	let modifierEl = null;
+	if (modifier) {
+		modifierEl = ElementCreate({
+			tag: "span",
+			classList: [
+				"information-sheet-modifier",
+				modifier > 0 ? "information-sheet-positive" : "information-sheet-negative",
+			],
+			children: [InformationSheetModifierText(modifier, SkillGetModifierDuration(C, type))],
+		});
+		InformationSheetSkillWatches.push({ type, value, modifier: modifierEl });
+	}
+
+	const skill = ElementCreate({
+		tag: "div",
+		classList: ["information-sheet-skill"],
+		children: [
+			InformationSheetTextStat(
+				TextGet(`Skill${type}`),
+				ElementCreate({
+					tag: "span",
+					classList: ["information-sheet-skill-figures"],
+					children: [modifierEl, value],
+				}),
+				[InformationSheetSkillPips(real, progress, ratio)],
+			),
+		],
+	});
+
+	const key = type === "Bondage" || type === "Evasion" ? `SkillRatio${type}` : "SkillRatio";
+	const ratioText = TextSubstitute(key, {
+		RATIO: Math.round(ratio * 100).toString(),
+	}).join("");
+
+	if (ratio !== 1) InformationSheetHover(skill, ratioText);
+	return skill;
+}
+
+/**
+ * Generates the skill progress bar widget.
+ * @param {number} level
+ * @param {number} progress
+ * @param {number} ratio
+ * @returns {HTMLDivElement}
+ */
+function InformationSheetSkillPips(level, progress, ratio) {
+	const earned = level + progress / SkillProgressMax;
+	const used = earned * ratio;
+	/** @type {HTMLOptionsUnion[]} */
+	const pips = [];
+	for (let i = 0; i < SkillLevelMaximum; i++) {
+		const solid = Math.max(0, Math.min(i + 1, used) - i);
+		const hatch = Math.max(0, Math.min(i + 1, earned) - Math.max(i, used));
+		/** @type {HTMLOptionsUnion[]} */
+		const segments = [];
+		if (solid > 0) {
+			segments.push({
+				tag: "span",
+				classList: ["information-sheet-pip-fill"],
+				style: { width: `${solid * 100}%` },
+			});
+		}
+		if (hatch > 0) {
+			segments.push({
+				tag: "span",
+				classList: ["information-sheet-pip-hatch"],
+				style: { width: `${hatch * 100}%` },
+			});
+		}
+		pips.push({
+			tag: "span",
+			classList: ["information-sheet-pip"],
+			children: segments,
+		});
+	}
+	return ElementCreate({
+		tag: "div",
+		classList: ["information-sheet-pips"],
+		attributes: { "aria-hidden": true },
+		style: { "--information-sheet-pips": String(SkillLevelMaximum) },
+		children: pips,
+	});
+}
+
+/**
+ * @param {PlayerCharacter} C
+ * @param {SkillType} type
+ * @returns {string}
+ */
+function InformationSheetSkillValue(C, type) {
+	const level = SkillGetLevel(C, type);
+	const progress = SkillGetProgress(C, type);
+	const parens = level === SkillLevelMaximum ? TextGet("SkillLevelMaximum") : `${(progress / 10).toFixed(0)}%`;
+	return `${level.toString().padStart(2, " ")} (${parens.padStart(3, " ")})`;
+}
+
+/**
+ * @param {number} modifier
+ * @param {number} duration
+ * @returns {string}
+ */
+function InformationSheetModifierText(modifier, duration) {
+	/** @type {CommonSubtituteSubstitution[]} */
+	const subst = [
+		["ABS", modifier > 0 ? "+" : "-"],
+		["VAL", Math.abs(modifier).toString()],
+		["DURATION", TimermsToTime(duration)],
+	];
+	return CommonStringSubstitute(TextGet("SkillModifier"), subst);
+}
+
+/**
+ * @param {PlayerCharacter} C
+ */
+function InformationSheetRefreshSkills(C) {
+	if (!C.IsPlayer() || InformationSheetSkillWatches.length === 0) return;
+	if (CurrentTime < InformationSheetSkillRefreshAt) return;
+	InformationSheetSkillRefreshAt = CurrentTime + 1000;
+
+	for (const watch of InformationSheetSkillWatches) {
+		const modifier = SkillGetModifier(C, watch.type);
+		watch.value.textContent = InformationSheetSkillValue(C, watch.type);
+		if (!modifier) {
+			watch.modifier.hidden = true;
+			continue;
+		}
+		watch.modifier.hidden = false;
+		watch.modifier.textContent = InformationSheetModifierText(modifier, SkillGetModifierDuration(C, watch.type));
+		watch.modifier.classList.toggle("information-sheet-positive", modifier > 0);
+		watch.modifier.classList.toggle("information-sheet-negative", modifier < 0);
+	}
+}
+
+/**
+ * @param {Character} C
+ * @returns {HTMLElement}
+ */
+function InformationSheetReputationSection(C) {
+	/** @type {HTMLElement[]} */
+	const entries = [InformationSheetDualReputation(C, "Dominant", ReputationGet(C, "Dominant"))];
+	const rest = C.Reputation
+		.filter((reputation) => reputation.Type !== "Dominant" && reputation.Value !== 0)
+		.sort((a, b) => InformationSheetCompareText(
+			ReputationLabel(a.Type, a.Value) ?? "",
+			ReputationLabel(b.Type, b.Value) ?? "",
+		));
+
+	for (const reputation of rest) {
+		if (ReputationConfig[reputation.Type]?.negative === true) {
+			entries.push(InformationSheetDualReputation(C, reputation.Type, reputation.Value));
+		} else {
+			const magnitude = Math.abs(reputation.Value);
+			entries.push(InformationSheetMeterStat(
+				ReputationLabel(reputation.Type, reputation.Value) ?? "",
+				magnitude.toString(),
+				magnitude,
+				100,
+				ReputationConfig[reputation.Type].color,
+			));
+		}
+	}
+	return InformationSheetSection("Reputation", entries, "ReputationNone", "reputation");
+}
+
+/**
+ * @param {Character} C
+ * @param {ReputationType} type
+ * @param {number} value
+ * @returns {HTMLDivElement}
+ */
+function InformationSheetDualReputation(C, type, value) {
+	return InformationSheetTextStat(
+		ReputationLabel(type, value) ?? "",
+		Math.abs(value).toString(),
+		[InformationSheetBimeter(value, 100, ["information-sheet-reputation-bimeter"], ReputationConfig[type].color)],
+	);
+}
+
+/** @type {Record<ServerChatRoomLanguage | "TW", string>} */
+const InformationSheetSortLocale = {
+	EN: "en",
+	DE: "de",
+	FR: "fr",
+	ES: "es",
+	RU: "ru",
+	CN: "zh-CN",
+	TW: "zh-TW",
+	UA: "uk",
+};
+
+/**
+ * @param {string} a
+ * @param {string} b
+ * @returns {number}
+ */
+function InformationSheetCompareText(a, b) {
+	const locale = InformationSheetSortLocale[TranslationLanguage] ?? "en";
+	return a.localeCompare(b, locale, { sensitivity: "base" });
+}
+
+/**
+ * @param {string} label
+ * @param {string} value
+ * @param {number} amount
+ * @param {number} max
+ * @param {string} color
+ * @returns {HTMLDivElement}
+ */
+function InformationSheetMeterStat(label, value, amount, max, color) {
+	const pct = max > 0 ? Math.max(0, Math.min(100, amount / max * 100)) : 0;
+	return InformationSheetTextStat(label, value, [
+		ElementCreate({
+			tag: "div",
+			classList: ["information-sheet-meter"],
+			attributes: { "aria-hidden": true },
+			children: [
+				{
+					tag: "span",
+					classList: ["information-sheet-meter-fill"],
+					style: { width: `${pct}%`, "background-color": color },
+				},
+			],
+		}),
+	]);
+}
+
+/**
+ * @param {NPCCharacter} C
+ * @returns {HTMLElement}
+ */
+function InformationSheetTraitSection(C) {
+	const metAt = NPCEventGet(C, "PrivateRoomEntry") * CheatFactor("AutoShowTraits", 0);
+
+	/* Hidden for the first week after meeting her, then names only, then the values. */
+	if (CurrentTime < metAt + MS_PER_WEEK) return InformationSheetSection("Trait", [], "TraitUnknown", "traits");
+
+	const levelsKnown = CurrentTime >= metAt + 2 * MS_PER_WEEK;
+	/** @type {HTMLElement[]} */
+	const entries = [];
+	for (const trait of C.Trait ?? []) {
+		const traitName = trait.Value > 0 ? trait.Name : NPCTraitReverse(trait.Name);
+		const label = TextGet("Trait" + traitName);
+		if (!levelsKnown) {
+			entries.push(InformationSheetTextStat(label, "??"));
+		} else {
+			// The first name of the pair is the positive pole, matching NPCTraitGet and Dominant reputation.
+			const pair = NPCTrait.find(([pole, opposite]) => pole === trait.Name || opposite === trait.Name);
+			const positive = pair?.[0] ?? trait.Name;
+			const negative = pair?.[1] ?? NPCTraitReverse(trait.Name);
+			const signed = pair ? NPCTraitGet(C, pair[0]) : trait.Value;
+			entries.push(InformationSheetTextStat(
+				TextGet("Trait" + negative),
+				Math.abs(signed).toString(),
+				[
+					ElementCreate({
+						tag: "span",
+						classList: ["information-sheet-stat-label", "information-sheet-trait-positive"],
+						children: [TextGet("Trait" + positive)],
+					}),
+					InformationSheetBimeter(signed, 100, ["information-sheet-trait-bimeter"]),
+				],
+				["information-sheet-trait"],
+			));
+		}
+	}
+	return InformationSheetSection("Trait", entries, "None", "traits");
+}
+
+/**
+ * Label and value on one row. Further nodes, such as a meter, sit under that row.
+ * Pass an element for `value` when the value is not plain text.
+ * @param {string} label
+ * @param {string | HTMLElement} value
+ * @param {readonly HTMLElement[]} [extra]
+ * @param {readonly string[]} [classList]
+ * @returns {HTMLDivElement}
+ */
+function InformationSheetTextStat(label, value, extra, classList) {
+	return ElementCreate({
+		tag: "div",
+		classList: ["information-sheet-stat", ...(classList ?? [])],
+		children: [
+			{ tag: "span", classList: ["information-sheet-stat-label"], children: [label] },
+			typeof value === "string"
+				? { tag: "span", classList: ["information-sheet-stat-value"], children: [value] }
+				: value,
+			...(extra ?? []),
+		],
+	});
+}
+
+/**
+ * @returns {HTMLLabelElement}
+ */
+function InformationSheetPermissionsSection() {
+	const dropdownOptions = Object.values(AllowedInteractions)
+		.map((interaction) => /** @type {Omit<HTMLOptions<"option">, "tag">} */({
+			attributes: {
+				value: interaction.toString(),
+				label: TextGet("AllowedInteraction" + interaction.toString()),
+				selected: interaction === Player.AllowedInteractions,
+			},
+		}));
+
+	return ElementDropdown.CreateLabelled(
+		InformationSheetIDs.allowedInteractions,
+		dropdownOptions,
+		TextGet("AllowedInteractions"),
+		function (ev) {
+			ev.preventDefault();
+			if (this.value in Object.values(AllowedInteractions) === false) return;
+			Player.AllowedInteractions = /** @type {AllowedInteractions} */ (CommonParseInt(this.value));
+			if (Player.GetDifficulty() >= Difficulty.EXTREME) {
+				LoginExtremeItemSettings(Player.AllowedInteractions === AllowedInteractions.Everyone);
+			}
+
+			const packed = {
+				ItemPermission: Player.AllowedInteractions,
+				AllowedInteractions: Player.AllowedInteractions,
+				...ServerPackItemPermissions(Player.PermissionItems),
+			};
+			ServerAccountUpdate.QueueData(packed);
+		},
+		null,
+		{ container: { classList: ["information-sheet-permissions"] } },
+	);
 }

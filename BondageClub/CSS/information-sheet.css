@@ -1,0 +1,407 @@
+#information-sheet-screen,
+#information-sheet-screen * {
+	pointer-events: none;
+}
+
+#information-sheet-screen .screen-header [role^="menuitem"],
+#information-sheet-screen .information-sheet-body,
+#information-sheet-screen .information-sheet-body * {
+	pointer-events: auto;
+}
+
+#information-sheet-screen {
+	grid-template:
+		"main header" minmax(0, 1fr)
+		/ minmax(0, 1fr) min-content;
+}
+
+#information-sheet-screen > .screen-hgroup {
+	display: none;
+}
+
+#information-sheet-screen .screen-header [role="menubar"] {
+	grid-auto-flow: row;
+}
+
+#information-sheet-screen .screen-main {
+	height: 100%;
+	overflow: hidden;
+	padding: 0;
+}
+
+.information-sheet {
+	box-sizing: border-box;
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	grid-template-rows: minmax(0, 1fr);
+	column-gap: 0.4em;
+	height: 100%;
+	padding: 0.35em;
+}
+
+#information-sheet-portrait {
+	width: initial;
+	aspect-ratio: 1 / 2;
+	height: 100%;
+	position: relative;
+}
+
+.information-sheet-body {
+	box-sizing: border-box;
+	display: grid;
+	grid-template-columns: minmax(0, 0.625fr) minmax(0, 0.625fr) minmax(0, 0.55fr);
+	grid-template-rows: auto minmax(0, 1fr);
+	gap: 0.55em;
+	height: 100%;
+	font-size: 0.6em;
+	line-height: 1.35;
+	overscroll-behavior: contain;
+}
+
+.information-sheet-body[data-layout="player"] {
+	grid-template-rows: auto minmax(0, 1fr) auto;
+	grid-template-areas:
+		"identity identity relationships"
+		"skills reputation relationships"
+		"permissions permissions relationships";
+}
+
+.information-sheet-body[data-layout="online"] {
+	grid-template-areas:
+		"identity identity relationships"
+		"reputation reputation relationships";
+}
+
+.information-sheet-body[data-layout="npc"] {
+	grid-template-areas:
+		"identity identity relationships"
+		"traits traits relationships";
+}
+
+.information-sheet-body[data-layout="simple"] {
+	grid-template-areas:
+		"identity identity relationships"
+		"identity identity relationships";
+}
+
+.information-sheet-identity-slot {
+	grid-area: identity;
+	gap: 0.45em;
+	font-size: 1.15em;
+}
+
+.information-sheet-area-skills {
+	grid-area: skills;
+}
+.information-sheet-area-reputation {
+	grid-area: reputation;
+}
+.information-sheet-area-traits {
+	grid-area: traits;
+}
+
+.information-sheet-note,
+.information-sheet-since,
+.information-sheet-duration,
+.information-sheet-entry-title,
+.information-sheet-empty,
+.information-sheet-owner {
+	margin: 0;
+}
+
+.information-sheet-identity {
+	display: flex;
+	flex-direction: column;
+	gap: 0.28em;
+	padding: 0.45em var(--scrollbar-gutter) 0.55em;
+	overflow-wrap: break-word;
+}
+
+.information-sheet-facts {
+	display: grid;
+	grid-template-columns: max-content minmax(0, 1fr);
+	column-gap: 0.7em;
+	row-gap: 0.16em;
+	margin: 0;
+}
+
+.information-sheet-facts dt,
+.information-sheet-since,
+.information-sheet-duration,
+.information-sheet-note,
+.information-sheet-empty {
+	color: #3a2c22;
+	font-weight: 500;
+}
+
+.information-sheet-facts dd {
+	margin: 0;
+	font-weight: 600;
+}
+
+.information-sheet-note,
+.information-sheet-since,
+.information-sheet-duration,
+.information-sheet-empty {
+	font-size: 0.86em;
+	line-height: 1.3;
+	overflow-wrap: break-word;
+}
+
+.information-sheet-title-forced {
+	color: red;
+}
+
+.information-sheet-title-earned {
+	color: #0000bf;
+}
+
+.information-sheet-birthday {
+	color: blue;
+}
+
+.information-sheet-copy {
+	user-select: none;
+	cursor: copy;
+	background-color: transparent;
+	transition: background-color 0.3s ease-out;
+}
+
+.information-sheet-copy:active {
+	background-color: #35ddf5;
+	transition: none;
+}
+
+.information-sheet-hover {
+	cursor: help;
+	text-decoration: underline dotted;
+	text-underline-offset: 0.15em;
+}
+
+#information-sheet-tooltip {
+	display: block;
+	position: fixed;
+	z-index: 5;
+	margin: 0;
+	max-width: 28em;
+	font-size: 0.58em;
+	line-height: 1.3;
+	padding: 0.3em 0.55em;
+	background: #ffff88;
+	color: black;
+	border: var(--border-width) solid black;
+	box-shadow: 0.15em 0.15em 0.4em rgb(0 0 0 / 45%);
+	text-align: center;
+}
+
+.information-sheet-relations-slot {
+	grid-area: relationships;
+	display: flex;
+	flex-direction: column;
+}
+
+.information-sheet-relations-slot > .scroll-box {
+	flex: 1 1 auto;
+}
+
+.information-sheet-column {
+	display: flex;
+	flex-direction: column;
+	gap: 0.55em;
+	padding: 0.45em var(--scrollbar-gutter) 0.55em;
+	overflow-wrap: break-word;
+	overscroll-behavior: contain;
+}
+
+.information-sheet-column h3 {
+	margin: 0;
+	font-size: 1.15em;
+	text-align: center;
+	text-wrap: balance;
+	letter-spacing: 0.03em;
+	padding-bottom: 0.22em;
+	border-bottom: var(--border-width) solid rgb(26 18 12 / 35%);
+}
+
+.information-sheet-entry {
+	display: flex;
+	flex-direction: column;
+	gap: 0.1em;
+}
+
+.information-sheet-entry-title {
+	font-size: 1.05em;
+	font-weight: 700;
+	overflow-wrap: break-word;
+}
+
+.information-sheet-owner {
+	font-size: 1.08em;
+	font-weight: 700;
+	overflow-wrap: break-word;
+}
+
+.information-sheet-ownership {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.1em;
+}
+
+.information-sheet-stat {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 0.1em;
+	align-items: baseline;
+}
+
+.information-sheet-stat-label {
+	color: #3a2c22;
+	overflow-wrap: break-word;
+}
+
+.information-sheet-stat-value {
+	font-weight: 700;
+}
+
+.information-sheet-skill-figures {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 0.4em;
+	white-space: nowrap;
+}
+
+.information-sheet-bimeter {
+	position: relative;
+	grid-column: 1 / -1;
+	height: 0.4em;
+	background: rgb(0 0 0 / 10%);
+	border: var(--border-width) solid rgb(0 0 0 / 32%);
+	box-sizing: border-box;
+}
+
+.information-sheet-bimeter-axis {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 1;
+	width: var(--border-width);
+	top: -0.18em;
+	bottom: -0.18em;
+	background: #1a120c;
+}
+
+.information-sheet-bimeter-fill {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+}
+
+.information-sheet-bimeter-fill[data-sign="positive"] {
+	left: 50%;
+	background: green;
+}
+
+.information-sheet-bimeter-fill[data-sign="negative"] {
+	right: 50%;
+	background: red;
+}
+
+.information-sheet-skill {
+	display: flex;
+	flex-direction: column;
+	gap: 0.1em;
+	text-decoration: none;
+}
+
+.information-sheet-modifier {
+	font-size: 0.86em;
+}
+
+.information-sheet-negative {
+	color: red;
+}
+
+.information-sheet-positive {
+	color: green;
+}
+
+.information-sheet-pips {
+	grid-column: 1 / -1;
+	display: grid;
+	grid-template-columns: repeat(var(--information-sheet-pips, 10), minmax(0, 1fr));
+	gap: 0.14em;
+	height: 0.4em;
+}
+
+.information-sheet-pip {
+	display: flex;
+	background: rgb(0 0 0 / 12%);
+	border: var(--border-width) solid rgb(0 0 0 / 40%);
+	box-sizing: border-box;
+	overflow: hidden;
+}
+
+.information-sheet-pip-fill,
+.information-sheet-pip-hatch {
+	display: block;
+	height: 100%;
+	max-width: 100%;
+}
+
+.information-sheet-pip-fill {
+	background-color: #e6b325;
+}
+
+.information-sheet-pip-hatch {
+	background-color: gray;
+}
+
+.information-sheet-meter {
+	grid-column: 1 / -1;
+	height: 0.4em;
+	background: rgb(0 0 0 / 10%);
+	border: var(--border-width) solid rgb(0 0 0 / 32%);
+	box-sizing: border-box;
+}
+
+.information-sheet-meter-fill {
+	display: block;
+	height: 100%;
+	max-width: 100%;
+	background: #3a342c;
+}
+
+.information-sheet-trait {
+	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+	column-gap: 0.55em;
+}
+
+.information-sheet-trait-positive {
+	text-align: right;
+}
+
+.information-sheet-trait .information-sheet-stat-value {
+	padding-inline: 0.35em;
+	text-align: center;
+}
+
+.information-sheet-trait-bimeter .information-sheet-bimeter-fill {
+	background: #3a342c;
+}
+
+#information-sheet-screen .information-sheet-permissions {
+	grid-area: permissions;
+	font-size: 1.15em;
+	grid-template-columns: max-content minmax(8em, 1fr);
+	align-items: center;
+	padding-inline: var(--scrollbar-gutter);
+}
+
+#information-sheet-screen .information-sheet-permissions .custom-select {
+	padding: 0.15em 0.3em;
+}
+
+#information-sheet-screen .information-sheet-permissions .dropdown-label {
+	color: #3a2c22;
+}
