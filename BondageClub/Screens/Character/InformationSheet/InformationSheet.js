@@ -23,12 +23,11 @@ const InformationSheetIDs = Object.freeze({
 	allowedInteractions: "information-sheet-allowed-interactions",
 });
 
-/** @type {Readonly<Record<0 | 1 | 2, "Dating" | "Engaged" | "Married">>} */
-const InformationSheetLoverStages = {
+const InformationSheetLoverStages = /** @type {const} */({
 	0: "Dating",
 	1: "Engaged",
 	2: "Married",
-};
+});
 
 /**
  * Skill rows whose modifier can expire while the sheet is open.
@@ -82,7 +81,7 @@ function InformationSheetRun() {
 	const C = InformationSheetSelection;
 	if (!C) return;
 
-	const portrait = /** @type {HTMLCanvasElement} */ (ElementWrap(InformationSheetIDs.portrait));
+	const portrait = /** @type {null | HTMLCanvasElement} */ (ElementWrap(InformationSheetIDs.portrait));
 	if (!portrait) return;
 	const ctx = portrait.getContext("2d");
 	if (!ctx) return;
@@ -301,7 +300,7 @@ function InformationSheetIdentitySection(C) {
 	/** @type {HTMLElement[]} */
 	const notes = [];
 	if (C.IsPlayer()) {
-		facts.push(...InformationSheetFact(TextGet("Money"), `$${C.Money}`));
+		facts.push(...InformationSheetFact(TextGet("Money"), `$${C.Money.toLocaleString(TranslationLanguage)}`));
 		notes.push(InformationSheetDuration(
 			TextGet(C.IsBirthday() ? "Birthday" : "MemberFor"),
 			C.Creation,

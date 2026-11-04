@@ -8,7 +8,6 @@
 #information-sheet-screen .information-sheet-body * {
 	pointer-events: auto;
 }
-}
 
 #information-sheet-screen {
 	grid-template:
@@ -22,7 +21,6 @@
 
 #information-sheet-screen .screen-header [role="menubar"] {
 	grid-auto-flow: row;
-	direction: ltr;
 }
 
 #information-sheet-screen .screen-main {
