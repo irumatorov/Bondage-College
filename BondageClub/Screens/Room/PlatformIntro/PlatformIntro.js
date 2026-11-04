@@ -62,7 +62,7 @@ function PlatformIntroRun() {
 	}
 	DrawText(TextGet("LoadingAssets") + " " + Count.toString() + " / " + Total.toString(), 1140, 930, "Black", "Silver");
 
-	for (let X = 0; X <= 9; X++)
+	for (let X = 0; X <= 8; X++)
 		DrawText(TextGet("Text" + X.toString()), 1400, 67 + X * 65, "Black", "Silver");
 
 	for (let X = 0; X <= 9; X++)

@@ -22,8 +22,6 @@ OnlinePreferences
 - 在线设置 -
 ImmersionPreferences
 - 沉浸设置 -
-ControllerPreferences
-- 手柄设置 -
 NotificationsPreferences
 - 通知设置 -
 GenderPreferences
@@ -56,8 +54,6 @@ HomepageImmersion
 沉浸
 HomepageGraphics
 显示
-HomepageController
-手柄
 HomepageNotifications
 通知
 HomepageGender
@@ -582,58 +578,6 @@ PowerModedefault
 普通
 PowerModehigh-performance
 高消耗,渲染较快
-Sensitivity
-灵敏度
-ControllerActive
-启用手柄
-MapButtons
-设置按钮
-MapSticks
-设置摇杆
-MoveLeftStickUp
-上移左摇杆
-MoveLeftStickRight
-右移左摇杆
-MoveRightStickUp
-上移右摇杆
-MoveRightStickRight
-右移右摇杆
-PressA
-按下A按钮
-PressB
-按下B按钮
-PressX
-按下X按钮
-PressY
-按下Y按钮
-PressLeftBumper
-按下左肩键
-PressRightBumper
-按下右肩键
-PressLeftTrigger
-按下左扳机
-PressRightTrigger
-按下右肩键
-PressSelect
-按下选择键
-PressStart
-按下开始键
-PressLeftStick
-按下左摇杆键
-PressRightStick
-按下右摇杆键
-PressUpOnDpad
-按下上方向键
-PressDownOnDpad
-按下下方向键
-PressLeftOnDpad
-按下左方向键
-PressRightOnDpad
-按下右方向键
-PressHome
-按下Home键
-DeadZone
-死区
 NotificationsAlertType0
 关闭
 NotificationsAlertType1

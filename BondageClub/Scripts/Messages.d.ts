@@ -86,7 +86,6 @@ interface ServerAccountData extends ServerAccountImmutableData {
 	LastMapData?: null | ChatRoomMapData;
 	/** String-based values have been deprecated and are superseded by {@link ServerChatRoomSettings} objects */
 	LastChatRoom?: null | ServerChatRoomSettings;
-	ControllerSettings?: ControllerSettingsType;
 	ImmersionSettings?: ImmersionSettingsType;
 	RestrictionSettings?: RestrictionSettingsType;
 	OnlineSettings?: PlayerOnlineSettings;

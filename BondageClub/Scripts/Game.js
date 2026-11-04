@@ -43,7 +43,6 @@ async function GameStart(isNode=false) {
 	MapDataLoad();
 	await AssetInventoryIDValidate();
 	CommandsLoad();
-	ControllerStart();
 	await TextPrefetchFile(InterfaceStringsPath).loadedPromise;
 	ServerInit();
 	Fullscreen.Init();
@@ -166,7 +165,6 @@ function GameRun(Timestamp) {
 		CurrentTime += TimerRunInterval;
 
 		DrawProcess(Timestamp);
-		ControllerProcess();
 		TimerProcess();
 
 		ServerSendQueueProcess();
@@ -198,7 +196,6 @@ function GameRunBackground(Timestamp) {
 		if (CurrentCharacter == null && !ScreenIsLoading) {
 			CurrentScreenFunctions.Run(Timestamp);
 		}
-		// Ignore gamepad when in the background
 		TimerProcess();
 
 		ServerSendQueueProcess();
@@ -218,11 +215,6 @@ function GameKeyDown(event) {
 
 	let handled = false;
 	handleKeyDown: {
-		if (ControllerIsActive() && ControllerSupportKeyDown(event)) {
-			handled = true;
-			break handleKeyDown;
-		}
-
 		if (CurrentScreen === "Preference" && PreferenceSubscreen?.name === "Keybindings" && KeyGUI.selectedAction) {
 			handled = true;
 			break handleKeyDown;

@@ -683,13 +683,8 @@ function StruggleStrengthDraw(C) {
 	if (StruggleAllowLoosen())
 		DrawButton(1300, 880, 400, 65, InterfaceTextGet("TryLoosen"), "White");
 	else {
-		/** @type {"ProgressKeys" | "ProgressClick" | "ProgressKeysController"} */
-		let msg = "ProgressKeys";
-		if (CommonIsMobile) {
-			msg = "ProgressClick";
-		} else if (ControllerIsActive()) {
-			msg = "ProgressKeysController";
-		}
+		/** @type {"ProgressKeys" | "ProgressClick"} */
+		const msg = CommonIsMobile ? "ProgressClick" : "ProgressKeys";
 		DrawText(InterfaceTextGet(msg), 1500, 900, "White", "Black");
 	}
 

@@ -642,9 +642,6 @@ async function CommonSetScreenWrapped(...spec) {
 
 	// `CurrentScreenFunctions` is still undefined the _very_ first time a screen is set as BC launches
 	CurrentScreenFunctions?.Unload();
-	if (ControllerIsActive()) {
-		ControllerClearAreas();
-	}
 
 	const namespace = /** @type {typeof window} */(globalThis);
 	const [NewModule, NewScreen] = spec;

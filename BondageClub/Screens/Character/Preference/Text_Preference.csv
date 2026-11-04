@@ -10,7 +10,6 @@ VisibilityPreferences,- Item Preferences -
 GraphicsPreferences,- Graphical Preferences -
 OnlinePreferences,- Online Preferences -
 ImmersionPreferences,- Immersion Preferences -
-ControllerPreferences,- Controller Preferences -
 NotificationsPreferences,- Notification Preferences -
 GenderPreferences,- Gender Preferences -
 ScriptsPreferences,- Script Permission Preferences -
@@ -29,7 +28,6 @@ HomepageVisibility,Item Visibility
 HomepageOnline,Online
 HomepageImmersion,Immersion
 HomepageGraphics,Graphics
-HomepageController,Controller
 HomepageNotifications,Notifications
 HomepageGender,Gender
 HomepageScripts,Scripts
@@ -307,32 +305,6 @@ GraphicsPowerMode,Preferred power consumption mode
 PowerModelow-power,"Low consumption, slower rendering"
 PowerModedefault,Default
 PowerModehigh-performance,"High consumption, faster rendering"
-Sensitivity,Sensitivity
-ControllerActive,Controller Active
-MapButtons,Map Buttons
-MapSticks,Map Sticks
-MoveLeftStickUp,Move left stick up
-MoveLeftStickRight,Move left stick right
-MoveRightStickUp,Move right stick up
-MoveRightStickRight,Move right stick right
-PressA,Press A button
-PressB,Press B button
-PressX,Press X button
-PressY,Press Y button
-PressLeftBumper,Press left bumper
-PressRightBumper,Press right bumper
-PressLeftTrigger,Press left trigger
-PressRightTrigger,Press right trigger
-PressSelect,Press Select button
-PressStart,Press Start button
-PressLeftStick,Press left stick button
-PressRightStick,Press right stick button
-PressUpOnDpad,Press Up on Dpad
-PressDownOnDpad,Press Down on Dpad
-PressLeftOnDpad,Press Left on Dpad
-PressRightOnDpad,Press Right on Dpad
-PressHome,Press Home button
-DeadZone,Dead Zone
 NotificationsAlertType0,Off
 NotificationsAlertType1,(1) in title
 NotificationsAlertType2,Popup

@@ -408,8 +408,6 @@ function ExtendedItemDrawButton(Option, CurrentOption, DialogPrefix, buttonData,
 		y + height - 25,
 		width, "black",
 	);
-
-	ControllerAddActiveArea(x + width / 2, y + height / 2);
 }
 
 /**

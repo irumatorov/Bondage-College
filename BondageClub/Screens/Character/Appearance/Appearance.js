@@ -1013,7 +1013,6 @@ function AppearanceRun() {
 				DrawItemPreview(Item, Player, X, Y, { Hover: true, Background });
 			}
 
-			ControllerAddActiveArea(X, Y);
 			X = X + 250;
 			if (X > 1800) {
 				X = 1250;
@@ -1291,7 +1290,6 @@ function AppearanceClick() {
 	const C = CharacterAppearanceSelection;
 	if (!C) return;
 
-	ControllerClearAreas();
 	// When there is an extended item
 	if (DialogFocusItem != null) {
 		CommonDynamicFunction("Inventory" + DialogFocusItem.Asset.Group.Name + DialogFocusItem.Asset.Name + "Click()");

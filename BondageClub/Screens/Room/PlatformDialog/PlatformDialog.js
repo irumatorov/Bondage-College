@@ -20,7 +20,6 @@ var PlatformDialogPosition = 0;
 var PlatformDialogCharacter = null;
 /** @type {HTMLAudioElement | null} */
 var PlatformDialogAudio = null;
-var PlatformDialogControllerHandle = false;
 var PlatformDialogAudioStyle = ["", "angry", "calm", "chat", "cheerful", "friendly", "sad", "serious", "shouting", "terrified", "unfriendly", "whispering"];
 /** @type {Platform.DialogCharacter[]} */
 var PlatformDialogCharacterTemplate = [
@@ -5217,7 +5216,6 @@ function PlatformDialogLoadPosition(Position) {
 	if (Position >= PlatformDialog.Dialog.length) {
 		if (PlatformDialog.Exit != null) PlatformDialog.Exit();
 		PlatformDialogLeave();
-		PlatformDialogControllerHandle = true;
 		return;
 	}
 	if ((PlatformDialog.Dialog[Position].Prerequisite != null) && !PlatformDialog.Dialog[Position].Prerequisite()) return PlatformDialogLoadPosition(PlatformDialogPosition + 1);
@@ -5534,27 +5532,6 @@ function PlatformDialogGetCharacter(Name) {
 			if (Character.Name == Name)
 				return Character;
 	throw new Error("not supposed to happen");
-}
-
-/**
- * Handles the controller inputs
- * @param {readonly GamepadButton[]} buttons - The buttons pressed on the controller
- * @returns {boolean} - Always TRUE to indicate that the controller is handled
- */
-function PlatformDialogController(buttons) {
-	if (buttons[ControllerButton.A]?.pressed && !buttons[ControllerButton.A]?.repeat) { PlatformDialogProcess(); }
-	else if (buttons[ControllerButton.B]?.pressed && !buttons[ControllerButton.B]?.repeat) { PlatformDialogProcess(); }
-	else if (buttons[ControllerButton.X]?.pressed && !buttons[ControllerButton.X]?.repeat) { PlatformDialogProcess(); }
-	else if (buttons[ControllerButton.Y]?.pressed && !buttons[ControllerButton.Y]?.repeat) { PlatformDialogProcess(); }
-	else if (buttons[ControllerButton.DPadU]?.pressed && !buttons[ControllerButton.DPadU]?.repeat) {
-		const event = new KeyboardEvent("W", { code: "KeyW" });
-		PlatformDialogKeyDown(event);
-	}
-	else if (buttons[ControllerButton.DPadD]?.pressed && !buttons[ControllerButton.DPadD]?.repeat) {
-		const event = new KeyboardEvent("W", { code: "KeyS" });
-		PlatformDialogKeyDown(event);
-	}
-	return true;
 }
 
 /**

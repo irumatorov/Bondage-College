@@ -131,14 +131,6 @@ const PreferenceSubscreens = [
 		resize: (onLoad) => PreferenceSubscreenGraphicsResize(onLoad),
 	},
 	{
-		name: "Controller",
-		load: () => PreferenceSubscreenControllerLoad(),
-		run: () => PreferenceSubscreenControllerRun(),
-		click: () => PreferenceSubscreenControllerClick(),
-		exit: () => PreferenceSubscreenControllerExit(),
-		unload: () => PreferenceSubscreenControllerUnload(),
-	},
-	{
 		name: "Notifications",
 		load: () => PreferenceSubscreenNotificationsLoad(),
 		run: () => PreferenceSubscreenNotificationsRun(),
@@ -253,9 +245,6 @@ function PreferenceRun() {
  * @returns {void} - Nothing
  */
 function PreferenceClick() {
-	if (ControllerIsActive()) {
-		ControllerClearAreas();
-	}
 	PreferenceSubscreen?.click();
 }
 
@@ -280,7 +269,6 @@ function PreferenceExit() {
 		ChatSettings: Player.ChatSettings,
 		VisualSettings: Player.VisualSettings,
 		AudioSettings: Player.AudioSettings,
-		ControllerSettings: Player.ControllerSettings,
 		GameplaySettings: Player.GameplaySettings,
 		ImmersionSettings: Player.ImmersionSettings,
 		RestrictionSettings: Player.RestrictionSettings,

@@ -22,8 +22,6 @@ OnlinePreferences
 - Онлайн-настройки -
 ImmersionPreferences
 - Настройки погружения -
-ControllerPreferences
-- Настройки контроллера -
 NotificationsPreferences
 - Настройки уведомлений -
 GenderPreferences
@@ -56,8 +54,6 @@ HomepageImmersion
 Погружение
 HomepageGraphics
 Графика
-HomepageController
-Контроллер
 HomepageNotifications
 Уведомления
 HomepageGender
@@ -568,28 +564,6 @@ PowerModedefault
 По умолчанию
 PowerModehigh-performance
 Высокое потребление, более быстрый рендеринг
-Sensitivity
-Чувствительность
-ControllerActive
-Активный контроллер
-MapButtons
-Кнопки карты
-MapSticks
-Картографические палочки
-MoveLeftStickUp
-переместить левый стик вверх
-MoveLeftStickRight
-двигай левый джойстик вправо
-PressUpOnDpad
-Нажмите вверх на Dpad
-PressDownOnDpad
-Нажмите вниз на Dpad
-PressLeftOnDpad
-Нажмите влево на Dpad
-PressRightOnDpad
-Нажмите вправо на Dpad
-DeadZone
-Мертвая зона
 NotificationsAlertType0
 Выключить
 NotificationsAlertType1

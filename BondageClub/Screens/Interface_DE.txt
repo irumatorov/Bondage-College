@@ -546,8 +546,6 @@ ProgressFlex
 Klicke auf die Seile, bevor sie den Boden erreichen
 ProgressKeys
 Drücke abwechselnd A (Q bei AZERTY) und D um zu beschleunigen
-ProgressKeysController
-Drücke abwechselnd A und S oder X und Y auf einem Controller
 PronounObjectHeHim
 ihn
 PronounObjectSheHer
