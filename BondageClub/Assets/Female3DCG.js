@@ -73116,6 +73116,7 @@ var AssetFemale3DCG = [
 				Hide: [],
 				ArousalZone: "ItemVulva",
 				Prerequisite: ["CanBaseLower"],
+				SetPose: ["BaseLower"],
 				Layer: [
 					{
 						Top: 560,
@@ -73129,7 +73130,7 @@ var AssetFemale3DCG = [
 						Name: "Mask",
 						HasImage: false,
 						AllowColorize: false,
-						AllowTypes: { d: [1, 2, 3, 4, 5] },
+						AllowTypes: { d: [1, 2, 3, 4] },
 						Alpha: [
 							{
 								Group: ["ItemDevices"],
