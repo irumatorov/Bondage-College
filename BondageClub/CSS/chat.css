@@ -66,7 +66,50 @@
 	text-align: center;
 }
 
+#chat-room-wrapper {
+	display: flex;
+	pointer-events: none;
+	flex-direction: row;
+}
+
+#chat-room-content {
+	position: relative;
+	user-select: none;
+	pointer-events: none;
+	z-index: 10;
+}
+
+#chat-room-content[data-view="Map"] #chat-room-content-resize-bar {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: -0.5em;
+	width: 1em;
+	pointer-events: all;
+	cursor: ew-resize;
+}
+
+#chat-room-content[data-view="Map"] #chat-room-content-resize-bar:hover {
+	background: rgba(0, 200, 255, 0.5);
+}
+#chat-room-wrapper:has(#chat-room-div[hidden]) #chat-room-content[data-view="Map"] #chat-room-content-resize-bar {
+	right: 0;
+}
+#chat-room-wrapper:has(#chat-room-div[hidden])
+	#chat-room-content[data-view="Map"]
+	#chat-room-content-resize-bar::after {
+	content: "<";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%);
+	font-size: 1em;
+	color: white;
+}
+
 #chat-room-div {
+	background: black;
+	flex: 1;
 	--button-size: min(8vh, 4vw);
 	/* NOTE: Variable is also referenced in `ChatRoomInputResize()` */
 	--gap-size: max(3px, min(0.4vh, 0.2vw));
@@ -453,6 +496,7 @@
 #TextAreaChatLog[data-colortheme="light2"] .chat-room-message-original {
 	padding-right: 2em;
 	line-height: 1.4em;
+	overflow-wrap: anywhere;
 }
 
 #TextAreaChatLog[data-colortheme="light2"] .ChatMessage {

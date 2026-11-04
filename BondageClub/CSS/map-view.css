@@ -279,3 +279,98 @@ textarea.chat-room-map-view-dialog-content-text {
 #color-picker[data-colortheme="dark2"].chat-room-map-view-color-picker {
 	background-color: #111;
 }
+
+#chat-room-map-controls {
+	position: absolute;
+	right: 10px;
+	bottom: 10px;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 10px;
+	pointer-events: auto;
+	z-index: 10;
+}
+@keyframes movementProgressFill {
+	0% {
+		background-position: right;
+	}
+	100% {
+		background-position: left;
+	}
+}
+.chat-room-map-control-btn {
+	pointer-events: auto;
+}
+.chat-room-map-control-btn {
+	width: 2em;
+	height: 2em;
+}
+.chat-room-map-control-btn .button-image {
+	max-width: 2em;
+	max-height: 2em;
+}
+#chat-room-map-move-row {
+	display: "flex";
+	gap: 2px;
+}
+
+.chat-room-map-control-btn.active {
+	background: linear-gradient(to right, #80ff80 50%, white 50%);
+	background-size: 200% 100%;
+	background-position: right;
+	animation: movementProgressFill var(--button-animation-duration, 0.1s) ease-in-out forwards infinite;
+}
+
+.chat-room-map-control-btn.active:hover::after {
+	content: "";
+	display: block;
+	width: 48px;
+	height: 48px;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+	margin: auto;
+}
+
+#chat-room-map-move-container {
+	display: flex;
+	flex-direction: column;
+	align-items: end;
+	gap: 2px;
+}
+
+#chat-room-map-move-row {
+	display: flex;
+	gap: 2px;
+}
+
+#chat-room-map-move-progress {
+	width: 182px;
+	height: 8px;
+	background: #333;
+	margin-top: 4px;
+	border: 1px solid black;
+	overflow: hidden;
+}
+
+#chat-room-map-move-progress-fill {
+	height: 100%;
+	background: cyan;
+	width: 0%;
+	transition: width 0.1s linear;
+}
+
+#chat-room-map-move-row {
+	display: flex;
+	gap: 2px;
+}
+
+#chat-room-map-move-progress {
+	border: var(--border-width) solid black;
+	overflow: hidden;
+}
+
+#chat-room-map-move-progress-fill {
+	transition: width 0.1s linear;
+}
