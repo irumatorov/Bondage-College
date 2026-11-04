@@ -1,0 +1,25 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		// checkJs stays off so only @ts-check files and .d.ts are reported.
+		// allowJs must stay on, or checkJs: false drops JavaScript from the program.
+		"allowJs": true,
+		"checkJs": false,
+		"tsBuildInfoFile": ".cache/tsc-expensive.tsbuildinfo"
+	},
+	"include": [
+		"Scripts/**/*",
+		"Screens/**/*",
+		"Assets/**/*",
+		"Backgrounds/**/*.js",
+		"Tools/Node/TypecheckExpensive.js"
+	],
+	"exclude": [
+		"Scripts/lib/**/*.js",
+		"Scripts/MessagesPatch.d.ts",
+		"Scripts/DeclarationsCheap.d.ts",
+		"node_modules/**/*",
+		"Tools/Node/csvtypescript_tmp_output",
+		"Screens/MiniGame/KinkyDungeon"
+	]
+}

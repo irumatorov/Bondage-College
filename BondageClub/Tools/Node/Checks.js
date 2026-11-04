@@ -17,7 +17,7 @@ import {
 const ROOT = path.resolve(fileURLToPath(import.meta.url), "../..");
 
 const CHEAP_CHECKS = /** @type {const} */([
-	"assets:typecheck",
+	"tools:typecheck",
 	"assets:check",
 	"assets:prettier",
 	"assets:eslint",
