@@ -86,11 +86,6 @@ interface HTMLElement {
 	removeAttribute(qualifiedName: string): void;
 }
 
-interface GamepadButton {
-	/** Whether the button was pressed the last input event */
-	repeat: boolean;
-}
-
 // Workaround for https://github.com/microsoft/TypeScript/issues/283
 interface Node {
 	cloneNode(deep?: boolean): this;
@@ -2449,21 +2444,6 @@ interface ExtensionSettings {
 	[key: string]: any;
 }
 
-interface ControllerSettingsOld {
-	ControllerA: number;
-	ControllerB: number;
-	ControllerX: number;
-	ControllerY: number;
-	ControllerStickUpDown: number;
-	ControllerStickLeftRight: number;
-	ControllerStickRight: number;
-	ControllerStickDown: number;
-	ControllerDPadUp: number;
-	ControllerDPadDown: number;
-	ControllerDPadLeft: number;
-	ControllerDPadRight: number;
-}
-
 type DifficultyLevel =
 	| 0 // Roleplay
 	| 1 // Regular
@@ -2501,7 +2481,6 @@ interface PlayerCharacter extends OnlineCharacter {
 	ChatSettings: ChatSettingsType;
 	VisualSettings: VisualSettingsType;
 	AudioSettings: AudioSettingsType;
-	ControllerSettings: ControllerSettingsType;
 	GameplaySettings: GameplaySettingsType;
 	ImmersionSettings: ImmersionSettingsType;
 	/** The chat room we were previous in. Used for relog room re-creation */
@@ -2609,17 +2588,6 @@ interface ImmersionSettingsType {
 	 * Whether garbled messages that have a non-garbled variant will be decoded.
 	 */
 	ShowUngarbledMessages: boolean;
-}
-
-type ControllerButton = typeof ControllerButton[keyof typeof ControllerButton];
-type ControllerAxis = typeof ControllerAxis[keyof typeof ControllerAxis];
-
-interface ControllerSettingsType {
-	ControllerActive: boolean;
-	ControllerSensitivity: number;
-	ControllerDeadZone: number;
-	Buttons: Record<ControllerButton, number>;
-	Axis: Record<ControllerAxis, number>;
 }
 
 interface ChatSettingsType {

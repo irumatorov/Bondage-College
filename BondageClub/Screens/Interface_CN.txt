@@ -706,8 +706,6 @@ ProgressFlex
 在绳索落到地面前点击以获得进度
 ProgressKeys
 交替点按A和D键加速（在AZERTY键盘上为Q和D）
-ProgressKeysController
-交替按下按控制器上的A键和S键，或X键和Y键
 PronounObjectHeHim
 他
 PronounObjectSheHer

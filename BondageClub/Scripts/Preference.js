@@ -9,12 +9,6 @@ var PreferenceChatMemberNumbersList = ["Always", "Never", "OnMouseover"];
 /** @type {ChatFontSizeType[]} */
 var PreferenceChatFontSizeList = ["Small", "Medium", "Large"];
 
-var PreferenceSettingsSensitivityList = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-var PreferenceSettingsSensitivityIndex = 13;
-var PreferenceSettingsDeadZoneList = [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
-var PreferenceSettingsDeadZoneIndex = 1;
-var PreferenceCalibrationStage = 0;
-
 /** @type {ImmersionSensDepName[]} */
 var PreferenceSettingsSensDepList = ["SensDepLight", "Normal", "SensDepNames", "SensDepTotal", "SensDepExtreme"];
 /** @type {LockTimerLimitName[]} */
@@ -348,7 +342,6 @@ function PreferenceInitPlayer(C, data) {
 		ChatSettings: JSON.stringify(data.ChatSettings) ?? "",
 		VisualSettings: JSON.stringify(data.VisualSettings) ?? "",
 		AudioSettings: JSON.stringify(data.AudioSettings) ?? "",
-		ControllerSettings: JSON.stringify(data.ControllerSettings) ?? "",
 		GameplaySettings: JSON.stringify(data.GameplaySettings) ?? "",
 		ImmersionSettings: JSON.stringify(data.ImmersionSettings) ?? "",
 		RestrictionSettings: JSON.stringify(data.RestrictionSettings) ?? "",
@@ -382,55 +375,6 @@ function PreferenceInitPlayer(C, data) {
 	// @ts-expect-error: Just backward-compat cleanup
 	delete data.OnlineSettings?.EnableWardrobeIcon;
 	C.ChatSettings = ValidationApplyRecord(data.ChatSettings, C, PreferenceChatSettingsValidate);
-
-	// @ts-expect-error: checking for old-style mapping
-	if (data.ControllerSettings && typeof data.ControllerSettings?.ControllerA === "number") {
-		// Port over to new mapping
-		const s = /** @type {ControllerSettingsOld} */(/** @type {unknown} */(data.ControllerSettings));
-		const buttonsMapping = {
-			[ControllerButton.A]: s.ControllerA,
-			[ControllerButton.B]: s.ControllerB,
-			[ControllerButton.X]: s.ControllerX,
-			[ControllerButton.Y]: s.ControllerY,
-			[ControllerButton.DPadU]: s.ControllerDPadUp,
-			[ControllerButton.DPadD]: s.ControllerDPadDown,
-			[ControllerButton.DPadL]: s.ControllerDPadLeft,
-			[ControllerButton.DPadR]: s.ControllerDPadRight,
-		};
-		const axisMapping = {
-			[ControllerAxis.StickLV]: s.ControllerStickUpDown,
-			[ControllerAxis.StickLH]: s.ControllerStickLeftRight,
-		};
-		ControllerLoadMapping(buttonsMapping, axisMapping);
-		// Delete the old mapping
-
-		const oldKeys = /** @type {never[]} */([
-			"ControllerA",
-			"ControllerB",
-			"ControllerX",
-			"ControllerY",
-			"ControllerStickUpDown",
-			"ControllerStickLeftRight",
-			"ControllerStickRight",
-			"ControllerStickDown",
-			"ControllerDPadUp",
-			"ControllerDPadDown",
-			"ControllerDPadLeft",
-			"ControllerDPadRight",
-		]);
-		for (const old of oldKeys) {
-			delete data.ControllerSettings[old];
-		}
-		// @ts-expect-error we don't have all the buttons
-		data.ControllerSettings.Buttons = buttonsMapping;
-		// @ts-expect-error we don't have all the axis
-		data.ControllerSettings.Axis = axisMapping;
-	}
-
-	C.ControllerSettings = ValidationApplyRecord(data.ControllerSettings, C, PreferenceControllerSettingsValidate);
-	ControllerLoadMapping(C.ControllerSettings.Buttons, C.ControllerSettings.Axis);
-
-	ControllerStart();
 
 	C.GameplaySettings = ValidationApplyRecord(data.GameplaySettings, C, PreferenceGameplaySettingsValidate);
 	C.GraphicsSettings = ValidationApplyRecord(data.GraphicsSettings, C, PreferenceGraphicsSettingsValidate);
@@ -958,32 +902,6 @@ var PreferenceAudioSettingsValidate = {
 	Notifications: ServerValidation.isBool(PreferenceAudioSettingsDefault.Notifications),
 	// @ts-expect-error deprecated
 	PlayBeeps: (arg) => undefined,
-};
-
-/**
- * Namespace with default values for {@link ControllerSettingsType} properties.
- * @type {Required<ControllerSettingsType>}
- * @namespace
- */
-var PreferenceControllerSettingsDefault = {
-	ControllerActive: false,
-	ControllerSensitivity: 5,
-	ControllerDeadZone: 0.01,
-	Buttons: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12, 13: 13, 14: 14, 15: 15, 16: 16 },
-	Axis: {0: 0, 1: 1, 2: 2, 3: 3},
-};
-
-/**
- * Namespace with functions for validating {@link ControllerSettingsType} properties
- * @type {{ [k in keyof Required<ControllerSettingsType>]: (arg: ControllerSettingsType[k], C: Character) => ControllerSettingsType[k] }}
- * @namespace
- */
-var PreferenceControllerSettingsValidate = {
-	ControllerActive: ServerValidation.isBool(PreferenceControllerSettingsDefault.ControllerActive),
-	ControllerSensitivity: ServerValidation.isItem(PreferenceSettingsSensitivityList, PreferenceControllerSettingsDefault.ControllerSensitivity),
-	ControllerDeadZone: ServerValidation.isItem(PreferenceSettingsDeadZoneList, PreferenceControllerSettingsDefault.ControllerDeadZone),
-	Buttons: (arg) => { return arg; },
-	Axis: (arg) => { return arg; },
 };
 
 /**

@@ -324,8 +324,6 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed, DrawCanvas) {
 
 		CharacterCheckHooks(C, CurrentCharacter != null);
 
-		ControllerAddActiveArea(X + 100, Y + 200);
-
 		// If there's a fixed image to draw instead of the character
 		if (C.FixedImage != null) {
 			DrawImageZoomCanvas(C.FixedImage, DrawCanvas, 0, 0, 500, 1000, X, Y, 500 * Zoom, 1000 * Zoom);
@@ -483,7 +481,6 @@ function DrawAssetGroupZone(C, Zone, Zoom, X, Y, HeightRatio, Color, Thickness =
 		if (FillColor != null) DrawRect(CZ[0], CZ[1], CZ[2], CZ[3], FillColor);
 		DrawEmptyRect(CZ[0], CZ[1], CZ[2], CZ[3], Color, Thickness);
 
-		ControllerAddActiveArea(Math.round(CZ[0]), Math.round(CZ[1]));
 	}
 }
 
@@ -906,8 +903,6 @@ function GetWrapTextSize(Text, Width, MaxLine) {
  * @returns {void} - Nothing
  */
 function DrawTextWrap(Text, X, Y, Width, Height, ForeColor, BackColor, MaxLine, LineSpacing = 23, Alignment = "Center") {
-	ControllerAddActiveArea(X, Y);
-
 	// Draw the rectangle if we need too
 	if (BackColor != null) {
 		MainCanvas.beginPath();
@@ -1078,9 +1073,6 @@ function DrawText(Text, X, Y, Color, BackColor) {
  * @returns {void} - Nothing
  */
 function DrawButton(Left, Top, Width, Height, Label, Color, Image=null, HoveringText=null, Disabled=false, tooltipPosition=null) {
-
-	ControllerAddActiveArea(Left, Top);
-
 	// Draw the button rectangle (makes the background color cyan if the mouse is over it)
 	MainCanvas.beginPath();
 	MainCanvas.rect(Left, Top, Width, Height);
@@ -1156,9 +1148,6 @@ function DrawBackNextButton(Left, Top, Width, Height, Label, Color, Image=null, 
 	const LeftSplit = Left + ArrowWidth;
 	const RightSplit = Left + Width - ArrowWidth;
 
-	ControllerAddActiveArea(Left, Top);
-	ControllerAddActiveArea(Left + Width - ArrowWidth, Top);
-
 	MainCanvas.save();
 	MainCanvas.textAlign = "center";
 
@@ -1192,8 +1181,6 @@ function DrawBackNextButton(Left, Top, Width, Height, Label, Color, Image=null, 
 	// Draw the text or image
 	DrawTextFit(Label, Left + Width / 2, Top + (Height / 2) + 1, (CommonIsMobile) ? Width - 6 : Width - 36, "Black");
 	if ((Image != null) && (Image != "")) DrawImage(Image, Left + 2, Top + 2);
-
-	ControllerAddActiveArea(Left + Width / 2, Top);
 
 	// Draw the back arrow
 	MainCanvas.beginPath();
@@ -1640,11 +1627,6 @@ function DrawProcess(time) {
 	// Draw Hovering text so they can be above everything else
 	DrawProcessHoverElements();
 
-	// Draw a marker for the controller's position
-	if (ControllerIsActive()) {
-		DrawRect(MouseX - 5, MouseY - 5, 10, 10, "Red");
-	}
-
 	// Checks for screen resize/position change and calls appropriate function
 	/** @type {RectTuple} */
 	const newCanvasPosition = [MainCanvas.canvas.offsetLeft, MainCanvas.canvas.offsetTop, MainCanvas.canvas.clientWidth, MainCanvas.canvas.clientHeight];
@@ -1822,7 +1804,6 @@ function DrawPreviewBox(X, Y, Path, Description, Options) {
 
 	// Now draw the preview box
 	DrawRect(X, Y, Width, Height, Background);
-	ControllerAddActiveArea(X, Y);
 	if (Border) DrawEmptyRect(X, Y, Width, Height, Foreground);
 	// DrawRect(ImageX, ImageY, ImageWidth, ImageHeight, "pink"); // Debug rect
 	if (Path !== "") DrawImageResize(Path, ImageX, ImageY, ImageWidth, ImageHeight);

@@ -10,7 +10,6 @@ type ChatRoomMapData = unknown;
 type ChatRoomMapPos = unknown;
 type ChatRoomMapTether = unknown;
 type ChatSettingsType = unknown;
-type ControllerSettingsType = unknown;
 type CraftingItem = unknown;
 type ExtensionSettings = unknown;
 type GameplaySettingsType = unknown;

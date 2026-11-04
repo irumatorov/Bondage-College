@@ -2,7 +2,7 @@
 
 type PreferenceSubscreenName =
 	"General" | "Difficulty" | "Restriction" | "Chat" | "CensoredWords" | "Audio" | "Arousal" |
-	"Security" | "Online" | "Visibility" | "Immersion" | "Graphics" | "Controller" | "Notifications" |
+	"Security" | "Online" | "Visibility" | "Immersion" | "Graphics" | "Notifications" |
 	"Gender" | "Scripts" | "Extensions" | "Main" | "Keybindings"
 	;
 

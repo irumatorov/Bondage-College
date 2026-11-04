@@ -538,8 +538,6 @@ ProgressFlex
 Щелкайте по веревкам, прежде чем они упадут на землю, для прогресса.
 ProgressKeys
 Альтернативные клавиши A (Q на AZERTY) и D для ускорения.
-ProgressKeysController
-Альтернативные клавиши A и S или X и Y на контроллере
 PronounObjectHeHim
 ему
 PronounObjectSheHer

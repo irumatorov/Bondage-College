@@ -857,9 +857,6 @@ function DialogLeave(options=null) {
 	// Destroy the remaining color pickers
 	ColorPickerExit(true);
 
-	// Go controller, go!
-	ControllerClearAreas();
-
 	// Refresh the to-be loaded super screen
 	// FIXME: Can't safely call `Load()` here again as many screens are ill equipped for reloads;
 	// limit it the `ChatRoom` screen for now unless _explicitly_ requested otherwise
@@ -5835,9 +5832,6 @@ function DialogLoad() {
 function DialogDraw() {
 	// Check that there's actually a character selected
 	if (!CurrentCharacter) return;
-	if (ControllerIsActive()) {
-		ControllerClearAreas();
-	}
 
 	// Draw both the player and the interaction character
 	if (!CurrentCharacter.IsPlayer())
