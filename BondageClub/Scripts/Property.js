@@ -1039,13 +1039,8 @@ var PropertyData = {
 			compare: PropertyDataEntry.compareShallowObjects,
 			union: PropertyDataEntry.unionShallowObjects,
 			compress(prop, { asset }, defaults) {
-				if (_ItemPropertiesR134Compression) {
-					const value = this.compressNumberRecord(prop, asset, defaults);
-					return value ? { [this.name]: value } : undefined;
-				} else {
-					// Remove as of R134Alpha
-					return { [this.name]: /** @type {never} */(prop) };
-				}
+				const value = this.compressNumberRecord(prop, asset, defaults);
+				return value ? { [this.name]: value } : undefined;
 			},
 			decompress(prop, { asset }) {
 				if (typeof prop === "string") {
@@ -1119,19 +1114,14 @@ var PropertyData = {
 				return PropertyDataEntry.unionShallowObjects(propOjbects);
 			},
 			compress(prop, { asset }, defaults) {
-				if (_ItemPropertiesR134Compression) {
-					/** @type {Partial<Record<LayerName, number>>} */
-					// @ts-ignore: Non-strict fails to narrow this down to an object; presumably due to `undefined` shenanigens
-					const defaultsObj = CommonIsObject(defaults) ? defaults : CommonFromEntries(asset.Layer.map(l => [l.Name ?? "", defaults ?? l.Priority]));
-					if (typeof prop === "number") {
-						return Object.values(defaultsObj).every(i => i === prop) ? undefined : { [this.name]: prop };
-					} else {
-						const value = this.compressNumberRecord(prop, asset, defaultsObj);
-						return value ? { [this.name]: value } : undefined;
-					}
+				/** @type {Partial<Record<LayerName, number>>} */
+				// @ts-ignore: Non-strict fails to narrow this down to an object; presumably due to `undefined` shenanigens
+				const defaultsObj = CommonIsObject(defaults) ? defaults : CommonFromEntries(asset.Layer.map(l => [l.Name ?? "", defaults ?? l.Priority]));
+				if (typeof prop === "number") {
+					return Object.values(defaultsObj).every(i => i === prop) ? undefined : { [this.name]: prop };
 				} else {
-					// Remove the `!_ItemPropertiesR134Compression` branch as of R134Alpha
-					return { [this.name]: /** @type {never} */(prop) };
+					const value = this.compressNumberRecord(prop, asset, defaultsObj);
+					return value ? { [this.name]: value } : undefined;
 				}
 			},
 			decompress(prop, { asset }) {

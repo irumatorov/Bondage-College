@@ -15,8 +15,6 @@ const fooAsset = {
 
 beforeAll(async () => {
 	const ret = await Game.loadAll();
-	// TODO: Remove as of R134Alpha
-	Game._ItemPropertiesR134Compression = true;
 	extendedAsset = Game.AssetGet("Female3DCG", "ItemPelvis", "ModularChastityBelt");
 	if (!extendedAsset) {
 		throw new Error(`Failed to retrieve asset "ItemPelvis/ModularChastityBelt"`);
