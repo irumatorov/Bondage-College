@@ -1,0 +1,22 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"strict": false,
+		"skipLibCheck": true,
+		"tsBuildInfoFile": ".cache/tsc-csvtypescript.tsbuildinfo"
+	},
+	"include": [
+		"Scripts/**/*",
+		"Screens/**/*",
+		"Assets/**/*",
+		"Backgrounds/**/*.js",
+		"Tools/Node/csvtypescript_tmp_output/**/*"
+	],
+	"exclude": [
+		"Scripts/lib/**/*.js",
+		"Scripts/MessagesPatch.d.ts",
+		"Scripts/DeclarationsExpensive.d.ts",
+		"Scripts/DeclarationsStatic.d.ts",
+		"Screens/MiniGame/KinkyDungeonPublic.d.ts"
+	]
+}
