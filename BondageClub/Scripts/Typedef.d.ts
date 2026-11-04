@@ -14,8 +14,6 @@ interface String {
 	replaceAt(index: number, character: string): string;
 }
 
-declare function parseInt(s: string | number, radix?: number): number;
-
 type MemoizedFunction<T extends AnyFunction> = T & {
 	/** Clears the cache of the memoized function */
 	clearCache(): void;

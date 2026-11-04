@@ -296,12 +296,12 @@ function NPCLongLoverEventDelay(C) {
  */
 function NPCLoveChange(C, LoveFactor) {
 	if (!C.IsNpc()) return;
-	LoveFactor = parseInt(LoveFactor);
-	if (C.Love == null) C.Love = LoveFactor;
-	else C.Love = C.Love + LoveFactor;
-	if (C.Love < -100) C.Love = -100;
-	if (C.Love > 100) C.Love = 100;
-	if (C.Love > 60 && !C.IsLoverOfPlayer() && !C.IsOwnedByPlayer() && !C.IsOwner() && (NPCEventGet(C, "EndSubTrial") <= 0)) C.Love = 60;
+	C.Love ??= 0;
+	C.Love = CommonClamp(C.Love + LoveFactor, -100, 100);
+	// Cap based on whether the NPC is our lover, sub, or owner
+	if (C.Love > 60 && !C.IsLoverOfPlayer() && !C.IsOwnedByPlayer() && !C.IsOwner() && (NPCEventGet(C, "EndSubTrial") <= 0)) {
+		C.Love = 60;
+	}
 }
 
 /**

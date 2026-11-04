@@ -232,9 +232,9 @@ let RhythmGameChart = {
 
 		let notes = RhythmGameChart.chartFile?.getElementsByTagName('Notes')[0].children ?? [];
 		for(let i=0; i<notes.length; i++){
-			let key = parseInt(notes[i].getAttribute('Key') ?? 0, 10);
-			let time = parseInt(notes[i].getAttribute('Time') ?? 0, 10);
-			let para = parseInt(notes[i].getAttribute('Para') ?? 0, 10);
+			let key = CommonParseInt(notes[i].getAttribute('Key') ?? "0") ?? 0;
+			let time = CommonParseInt(notes[i].getAttribute('Time') ?? "0") ?? 0;
+			let para = CommonParseInt(notes[i].getAttribute('Para') ?? "0") ?? 0;
 			RhythmGameChart.notes.push({
 				id : i,
 				key : key,
@@ -261,7 +261,7 @@ let RhythmGameChart = {
 		let timings = RhythmGameChart.chartFile?.getElementsByTagName('Timings')[0].children ?? [];
 		for(let i=0; i<timings.length; i++){
 			let type = timings[i].getAttribute('Type');
-			let time = parseInt(timings[i].getAttribute('Time') ?? 0, 10);
+			let time = CommonParseInt(timings[i].getAttribute('Time') ?? "0") ?? 0;
 			let data = parseFloat(timings[i].getAttribute('Data') ?? "");
 			if(RhythmGameChart.bpm === -1 && type === 'BPM'){
 				RhythmGameChart.bpm = data;

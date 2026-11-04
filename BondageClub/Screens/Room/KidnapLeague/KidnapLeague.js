@@ -271,28 +271,29 @@ async function KidnapLeagueBountyStart() {
 function KidnapLeagueBountyFightStart() {
 	if (!KidnapLeagueBountyState) return;
 	const { Bounty, Location, Difficulty } = KidnapLeagueBountyState;
-	KidnapStart(Bounty, Location, Difficulty, "KidnapLeagueBountyFightEnd()");
+	KidnapStart(Bounty, Location, Difficulty, (victory) => CommonPromiseCatch(KidnapLeagueBountyFightEnd(victory)));
 }
 
 /**
  * Ends the bounty hunter fight and goes back to the kidnap league screen.
+ * @param {boolean} victory - Whether the player won the encounter
  * @returns {SafePromise<void>} - Nothing
  */
-async function KidnapLeagueBountyFightEnd() {
+async function KidnapLeagueBountyFightEnd(victory) {
 	if (!KidnapLeagueBountyState) return;
 	CurrentDarkFactor = 1.0;
 	KidnapLeagueRandomActivityCount = 0;
 	const { Bounty, Location } = KidnapLeagueBountyState;
 	SkillProgress(Player, "Willpower", KidnapSuccessWillpowerProgress(Bounty));
-	Bounty.AllowItem = KidnapVictory;
-	KidnapLeagueBountyState.Victory = KidnapVictory;
-	Bounty.Stage = (KidnapVictory) ? "101" : "201";
+	Bounty.AllowItem = victory;
+	KidnapLeagueBountyState.Victory = victory;
+	Bounty.Stage = victory ? "101" : "201";
 	KidnapLeagueRandomKidnapper = Bounty;
-	if (!KidnapVictory) CharacterRelease(Bounty);
+	if (!victory) CharacterRelease(Bounty);
 	await CommonSetScreen("Room", "KidnapLeague");
 	KidnapLeagueBackground = Location;
 	CharacterSetCurrent(Bounty);
-	Bounty.CurrentDialog = DialogFind(Bounty, (KidnapVictory) ? "BountyVictory" : "BountyDefeat");
+	Bounty.CurrentDialog = DialogFind(Bounty, victory ? "BountyVictory" : "BountyDefeat");
 	KidnapLeagueWillPayForFreedom = false;
 }
 
@@ -327,21 +328,22 @@ function KidnapLeagueBountyReset() {
  */
 function KidnapLeagueStartKidnap(Difficulty) {
 	if (Difficulty < 0) ReputationProgress("Dominant", -2);
-	KidnapStart(KidnapLeagueTrainer, "KidnapLeague", Difficulty, "KidnapLeagueEndKidnap()");
+	KidnapStart(KidnapLeagueTrainer, "KidnapLeague", Difficulty, (victory) => CommonPromiseCatch(KidnapLeagueEndKidnap(victory)));
 }
 
 /**
  * Ends a kidnap match ends. Send the player to the kidnap league screen and sets the right trainer dialog.
+ * @param {boolean} victory - Whether the player won the encounter
  * @returns {SafePromise<void>} - Nothing
  */
-async function KidnapLeagueEndKidnap() {
+async function KidnapLeagueEndKidnap(victory) {
 	SkillProgress(Player, "Willpower", KidnapSuccessWillpowerProgress(KidnapLeagueTrainer));
-	KidnapLeagueTrainer.AllowItem = KidnapVictory;
-	KidnapLeagueTrainer.Stage = (KidnapVictory) ? "100" : "200";
-	if (!KidnapVictory) CharacterRelease(KidnapLeagueTrainer);
+	KidnapLeagueTrainer.AllowItem = victory;
+	KidnapLeagueTrainer.Stage = victory ? "100" : "200";
+	if (!victory) CharacterRelease(KidnapLeagueTrainer);
 	await CommonSetScreen("Room", "KidnapLeague");
 	CharacterSetCurrent(KidnapLeagueTrainer);
-	KidnapLeagueTrainer.CurrentDialog = DialogFind(KidnapLeagueTrainer, (KidnapVictory) ? "KidnapVictory" : "KidnapDefeat");
+	KidnapLeagueTrainer.CurrentDialog = DialogFind(KidnapLeagueTrainer, victory ? "KidnapVictory" : "KidnapDefeat");
 }
 
 /**
@@ -408,26 +410,29 @@ async function KidnapLeagueRandomIntro() {
 
 /**
  * Triggered at the end of a match, sets a random outro sequence.
- * @param {boolean} Surrender - Whether or not the player surrendered.
+ * @param {boolean} victory - Wether the player won or not
+ * @param {boolean} surrender - Wether the player surrendered or not
  * @returns {SafePromise<void>} - Nothing
  */
-async function KidnapLeagueRandomOutro(Surrender) {
+async function KidnapLeagueRandomOutro(victory, surrender) {
 	if (!KidnapLeagueRandomKidnapper) return;
 	KidnapLeagueRandomActivityCount = 0;
 	await CommonSetScreen("Room", "KidnapLeague");
 	SkillProgress(Player, "Willpower", KidnapSuccessWillpowerProgress(KidnapLeagueRandomKidnapper));
 	KidnapLeagueBackground = "MainHall";
-	if ((Surrender == null) || (Surrender == false)) ReputationProgress("Kidnap", KidnapVictory ? 4 : 2);
-	KidnapLeagueRandomKidnapper.AllowItem = KidnapVictory;
-	KidnapLeagueRandomKidnapper.Stage = (KidnapVictory) ? "100" : "200";
+	if (!surrender) ReputationProgress("Kidnap", victory ? 4 : 2);
+	KidnapLeagueRandomKidnapper.AllowItem = victory;
+	KidnapLeagueRandomKidnapper.Stage = victory ? "100" : "200";
 	KidnapLeagueWillPayForFreedom = (Math.random() >= 0.5);
-	if (!KidnapVictory) CharacterRelease(KidnapLeagueRandomKidnapper);
+	if (!victory) CharacterRelease(KidnapLeagueRandomKidnapper);
 	CharacterSetCurrent(KidnapLeagueRandomKidnapper);
-	if (Surrender === true) {
+	if (surrender) {
 		KidnapLeagueRandomKidnapper.Stage = "205";
 		InventoryWearRandom(Player, "ItemArms", KidnapLeagueRandomKidnapperDifficulty);
 		KidnapLeagueRandomKidnapper.CurrentDialog = DialogFind(KidnapLeagueRandomKidnapper, "Surrender" + KidnapLeagueRandomKidnapperScenario);
-	} else KidnapLeagueRandomKidnapper.CurrentDialog = DialogFind(KidnapLeagueRandomKidnapper, ((KidnapVictory) ? "Victory" : "Defeat") + KidnapLeagueRandomKidnapperScenario);
+	} else {
+		KidnapLeagueRandomKidnapper.CurrentDialog = DialogFind(KidnapLeagueRandomKidnapper, (victory ? "Victory" : "Defeat") + KidnapLeagueRandomKidnapperScenario);
+	}
 }
 
 /**
@@ -436,7 +441,7 @@ async function KidnapLeagueRandomOutro(Surrender) {
  */
 function KidnapLeagueRandomStart() {
 	if (!KidnapLeagueRandomKidnapper) return;
-	KidnapStart(KidnapLeagueRandomKidnapper, "MainHall", KidnapLeagueRandomKidnapperDifficulty, "KidnapLeagueRandomOutro()");
+	KidnapStart(KidnapLeagueRandomKidnapper, "MainHall", KidnapLeagueRandomKidnapperDifficulty, (victory, surrender) => CommonPromiseCatch(KidnapLeagueRandomOutro(victory, surrender)));
 }
 
 /**
@@ -456,7 +461,7 @@ function KidnapLeagueRandomBribe(Amount) {
  */
 function KidnapLeagueRandomSurrender() {
 	KidnapVictory = false;
-	KidnapLeagueRandomOutro(true);
+	KidnapLeagueRandomOutro(false, true);
 }
 
 /**

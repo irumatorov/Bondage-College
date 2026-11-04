@@ -2,6 +2,9 @@
 var MagicBattleBackground = "";
 /** @type {Character} */
 var MagicBattleOpponent = /** @type {never} */ (null);
+/** @type {null | ((victory: boolean) => void)} */
+var MagicBattleEndCallback = null;
+/** @deprecated */
 var MagicBattleReturnFunction = "";
 var MagicBattleDifficulty = 0;
 var MagicBattleVictory = false;
@@ -19,17 +22,16 @@ var MagicBattleSpellDifficulty = [3, 5, 7, 9, 6, 8, 4, 8];
  * @param {Character} Opponent
  * @param {number} Difficulty
  * @param {string} Background
- * @param {string} FunctionName
+ * @param {(victory: boolean) => void} callback
  * @returns {void} - Nothing
  */
-function MagicBattleStart(Opponent, Difficulty, Background, FunctionName) {
+function MagicBattleStart(Opponent, Difficulty, Background, callback) {
 	MagicBattlePlayerAppearance = CharacterAppearanceStringify(Player);
 	MagicBattleOpponentAppearance = CharacterAppearanceStringify(Opponent);
 	MagicBattleOpponent = Opponent;
 	MagicBattleBackground = Background;
-	MagicBattleReturnFunction = FunctionName;
-	MagicBattleDifficulty = parseInt(Difficulty);
-	if (isNaN(MagicBattleDifficulty)) MagicBattleDifficulty = 0;
+	MagicBattleEndCallback = callback;
+	MagicBattleDifficulty = Difficulty;
 	MagicBattleVictory = false;
 	MagicBattleAvailSpell = MagicBattleGetAvailSpells(MagicBattleOpponent);
 	DialogLeave();
@@ -125,8 +127,10 @@ function MagicBattleClick() {
 		for (let S = 0; S < MagicBattleAvailSpell.length; S++)
 			if (MouseIn(800, 500 + S * 100, 400, 60))
 				return MagicBattleSpellStart(MagicBattleAvailSpell[S]);
-	if (((!Player.CanTalk() || !MagicBattleOpponent.CanTalk())) && (MouseIn(800, 600, 400, 60)))
-		CommonDynamicFunction(MagicBattleReturnFunction + "()");
+	if ((!Player.CanTalk() || !MagicBattleOpponent.CanTalk()) && MouseIn(800, 600, 400, 60)) {
+		MagicBattleEndCallback?.(MiniGameVictory);
+		MagicBattleEndCallback = null;
+	}
 }
 
 /**

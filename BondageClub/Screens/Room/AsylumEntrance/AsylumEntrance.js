@@ -281,19 +281,19 @@ function AsylumEntranceStartNurse() {
  * @returns {void} - Nothing
  */
 function AsylumEntranceFightNurse() {
-	KidnapStart(AsylumEntranceNurse, "AsylumEntrance", 7, "AsylumEntranceFightNurseEnd()");
+	KidnapStart(AsylumEntranceNurse, "AsylumEntrance", 7, (victory) => CommonPromiseCatch(AsylumEntranceFightNurseEnd(victory)));
 }
 
 /**
  * Resolves the result of the fight against the nurse
+ * @param {boolean} victory - Wether the player won or not
  * @returns {SafePromise<void>}
  */
-async function AsylumEntranceFightNurseEnd() {
+async function AsylumEntranceFightNurseEnd(victory) {
 	SkillProgress(Player, "Willpower", KidnapSuccessWillpowerProgress(AsylumEntranceNurse));
-	AsylumEntranceNurse.Stage = (KidnapVictory) ? "120" : "130";
+	AsylumEntranceNurse.Stage = victory ? "120" : "130";
 	DialogChangeReputation("Asylum", -6);
-	if (!KidnapVictory) CharacterRelease(AsylumEntranceNurse);
-	else CharacterRelease(Player);
+	CharacterRelease(victory ? Player : AsylumEntranceNurse);
 	AsylumEntranceWearNurseClothes(AsylumEntranceNurse);
 	AsylumEntranceWearPatientClothes(Player);
 	InventoryRemove(AsylumEntranceNurse, "ItemHead");
@@ -309,7 +309,7 @@ async function AsylumEntranceFightNurseEnd() {
 	InventoryRemove(Player, "ItemFeet");
 	await CommonSetScreen("Room", "AsylumEntrance");
 	CharacterSetCurrent(AsylumEntranceNurse);
-	AsylumEntranceNurse.CurrentDialog = DialogFind(AsylumEntranceNurse, (KidnapVictory) ? "FightVictory" : "FightDefeat");
+	AsylumEntranceNurse.CurrentDialog = DialogFind(AsylumEntranceNurse, victory ? "FightVictory" : "FightDefeat");
 }
 
 /**
@@ -396,22 +396,23 @@ async function AsylumEntranceNurseCatchEscapedPlayer() {
  */
 function AsylumEntranceKidnapNurseFight() {
 	DialogChangeReputation("Dominant", 4);
-	KidnapStart(AsylumEntranceKidnapNurse, "MainHall", 7, "AsylumEntranceKidnapNurseFightOutro()");
+	KidnapStart(AsylumEntranceKidnapNurse, "MainHall", 7, (victory, surrender) => CommonPromiseCatch(AsylumEntranceKidnapNurseFightOutro(victory, surrender)));
 }
 
 /**
  * Resolved the fight against the kidnap nurse
- * @param {boolean} Surrender - Wether the player surrendered or not
+ * @param {boolean} victory - Wether the player won or not
+ * @param {boolean} surrender - Wether the player surrendered or not
  * @returns {SafePromise<void>}
  */
-async function AsylumEntranceKidnapNurseFightOutro(Surrender) {
+async function AsylumEntranceKidnapNurseFightOutro(victory, surrender) {
 	await CommonSetScreen("Room", "AsylumEntrance");
 	SkillProgress(Player, "Willpower", KidnapSuccessWillpowerProgress(AsylumEntranceKidnapNurse));
-	if ((Surrender != null) && Surrender) DialogChangeReputation("Dominant", -3);
-	AsylumEntranceKidnapNurse.Stage = (KidnapVictory) ? "100" : "200";
-	if (!KidnapVictory) CharacterRelease(AsylumEntranceKidnapNurse);
+	if (surrender) DialogChangeReputation("Dominant", -3);
+	AsylumEntranceKidnapNurse.Stage = victory ? "100" : "200";
+	if (!victory) CharacterRelease(AsylumEntranceKidnapNurse);
 	CharacterSetCurrent(AsylumEntranceKidnapNurse);
-	AsylumEntranceKidnapNurse.CurrentDialog = DialogFind(AsylumEntranceKidnapNurse, ((KidnapVictory) ? "Victory" : "Defeat"));
+	AsylumEntranceKidnapNurse.CurrentDialog = DialogFind(AsylumEntranceKidnapNurse, victory ? "Victory" : "Defeat");
 }
 
 /**
@@ -500,25 +501,26 @@ async function AsylumEntranceEscapedPatientMeet() {
 function AsylumEntranceEscapedPatientFight() {
 	DialogChangeReputation("Asylum", 2);
 	DialogChangeReputation("Dominant", 2);
-	KidnapStart(AsylumEntranceEscapedPatient, "MainHall", 4, "AsylumEntranceEscapedPatientFightOutro()");
+	KidnapStart(AsylumEntranceEscapedPatient, "MainHall", 4, (victory, surrender) => CommonPromiseCatch(AsylumEntranceEscapedPatientFightOutro(victory, surrender)));
 }
 
 /**
  * Resolves the fight against an escaped patient
- * @param {boolean} Surrender - Wether the player surrendered or not
+ * @param {boolean} victory - Wether the player won or not
+ * @param {boolean} surrender - Wether the player surrendered or not
  * @returns {SafePromise<void>}
  */
-async function AsylumEntranceEscapedPatientFightOutro(Surrender) {
+async function AsylumEntranceEscapedPatientFightOutro(victory, surrender) {
 	await CommonSetScreen("Room", "AsylumEntrance");
 	AsylumEntranceBackground = "MainHall";
 	SkillProgress(Player, "Willpower", KidnapSuccessWillpowerProgress(AsylumEntranceEscapedPatient));
-	if ((Surrender != null) && Surrender) DialogChangeReputation("Dominant", -3);
-	AsylumEntranceEscapedPatient.Stage = (KidnapVictory) ? "100" : "200";
-	if (!KidnapVictory) CharacterRelease(AsylumEntranceEscapedPatient);
+	if (surrender) DialogChangeReputation("Dominant", -3);
+	AsylumEntranceEscapedPatient.Stage = victory ? "100" : "200";
+	if (!victory) CharacterRelease(AsylumEntranceEscapedPatient);
 	InventoryRemove(Player, "ItemMouth");
 	InventoryRemove(AsylumEntranceEscapedPatient, "ItemMouth");
 	CharacterSetCurrent(AsylumEntranceEscapedPatient);
-	AsylumEntranceEscapedPatient.CurrentDialog = DialogFind(AsylumEntranceEscapedPatient, ((KidnapVictory) ? "Victory" : "Defeat"));
+	AsylumEntranceEscapedPatient.CurrentDialog = DialogFind(AsylumEntranceEscapedPatient, victory ? "Victory" : "Defeat");
 }
 
 /**
