@@ -698,3 +698,169 @@ describe("map positions", () => {
 		expect(Game.MapIsPosition(null)).toBe(false);
 	});
 });
+
+describe("placed object settings", () => {
+	beforeEach(() => {
+		Game.Player = { MemberNumber: 1 };
+		Game.ChatRoomData = { Admin: [1], MapData: Game.ChatRoomMapViewInitialize("Always") };
+	});
+
+	it("only applies settings to the object it was made for, within the limits", () => {
+		Game.ChatRoomData.MapData.ObjectSettings = {
+			[4 * 40 + 3]: { ID: 362, Rotation: 90, Size: 150 },
+			[5 * 40 + 3]: { ID: 362, Rotation: 400, Size: 20 },
+		};
+		expect(Game.ChatRoomMapViewGetObjectSettings({ X: 3, Y: 4 }, 362)).toEqual({ ID: 362, Rotation: 90, Size: 150 });
+		expect(Game.ChatRoomMapViewGetObjectSettings({ X: 3, Y: 4 }, 365)).toBe(null);
+		expect(Game.ChatRoomMapViewGetObjectSettings({ X: 3, Y: 5 }, 362)).toEqual({ ID: 362 });
+	});
+
+	it("drops the settings of objects no longer on their tile when the map is saved", () => {
+		Game.MapManager.OnViewActivate();
+		Game.MapManager.Map.setObject(1, 1, Game.MapDataGetObject(362));
+		Game.ChatRoomData.MapData.ObjectSettings = {
+			41: { ID: 362, Rotation: 90 },
+			42: { ID: 362, Size: 150 },
+		};
+		Game.MapManager.Map.updateGlobalMapData();
+		expect(Game.ChatRoomData.MapData.ObjectSettings).toEqual({ 41: { ID: 362, Rotation: 90 } });
+		Game.MapManager.Map.setObject(1, 1, Game.MapDataGetObject(365));
+		Game.MapManager.Map.updateGlobalMapData();
+		expect(Game.ChatRoomData.MapData.ObjectSettings).toBeUndefined();
+	});
+
+	it("leaves functional objects and doors as they are", () => {
+		Game.ChatRoomData.MapData.ObjectSettings = {
+			41: { ID: 3520, Rotation: 10, Size: 150 },
+			42: { ID: 4016, Rotation: 10, Size: 150 },
+		};
+		expect(Game.ChatRoomMapViewGetObjectSettings({ X: 1, Y: 1 }, 3520)).toBe(null);
+		expect(Game.ChatRoomMapViewGetObjectSettings({ X: 2, Y: 1 }, 4016)).toBe(null);
+	});
+
+	it("leaves out values back at their default", () => {
+		Game.ChatRoomMapViewSetObjectSettings({ X: 1, Y: 1 }, 362, "Size", 150);
+		Game.ChatRoomMapViewSetObjectSettings({ X: 1, Y: 1 }, 362, "Rotation", 30);
+		Game.ChatRoomMapViewSetObjectSettings({ X: 1, Y: 1 }, 362, "Size", 100);
+		expect(Game.ChatRoomData.MapData.ObjectSettings).toEqual({ 41: { ID: 362, Rotation: 30 } });
+		Game.ChatRoomMapViewSetObjectSettings({ X: 1, Y: 1 }, 362, "Rotation", 0);
+		expect(Game.ChatRoomData.MapData.ObjectSettings).toEqual({});
+	});
+
+	it("can be undone, one step per change", () => {
+		const objects = Game.ChatRoomData.MapData.Objects;
+		Game.ChatRoomData.MapData.Objects = objects.slice(0, 41) + String.fromCharCode(362) + objects.slice(42);
+		Game.MapManager.OnViewActivate();
+		const pos = { X: 1, Y: 1 };
+		Game.ChatRoomMapViewRegisterObjectSettingsUndo(pos);
+		Game.ChatRoomMapViewSetObjectSettings(pos, 362, "Rotation", 30);
+		Game.ChatRoomMapViewRegisterObjectSettingsUndo(pos);
+		Game.ChatRoomMapViewSetObjectSettings(pos, 362, "Size", 150);
+		expect(Game.MapManager.Map.undo()).toBe(true);
+		expect(Game.ChatRoomData.MapData.ObjectSettings).toEqual({ 41: { ID: 362, Rotation: 30 } });
+		expect(Game.MapManager.Map.undo()).toBe(true);
+		expect(Game.ChatRoomData.MapData.ObjectSettings).toBeUndefined();
+		expect(Game.MapManager.Map.undo()).toBe(false);
+	});
+
+	it("only turns and sizes objects standing on their own", () => {
+		expect(Game.ChatRoomMapViewObjectCanTransform(Game.MapDataGetObject(362))).toBe(true);
+		expect(Game.ChatRoomMapViewObjectCanTransform(Game.MapDataGetObject(710))).toBe(false);
+		expect(Game.ChatRoomMapViewObjectCanTransform(Game.MapDataGetObject(2033))).toBe(false);
+		expect(Game.ChatRoomMapViewObjectCanTransform(Game.MapDataGetObject(3010))).toBe(false);
+		for (const id of [185, 186, 187, 188, 330, 331, 332, 333]) {
+			expect(Game.ChatRoomMapViewObjectCanTransform(Game.MapDataGetObject(id))).toBe(false);
+		}
+		Game.ChatRoomData.MapData.ObjectSettings = { 41: { ID: 710, Rotation: 90, Size: 150 } };
+		expect(Game.ChatRoomMapViewGetObjectSettings({ X: 1, Y: 1 }, 710)).toEqual({ ID: 710 });
+	});
+
+	describe("colors", () => {
+		const throne = Game.MapDataGetObject(150);
+		const couch = Game.MapDataGetObject(710);
+		const plainObject = Game.MapDataGetObject(151);
+		const pos = { X: 1, Y: 1 };
+
+		it("are defined as valid color layers in the map data", () => {
+			const range = (from: number, to: number) => Array.from({ length: to - from + 1 }, (_, i) => from + i);
+			const colorableIDs = [
+				130, 140, 150, 165, 220, 389, 403, 511, 560, 570, 630, 640, 650, 710, 720, 730, 740, 750,
+				1010, 1020, 1030, 1050, 1090, 3075, 3076, 3121, 5014,
+				...range(1110, 1119), ...range(1201, 1226), ...range(1301, 1309),
+			];
+			for (const object of colorableIDs.map(id => Game.MapDataGetObject(id))) {
+				expect(object.ColorLayers?.length).toBeGreaterThan(0);
+				for (const layer of object.ColorLayers) {
+					expect(layer.DefaultColor).toMatch(/^#[0-9A-F]{6}$/i);
+				}
+				const names = [...object.ColorLayers.map(l => l.Name), ...(object.FixedColorLayers ?? [])];
+				expect(new Set(names).size).toBe(names.length);
+			}
+		});
+
+		it("are checked against the object's layers", () => {
+			expect(Game.MapIsValidObjectColors(["#3050E0", "Default"], throne)).toBe(true);
+			expect(Game.MapIsValidObjectColors(["#3050E0", "Default"], plainObject)).toBe(false);
+			expect(Game.MapIsValidObjectColors(["#3050E0"], throne)).toBe(false);
+			expect(Game.MapIsValidObjectColors(["red", "Default"], throne)).toBe(false);
+			expect(Game.MapIsValidObjectColors(["#3050E0", "#ABC"], throne)).toBe(false);
+			expect(Game.MapIsValidObjectColors("#3050E0", throne)).toBe(false);
+		});
+
+		it("fall back to the layers' default colors", () => {
+			expect(Game.MapGetObjectLayerColors(pos, throne)).toEqual(throne.ColorLayers.map(l => l.DefaultColor));
+			Game.ChatRoomMapViewSetObjectSettings(pos, throne.ID, "Colors", ["#3050E0", "Default"]);
+			expect(Game.MapGetObjectLayerColors(pos, throne)).toEqual(["#3050E0", throne.ColorLayers[1].DefaultColor]);
+		});
+
+		it("are left out when they are all back at their default", () => {
+			Game.ChatRoomMapViewSetObjectSettings(pos, throne.ID, "Size", 150);
+			Game.ChatRoomMapViewSetObjectSettings(pos, throne.ID, "Colors", ["#3050E0", "Default"]);
+			expect(Game.ChatRoomData.MapData.ObjectSettings).toEqual({ 41: { ID: 150, Size: 150, Colors: ["#3050E0", "Default"] } });
+			Game.ChatRoomMapViewSetObjectSettings(pos, throne.ID, "Colors", ["Default", "Default"]);
+			expect(Game.ChatRoomData.MapData.ObjectSettings).toEqual({ 41: { ID: 150, Size: 150 } });
+		});
+
+		it("only apply when valid, to the object they were picked for", () => {
+			Game.ChatRoomData.MapData.ObjectSettings = {
+				41: { ID: 150, Colors: ["#3050e0", "Default"] },
+				42: { ID: 150, Colors: ["#3050E0", "<b>red</b>"] },
+				43: { ID: 151, Colors: ["#3050E0"] },
+			};
+			expect(Game.ChatRoomMapViewGetObjectSettings(pos, 150)).toEqual({ ID: 150, Colors: ["#3050E0", "Default"] });
+			expect(Game.ChatRoomMapViewGetObjectSettings(pos, 710)).toBe(null);
+			expect(Game.ChatRoomMapViewGetObjectSettings({ X: 2, Y: 1 }, 150)).toEqual({ ID: 150 });
+			expect(Game.ChatRoomMapViewGetObjectSettings({ X: 3, Y: 1 }, 151)).toEqual({ ID: 151 });
+		});
+
+		it("only paste a color format on the same object", () => {
+			const format = { ObjectID: throne.ID, Colors: ["#3050E0", "Default"] };
+			expect(Game.MapCanPasteColorFormat(format, throne)).toBe(true);
+			expect(Game.MapCanPasteColorFormat(format, couch)).toBe(false);
+			expect(Game.MapCanPasteColorFormat(format, plainObject)).toBe(false);
+			expect(Game.MapCanPasteColorFormat(null, throne)).toBe(false);
+			expect(Game.MapCanPasteColorFormat({ ObjectID: plainObject.ID, Colors: [] }, plainObject)).toBe(false);
+		});
+
+		it("paste a color format between objects sharing color layers", () => {
+			const letterA = Game.MapDataGetObject(1201);
+			const letterFormat = { ObjectID: letterA.ID, Colors: ["#E04080"] };
+			expect(Game.MapCanPasteColorFormat(letterFormat, Game.MapDataGetObject(1116))).toBe(true);
+			expect(Game.MapCanPasteColorFormat(letterFormat, Game.MapDataGetObject(1301))).toBe(true);
+			expect(Game.MapCanPasteColorFormat(letterFormat, throne)).toBe(false);
+			expect(Game.MapCanPasteColorFormat({ ObjectID: throne.ID, Colors: ["#3050E0", "Default"] }, letterA)).toBe(false);
+		});
+	});
+
+	it("keeps the settings through a map copy and paste", () => {
+		const settingsByTile = { 41: { ID: 362, Rotation: 176, Size: 180 } };
+		Game.MapManager.OnViewActivate();
+		Game.MapManager.Map.setObject(1, 1, Game.MapDataGetObject(362));
+		Game.MapManager.Map.updateGlobalMapData();
+		Game.ChatRoomData.MapData.ObjectSettings = settingsByTile;
+		const mapString = Game.MapManager.Map.exportString();
+		Game.ChatRoomData = { Admin: [1], MapData: Game.ChatRoomMapViewInitialize("Always") };
+		expect(Game.MapManager.Map.importString(mapString)).toBe(true);
+		expect(Game.ChatRoomData.MapData.ObjectSettings).toEqual(settingsByTile);
+	});
+});

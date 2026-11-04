@@ -244,6 +244,20 @@ interface ServerChatRoomMapData {
 	Objects?: string;
 	Effects?: string;
 	CellData?: Record<number,ChatRoomMapObjectConfig> | undefined;
+	/** How admins turned, sized and colored placed objects, by tile index */
+	ObjectSettings?: Record<number, ChatRoomMapObjectSettings>;
+}
+
+/** How an admin turned, sized and colored the object placed on a tile */
+type ChatRoomMapObjectSettings = {
+	/** The object it applies to; it no longer applies once another object is placed there */
+	ID: number
+	/** In degrees, from 1 to 359 */
+	Rotation?: number
+	/** In percent, from 50 to 200 */
+	Size?: number
+	/** One entry per {@link ChatRoomMapObject.ColorLayers} layer, `"Default"` keeping the layer's default color */
+	Colors?: (HexColor | "Default")[]
 }
 
 interface ServerChatRoomCustomData {

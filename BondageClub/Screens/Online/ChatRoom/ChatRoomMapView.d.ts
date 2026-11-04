@@ -62,7 +62,7 @@ type MapDataIndexedArgs<args extends readonly unknown[]> = [x: number, y: number
 
 type ChatRoomMapViewObjectModeType = "Tile" | "Object" | "Effect";
 
-type ChatRoomMapViewEditModeType = "" | ChatRoomMapViewObjectModeType | "TileType" | "ObjectType";
+type ChatRoomMapViewEditModeType = "" | ChatRoomMapViewObjectModeType | "TileType" | "ObjectType" | "ObjectSettings";
 
 type ChatRoomMapViewTool = {
 	canPaint: () => boolean;

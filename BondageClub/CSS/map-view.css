@@ -183,6 +183,7 @@
 	background: #505050b0;
 	border: var(--border-width) solid black;
 	min-height: 7em;
+	max-height: 100%;
 	color: white;
 	display: flex;
 	flex-direction: column;
@@ -207,6 +208,7 @@
 	padding: 0.3em;
 	display: flex;
 	flex: 1;
+	overflow-y: auto;
 }
 
 .chat-room-map-view-dialog-footer {
@@ -278,4 +280,79 @@ textarea.chat-room-map-view-dialog-content-text {
 #color-picker[data-colortheme="dark"].chat-room-map-view-color-picker,
 #color-picker[data-colortheme="dark2"].chat-room-map-view-color-picker {
 	background-color: #111;
+}
+
+.chat-room-map-view-dialog-controls,
+.chat-room-map-view-dialog-color-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3em;
+	width: 100%;
+}
+
+.chat-room-map-view-dialog-header,
+.chat-room-map-view-dialog-footer {
+	flex-shrink: 0;
+}
+
+.chat-room-map-view-dialog-control {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+}
+
+.chat-room-map-view-dialog-control > span {
+	flex: 1;
+}
+
+.chat-room-map-view-dialog-control > input {
+	flex: 2;
+}
+
+.chat-room-map-view-dialog-color-row {
+	display: flex;
+	align-items: center;
+	gap: 0.3em;
+}
+
+.chat-room-map-view-dialog-color-name {
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.chat-room-map-view-dialog-color-swatch {
+	width: 2em;
+	height: 1.4em;
+	padding: 0;
+	border: 2px solid white;
+	outline: 1px solid black;
+	cursor: pointer;
+}
+
+.chat-room-map-view-dialog-color-swatch:hover {
+	border-color: cyan;
+}
+
+.chat-room-map-view-dialog-color-hex {
+	width: 5.5em;
+	font-family: monospace;
+	text-transform: uppercase;
+}
+
+.chat-room-map-view-dialog-color-hex-invalid {
+	outline: 2px solid red;
+}
+
+.chat-room-map-view-dialog-color-buttons {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 0.3em;
+}
+
+.chat-room-map-view-dialog-color-button {
+	font-size: 0.7em;
+	padding: 0.2em 0.6em;
 }
