@@ -51,6 +51,9 @@ const ChatRoomMapViewLeashRange = 2;
 const ChatRoomMapViewRemoteRange = ChatRoomMapViewPerceptionRangeMax;
 const ChatRoomMapSignTextMaxLength = 150;
 var ChatRoomMapViewEditorMaxRecentElements = 16;
+var ChatRoomMapViewSplitPosition = 1000;
+var ChatRoomMapViewSplitPositionMax = 1500;
+var ChatRoomMapViewSplitPositionMin = 500;
 
 /**
  * @type {boolean[]}
@@ -129,6 +132,26 @@ function ChatRoomMapViewInitialize(mode) {
 }
 
 /**
+ * Sets the width of the chat room map
+ * @param {number} width
+ */
+function ChatRoomMapViewSetSplitPosition(width) {
+	const chatDiv = ElementWrap("chat-room-div");
+	if (chatDiv && width >= 2000) {
+		ChatRoomMapViewSplitPosition = 2000;
+		ElementSetSize("chat-room-content", 2000);
+		chatDiv.setAttribute("hidden", "true");
+		return;
+	}
+	if (chatDiv) {
+		chatDiv.removeAttribute("hidden");
+		ChatRoomInputResize(chatDiv);
+	}
+	ChatRoomMapViewSplitPosition = CommonClamp(width, ChatRoomMapViewSplitPositionMin, ChatRoomMapViewSplitPositionMax);
+	ElementSetSize("chat-room-content", ChatRoomMapViewSplitPosition);
+}
+
+/**
  * Initializes the character's map data to its default blank state
  * @param {Character} C - The character to be initialized
  * @returns {ChatRoomMapData | null}
@@ -187,14 +210,28 @@ function ChatRoomMapViewLeave() {
  */
 function ChatRoomMapViewActivate() {
 	MapManager.OnViewActivate();
-	ChatRoomMapViewCreateUI();
+	ChatRoomMapViewCreateEditorUI();
+	ChatRoomMapViewCreateMapMovementButtons();
 }
 
-function ChatRoomMapViewCreateUI() {
+
+
+/** @type {ScreenResizeHandler} */
+function ChatRoomMapViewResize() {
+	if (ElementWrap("chat-room-map-view-panel-editor")) ElementPositionFixed("chat-room-map-view-panel-editor", 0, 0, 300, 800);
+	if (ElementWrap("chat-room-map-view-panel")) ElementPositionFixed("chat-room-map-view-panel", 0, 0, ChatRoomMapViewSplitPosition, 1000);
+	if (ChatRoomMapViewColorPicker) ColorPickerResize(false);
+	ElementSetSize("chat-room-content", ChatRoomMapViewSplitPosition);
+}
+
+
+function ChatRoomMapViewCreateEditorUI() {
+	const content = ElementWrap("chat-room-content");
+
 	if (!ElementWrap("chat-room-map-view-panel")) ChatRoomMapViewPanel = ElementCreate({
 		tag: "div",
 		attributes: { id: "chat-room-map-view-panel" },
-		parent: document.body,
+		parent: content,
 	});
 
 	if (!ElementWrap("chat-room-map-view-panel-container"))	ChatRoomMapViewPanelContainer = ElementCreate({
@@ -205,6 +242,96 @@ function ChatRoomMapViewCreateUI() {
 
 	ChatRoomMapViewShowEditor();
 	ChatRoomMapViewCreateDialogMenu();
+}
+
+function ChatRoomMapViewCreateMapMovementButtons() {
+	const content = ElementWrap("chat-room-content");
+	const superPowersBtn = ElementWrap("chat-room-map-superpowers-btn") ?? ElementButton.Create("chat-room-map-superpowers-btn", () => {
+		ChatRoomMapViewSuperPowersActive = !ChatRoomMapViewSuperPowersActive;
+		ElementButton.SetImage(superPowersBtn, "Icons/" + (ChatRoomMapViewSuperPowersActive ? "SuperPowersActive" : "SuperPowersInactive") + ".png");
+		MapManager.Map.updatePlayerPerception();
+	}, {
+		image: "Icons/" + (ChatRoomMapViewSuperPowersActive ? "SuperPowersActive" : "SuperPowersInactive") + ".png",
+		tooltip: "Toggle Super Powers",
+	}, {
+		button: {
+			classList: ["chat-room-map-control-btn"],
+		}
+	});
+
+	superPowersBtn.classList.toggle("hidden", !ChatRoomPlayerIsAdmin());
+	if (!ElementWrap("chat-room-map-controls")) ElementCreate({
+		tag: "div",
+		attributes: { id: "chat-room-map-controls" },
+		parent: content,
+		children: [
+			{
+				tag: "div",
+				attributes: { id: "chat-room-map-move-container" },
+				children: [
+					{
+						tag: "div",
+						attributes: { id: "chat-room-map-move-row" },
+						children: [
+							ElementButton.Create("chat-room-map-move-north", () => {
+								if (ChatRoomMapViewMovement?.Direction === "North") {
+									ChatRoomMapViewSetMapViewMovement(null);
+									return;
+								}
+								ChatRoomMapViewMove("North");
+							}, {
+								image: "Icons/North.png",
+								tooltip: "Move North",
+							}, {
+								button: { classList: ["chat-room-map-control-btn"] }
+							}),
+
+							superPowersBtn,
+						]
+					},{
+						tag: "div",
+						attributes: { id: "chat-room-map-move-row" },
+						children: [
+							.../** @type {ChatRoomMapDirection[]} */(["West", "South", "East"]).map((direction) => {
+								return ElementButton.Create(`chat-room-map-move-${direction.toLocaleLowerCase()}`, () => {
+									if (ChatRoomMapViewMovement?.Direction === direction) {
+										ChatRoomMapViewSetMapViewMovement(null);
+										return;
+									}
+									ChatRoomMapViewMove(direction);
+								}, {
+									image: `Icons/${direction}.png`,
+									tooltip: `Move ${direction}`,
+								}, {
+									button: { classList: ["chat-room-map-control-btn"] }
+								});
+							}),
+						]
+					}
+				]
+			}
+		],
+	});
+
+	ChatRoomMapViewUpdateMovementButtons();
+}
+
+function ChatRoomMapViewUpdateMovementButtons() {
+	const duration = ChatRoomMapViewMovement
+		? ChatRoomMapViewMovement.TimeEnd - ChatRoomMapViewMovement.TimeStart
+		: 0;
+
+	["north", "west", "south", "east"].forEach(dir => {
+		const btn = ElementWrap("chat-room-map-move-" + dir);
+		if (!btn) return;
+
+		const capitalizedDir = dir.charAt(0).toUpperCase() + dir.slice(1);
+		const active = ChatRoomMapViewMovement?.Direction === capitalizedDir;
+
+		btn.classList.toggle("active", active && !!ChatRoomMapViewMovement);
+		btn.style.setProperty("--button-animation-duration", duration + "ms");
+		ElementButton.SetImage(btn, "Icons/" + (active ? "Cancel" : capitalizedDir) + ".png");
+	});
 }
 
 function ChatRoomMapViewCreateDialogMenu() {
@@ -414,7 +541,7 @@ function ChatRoomMapViewEditorSetSelection(item, type, updateRecent=true) {
 	if (MapDoodadIsObject(item)) {
 		if ((item.AssetName != null) && (item.AssetGroup != null) && !InventoryAvailable(Player, item.AssetName, item.AssetGroup)) return;
 	}
-	document.getElementById("chat-room-map-view-panel-editor-recent-items-grid")?.setAttribute("value", item.ID, );
+	ElementWrap("chat-room-map-view-panel-editor-recent-items-grid")?.setAttribute("value", item.ID, );
 	if (updateRecent) {
 		Player.RecentlyUsedMapElements = [
 			item,
@@ -426,7 +553,7 @@ function ChatRoomMapViewEditorSetSelection(item, type, updateRecent=true) {
 		ChatRoomMapViewReloadEditorPanel(true);
 		return;
 	}
-	document.getElementById("chat-room-map-view-panel-editor-selection")?.replaceChildren?.(...ChatRoomMapViewGetSelection());
+	ElementWrap("chat-room-map-view-panel-editor-selection")?.replaceChildren?.(...ChatRoomMapViewGetSelection());
 }
 
 /**
@@ -437,14 +564,14 @@ function ChatRoomMapViewEditorSetSelection(item, type, updateRecent=true) {
 function ChatRoomMapViewReloadEditorPanel(selectionOnly=false, search="") {
 	if (search != null) ChatRoomMapViewLastSearch = search;
 
-	document.getElementById("chat-room-map-view-panel-editor-recent-items-grid")?.replaceChildren?.(...ChatRoomMapViewGetRecentItems());
-	document.getElementById("chat-room-map-view-panel-editor-selection")?.replaceChildren?.(...ChatRoomMapViewGetSelection());
+	ElementWrap("chat-room-map-view-panel-editor-recent-items-grid")?.replaceChildren?.(...ChatRoomMapViewGetRecentItems());
+	ElementWrap("chat-room-map-view-panel-editor-selection")?.replaceChildren?.(...ChatRoomMapViewGetSelection());
 	if (selectionOnly) return;
 
-	document.getElementById("chat-room-map-view-panel-editor-items-grid")?.replaceChildren?.(...ChatRoomMapViewGetItems(search));
-	document.getElementById("chat-room-map-view-panel-editor-buttons-list")?.replaceChildren?.(...ChatRoomMapViewGetButtons());
+	ElementWrap("chat-room-map-view-panel-editor-items-grid")?.replaceChildren?.(...ChatRoomMapViewGetItems(search));
+	ElementWrap("chat-room-map-view-panel-editor-buttons-list")?.replaceChildren?.(...ChatRoomMapViewGetButtons());
 
-	const panel = document.getElementById("chat-room-map-view-panel-editor");
+	const panel = ElementWrap("chat-room-map-view-panel-editor");
 	if (panel == null) return;
 
 	if (ChatRoomMapViewEditMode !== "") {
@@ -826,12 +953,6 @@ function ChatRoomMapViewGetRecentItems() {
 		.map(item => ChatRoomMapViewCreateMapElementItem(item, false));
 }
 
-/** @type {ScreenResizeHandler} */
-function ChatRoomMapViewResize() {
-	if (ElementWrap("chat-room-map-view-panel-editor")) ElementPositionFixed("chat-room-map-view-panel-editor", 0, 0, 300, 800);
-	if (ElementWrap("chat-room-map-view-panel")) ElementPositionFixed("chat-room-map-view-panel", 0, 0, 1000, 1000);
-	if (ChatRoomMapViewColorPicker) ColorPickerResize(false);
-}
 
 /**
  * Opens the color picker over the chat log, or closes it if it's open. The chat input is disabled while it's open,
@@ -872,15 +993,15 @@ function ChatRoomMapViewColorPickerToggle(options) {
  * @returns {void} - Nothing
  */
 function ChatRoomMapViewDeactivate() {
+	ChatRoomMapViewSetSplitPosition(1000);
 	ChatRoomMapViewDestroyElements();
 }
 
 function ChatRoomMapViewDestroyElements() {
 	document.removeEventListener("blur", ChatRoomMapViewBlur);
 	if (ChatRoomMapViewColorPicker) ChatRoomMapViewColorPickerToggle();
-	if (ElementWrap("chat-room-map-view-panel")) {
-		ElementRemove("chat-room-map-view-panel");
-	}
+	ElementRemove("chat-room-map-view-panel");
+	ElementRemove("chat-room-map-controls");
 }
 
 /**
@@ -948,7 +1069,7 @@ function ChatRoomMapViewCanLeave() {
  * @returns {void} - Nothing
  */
 function ChatRoomMapViewScreenshot() {
-	ChatRoomPhoto(0, 0, 1000, 1000, ChatRoomCharacter);
+	ChatRoomPhoto(0, 0, ChatRoomMapViewSplitPosition, 1000, ChatRoomCharacter);
 }
 
 /**
@@ -1414,15 +1535,18 @@ function ChatRoomMapViewDrawGrid(Left, Top, Width, Height) {
 	// Manages collisions, moves the player if she's on a tile that cannot be entered
 	ChatRoomMapViewCollision();
 
-	// Defines the width and height of the visible tile
-	let TileWidth = Width / ((ChatRoomMapViewPerceptionRange * 2) + 1);
-	let TileHeight = Height / ((ChatRoomMapViewPerceptionRange * 2) + 1);
-	let EditWidth = (ChatRoomMapViewEditRange - 1) * TileWidth;
-	let EditHeight = (ChatRoomMapViewEditRange - 1) * TileHeight;
+	// TileWidth = TileHeight = TileSize
+	const TileSize = Height / Math.max(ChatRoomMapViewPerceptionRange * 2+1,1);
+	const EditSize = (ChatRoomMapViewEditRange - 1) * TileSize;
 	const activeTool = ChatRoomMapViewGetActiveTool();
-	const MaxVisibleRange = ChatRoomMapViewGetSightRange();
 	let CharacterUnderCursor = null;
 	let FogActive = ChatRoomMapFogIsActive();
+
+	const MaxRangeX = Math.ceil(Width / (2 * TileSize)) + 1;
+	const MaxRangeY = Math.ceil(Height / (2 * TileSize)) + 1;
+
+	const OffsetX = (Width - TileSize) / 2;
+	const OffsetY = (Height - TileSize) / 2;
 
 	// Clears the tile and character selection
 	ChatRoomMapViewFocusedCharacter = null;
@@ -1444,15 +1568,14 @@ function ChatRoomMapViewDrawGrid(Left, Top, Width, Height) {
 		const { X, Y } = MapIndexToCoordinates(Pos);
 
 		// Only process if the X & Y are within the visible sight range
-		let MaxRange = Math.max(Math.abs(X - PlayerX), Math.abs(Y - PlayerY));
-		if (MaxRange > MaxVisibleRange) continue;
+		if ((Math.abs(X - PlayerX) > MaxRangeX) || (Math.abs(Y - PlayerY) > MaxRangeY)) continue;
 
-		// Defines the screen X and Y positions
-		let ScreenX = (X - PlayerX) * TileWidth + ChatRoomMapViewPerceptionRange * TileWidth;
-		let ScreenY = (Y - PlayerY) * TileHeight + ChatRoomMapViewPerceptionRange * TileWidth;
+		// Defines the screen X and Y positions, player tile centered in the drawing area
+		let ScreenX = (X - PlayerX) * TileSize + OffsetX;
+		let ScreenY = (Y - PlayerY) * TileSize + OffsetY;
 
-		// If this tile's coordinates are out of the view range, we don't have to bother with it
-		if ((ScreenX < 0) || (ScreenX >= Width) || (ScreenY < 0) || (ScreenY >= Height)) continue;
+		// If this tile's coordinates are out of the view range, we don't have to bother with it.
+		if ((ScreenX < - TileSize) || (ScreenX >= Width) || (ScreenY < - TileSize) || (ScreenY >= Height)) continue;
 
 		// Drawing variables
 		const TileCanvasX = Left + ScreenX;
@@ -1469,7 +1592,7 @@ function ChatRoomMapViewDrawGrid(Left, Top, Width, Height) {
 		let Fog = false;
 		if (FogActive && !MapManager.Map.isTileVisible(Pos)) {
 			if (ChatRoomMapViewTileFog[Pos] == 0) {
-				DrawImageResize(MapGetAssetUrl("Tile", "Fog", "Full"), Math.floor(TileCanvasX), Math.floor(TileCanvasY), Math.ceil(TileWidth), Math.ceil(TileHeight));
+				DrawImageResize(MapGetAssetUrl("Tile", "Fog", "Full"), Math.floor(TileCanvasX), Math.floor(TileCanvasY), Math.ceil(TileSize), Math.ceil(TileSize));
 				continue;
 			}
 			TileID = ChatRoomMapViewTileFog[Pos];
@@ -1485,14 +1608,14 @@ function ChatRoomMapViewDrawGrid(Left, Top, Width, Height) {
 			TileImage = url ? DrawGetImage(url) : undefined;
 			if (TileImage) {
 				const { Width: WidthScale = 1, Height: HeightScale = 1, Rotation, Left: TileLeft = 0, Top: TileTop = 0 } = TileData;
-				const width = Math.ceil(TileWidth * WidthScale);
-				const height = Math.ceil(TileHeight * HeightScale);
-				const x = Math.floor(TileCanvasX) + TileWidth * TileLeft;
-				const y = Math.floor(TileCanvasY) + TileHeight * TileTop;
+				const width = Math.ceil(TileSize * WidthScale);
+				const height = Math.ceil(TileSize * HeightScale);
+				const x = Math.floor(TileCanvasX) + TileSize * TileLeft;
+				const y = Math.floor(TileCanvasY) + TileSize * TileTop;
 				DrawImageResize(TileImage, x, y, width, height, {Rotation});
 			}
 
-			if (TileData.Type == "Wall") ChatRoomMapViewWallEffect(X, Y, Left + ScreenX, Top + ScreenY, Math.ceil(TileWidth), Math.ceil(TileHeight));
+			if (TileData.Type == "Wall") ChatRoomMapViewWallEffect(X, Y, Left + ScreenX, Top + ScreenY, Math.ceil(TileSize), Math.ceil(TileSize));
 			else FloorWallEffect = ChatRoomMapViewFloorWallEffect(X, Y);
 		}
 
@@ -1527,23 +1650,23 @@ function ChatRoomMapViewDrawGrid(Left, Top, Width, Height) {
 				const nearlyInvisible = opacity < 0.3 && building && ChatRoomPlayerIsAdmin();
 
 				DrawImageResize(color ? ChatRoomMapViewGetColoredImage(ObjectImage, CommonColorTrimAlpha(color)) : ObjectImage,
-					Math.floor(Left + ScreenX + ((Obj.Left == null) ? 0 : TileWidth * Obj.Left)),
-					Math.floor(Top + ScreenY + ((Obj.Top == null) ? 0 : TileHeight * Obj.Top)),
-					Math.ceil(TileWidth * ((Obj.Width == null) ? 1 : Obj.Width)),
-					Math.ceil(TileHeight * ((Obj.Height == null) ? 1 : Obj.Height)),
+					Math.floor(Left + ScreenX + ((Obj.Left == null) ? 0 : TileSize * Obj.Left)),
+					Math.floor(Top + ScreenY + ((Obj.Top == null) ? 0 : TileSize * Obj.Top)),
+					Math.ceil(TileSize * ((Obj.Width == null) ? 1 : Obj.Width)),
+					Math.ceil(TileSize * ((Obj.Height == null) ? 1 : Obj.Height)),
 					{ Rotation: Obj.Rotation, Alpha: opacity }
 				);
-				if (nearlyInvisible) DrawCircle(Left + ScreenX + TileWidth / 2, Top + ScreenY + TileHeight / 2, TileWidth * 0.47, 1.5, "#FFFFFF80");
+				if (nearlyInvisible) DrawCircle(Left + ScreenX + TileSize / 2, Top + ScreenY + TileSize / 2, TileSize * 0.47, 1.5, "#FFFFFF80");
 			}
 			// While placing empty space, show what currently blocks standing, including an impassable cell with no sprite
 			if (!Fog && ChatRoomMapViewEditMode === "Object" && ChatRoomMapViewEditSubMode === "EmptySpace" && ChatRoomMapViewObjectBlocksStanding(Obj)) {
-				ChatRoomMapViewDrawObstacleMark({ x: Left + ScreenX, y: Top + ScreenY, w: TileWidth, h: TileHeight });
+				ChatRoomMapViewDrawObstacleMark({ x: Left + ScreenX, y: Top + ScreenY, w: TileSize, h: TileSize });
 			}
 		}
 
-		const leftMousePos = Left + ScreenX - EditWidth;
-		const topMousePos = Top + ScreenY - EditHeight;
-		const mouseInTile = MouseIn(leftMousePos, topMousePos, EditWidth + TileWidth, EditHeight + TileHeight);
+		const leftMousePos = Left + ScreenX - EditSize;
+		const topMousePos = Top + ScreenY - EditSize;
+		const mouseInTile = MouseIn(leftMousePos, topMousePos, EditSize + TileSize, EditSize + TileSize);
 		const mouseOverButtons = ChatRoomPlayerIsAdmin() && MouseIn(790, 860, 60, 60)
 			|| MouseIn(860, 860, 60, 60)
 			|| MouseIn(790, 930, 60, 60)
@@ -1559,40 +1682,40 @@ function ChatRoomMapViewDrawGrid(Left, Top, Width, Height) {
 			if (C) {
 
 				// Draws the character on the grid
-				DrawCharacter(C, Left + ScreenX + (TileWidth * 0.05), Top + ScreenY - (TileHeight * 0.85), TileHeight * 1.8 / 1000);
+				DrawCharacter(C, Left + ScreenX + (TileSize * 0.05), Top + ScreenY - (TileSize * 0.85), TileSize * 1.8 / 1000);
 				const stack = ChatRoomMapViewCharacterMap.get(X + Y * ChatRoomMapViewWidth);
 				if (stack && stack.length > 1) {
 					sharedTiles.push({
 						stack,
-						x: Left + ScreenX + TileWidth / 2,
-						y: Top + ScreenY - TileHeight * 0.85,
-						charX: Left + ScreenX + TileWidth * 0.05,
-						charY: Top + ScreenY - TileHeight * 0.85,
+						x: Left + ScreenX + TileSize / 2,
+						y: Top + ScreenY - TileSize * 0.85,
+						charX: Left + ScreenX + TileSize * 0.05,
+						charY: Top + ScreenY - TileSize * 0.85,
 					});
 				}
-				DrawStatus(C, Left + ScreenX + (TileWidth * 0.05), Top + ScreenY - (TileHeight * 0.85), TileHeight * 1.8 / 1000);
+				DrawStatus(C, Left + ScreenX + (TileSize * 0.05), Top + ScreenY - (TileSize * 0.85), TileSize * 1.8 / 1000);
 
 				// Keeps the character under the cursor
-				if (MouseIn(Left + ScreenX + (TileWidth * 0.05), Top + ScreenY - (TileHeight * 0.85), TileWidth * 0.9, TileHeight * 1.8)) {
+				if (MouseIn(Left + ScreenX + (TileSize * 0.05), Top + ScreenY - (TileSize * 0.85), TileSize * 0.9, TileSize * 1.8)) {
 					ChatRoomMapViewFocusedCharacter = C;
-					ChatRoomMapViewFocusedCharacterX = Left + ScreenX + (TileWidth * 0.05);
-					ChatRoomMapViewFocusedCharacterY = Top + ScreenY - (TileHeight * 0.85);
-					CharacterUnderCursor = { Character: C, StatusBaseX: TileCanvasX + (TileWidth / 2), StatusBaseY: TileCanvasY + TileHeight - 20 };
+					ChatRoomMapViewFocusedCharacterX = Left + ScreenX + (TileSize * 0.05);
+					ChatRoomMapViewFocusedCharacterY = Top + ScreenY - (TileSize * 0.85);
+					CharacterUnderCursor = { Character: C, StatusBaseX: TileCanvasX + (TileSize / 2), StatusBaseY: TileCanvasY + TileSize - 20 };
 				}
 
 				// Draw the water effect if character stands in water
 				if (TileImage != null && TileData != null && TileData.Type == "Water") {
 					const Transparency = (TileData.Transparency) ? TileData.Transparency : 0.0;
 					const TransparencyCutoutHeight = (TileData.TransparencyCutoutHeight) ? TileData.TransparencyCutoutHeight : 1.0;
-					DrawImageEx(TileImage, MainCanvas, TileCanvasX, TileCanvasY, {Width: TileWidth, Height: TileHeight, Alpha: Transparency, AlphaMasks: [[TileCanvasX, TileCanvasY, TileImage.width, TileImage.height * TransparencyCutoutHeight]]});
+					DrawImageEx(TileImage, MainCanvas, TileCanvasX, TileCanvasY, {Width: TileSize, Height: TileSize, Alpha: Transparency, AlphaMasks: [[TileCanvasX, TileCanvasY, TileImage.width, TileImage.height * TransparencyCutoutHeight]]});
 				}
 
 				// Draw the transparency effect for objects
 				if (TileImage && (ObjectImage != null) && (ObjectData != null) && (ObjectData.Transparency != null) && (ObjectData.TransparencyCutoutHeight != null)) {
-					let ImgX = Math.floor(Left + ScreenX + ((ObjectData.Left == null) ? 0 : TileWidth * ObjectData.Left));
-					let ImgY = Math.floor(Top + ScreenY + ((ObjectData.Top == null) ? 0 : TileHeight * ObjectData.Top));
-					let W = Math.ceil(TileWidth * ((ObjectData.Width == null) ? 1 : ObjectData.Width));
-					let H = Math.ceil(TileHeight * ((ObjectData.Height == null) ? 1 : ObjectData.Height));
+					let ImgX = Math.floor(Left + ScreenX + ((ObjectData.Left == null) ? 0 : TileSize * ObjectData.Left));
+					let ImgY = Math.floor(Top + ScreenY + ((ObjectData.Top == null) ? 0 : TileSize * ObjectData.Top));
+					let W = Math.ceil(TileSize * ((ObjectData.Width == null) ? 1 : ObjectData.Width));
+					let H = Math.ceil(TileSize * ((ObjectData.Height == null) ? 1 : ObjectData.Height));
 					let WA = Math.ceil(TileImage.width * 2 * ((ObjectData.Width == null) ? 1 : ObjectData.Width));
 					let HA = Math.ceil(TileImage.height * ObjectData.TransparencyCutoutHeight * ((ObjectData.Height == null) ? 1 : ObjectData.Height));
 					DrawImageEx(ObjectImage, MainCanvas, ImgX, ImgY, {Width: W, Height: H, Alpha: ObjectData.Transparency, AlphaMasks: [[ImgX, ImgY, WA, HA]]});
@@ -1602,41 +1725,31 @@ function ChatRoomMapViewDrawGrid(Left, Top, Width, Height) {
 		}
 
 		// Draw the floor wall effect and rectancle if needed at the end
-		if (FloorWallEffect != -1) DrawImageResize(MapGetAssetUrl("Tile", "WallEffect", `${FloorWallEffect}`), Math.floor(ScreenX), Math.floor(ScreenY), Math.ceil(TileWidth), Math.ceil(TileHeight));
-		if (DrawSelectionRect && activeTool) DrawEmptyRect(Left + ScreenX, Top + ScreenY, TileWidth, TileHeight, activeTool.selectionColor, 3);
-		if (padMenuIndex === X + Y * ChatRoomMapViewWidth) DrawEmptyRect(Left + ScreenX, Top + ScreenY, TileWidth, TileHeight, "white", 2);
-		if (padDestination?.X === X && padDestination?.Y === Y) DrawEmptyRect(Left + ScreenX, Top + ScreenY, TileWidth, TileHeight, "cyan", 5);
-		if (ChatRoomMapViewTeleportPadPicking && MouseIn(Left + ScreenX, Top + ScreenY, TileWidth, TileHeight)) DrawRect(Left + ScreenX, Top + ScreenY, TileWidth, TileHeight, "#00FFFF60");
+		if (FloorWallEffect != -1) DrawImageResize(MapGetAssetUrl("Tile", "WallEffect", `${FloorWallEffect}`), Math.floor(ScreenX), Math.floor(ScreenY), Math.ceil(TileSize), Math.ceil(TileSize));
+		if (DrawSelectionRect && activeTool) DrawEmptyRect(Left + ScreenX, Top + ScreenY, TileSize, TileSize, activeTool.selectionColor, 3);
+		if (padMenuIndex === X + Y * ChatRoomMapViewWidth) DrawEmptyRect(Left + ScreenX, Top + ScreenY, TileSize, TileSize, "white", 2);
+		if (padDestination?.X === X && padDestination?.Y === Y) DrawEmptyRect(Left + ScreenX, Top + ScreenY, TileSize, TileSize, "cyan", 5);
+		if (ChatRoomMapViewTeleportPadPicking && MouseIn(Left + ScreenX, Top + ScreenY, TileSize, TileSize)) DrawRect(Left + ScreenX, Top + ScreenY, TileSize, TileSize, "#00FFFF60");
 
 	}
 
 	ChatRoomMapViewDrawTethers(
 		pos => [
-			Left + (pos.X - PlayerX) * TileWidth + ChatRoomMapViewPerceptionRange * TileWidth,
-			Top + (pos.Y - PlayerY) * TileHeight + ChatRoomMapViewPerceptionRange * TileWidth,
+			Left + (pos.X - PlayerX) * TileSize + ChatRoomMapViewPerceptionRange * TileSize,
+			Top + (pos.Y - PlayerY) * TileSize + ChatRoomMapViewPerceptionRange * TileSize,
 		],
-		TileWidth,
-		TileHeight,
+		TileSize,
+		TileSize,
 	);
 
 	for (let X = 0; X < ChatRoomMapViewWidth; X++) {
 		for (let Y = 0; Y < ChatRoomMapViewHeight; Y++) {
 			const tileEffects = MapManager.Map.getEffects(X, Y);
-			let MaxRange = Math.max(
-				Math.abs(X - PlayerX),
-				Math.abs(Y - PlayerY),
-			);
-			if (MaxRange > MaxVisibleRange) continue;
+			if ((Math.abs(X - PlayerX) > MaxRangeX) || (Math.abs(Y - PlayerY) > MaxRangeY)) continue;
 
 			// Calculate Screen Positions
-			let currentX =
-				Left +
-				(X - PlayerX) * TileWidth +
-				ChatRoomMapViewPerceptionRange * TileWidth;
-			let currentY =
-				Top +
-				(Y - PlayerY) * TileHeight +
-				ChatRoomMapViewPerceptionRange * TileWidth;
+			let currentX = Left + (X - PlayerX) * TileSize + OffsetX;
+			let currentY = Top + (Y - PlayerY) * TileSize + OffsetY;
 
 			// Bounds Check
 			if (
@@ -1650,12 +1763,12 @@ function ChatRoomMapViewDrawGrid(Left, Top, Width, Height) {
 			// Pixel Snapping (Prevents gaps and borders)
 			const nextX =
 				Left +
-				(X + 1 - PlayerX) * TileWidth +
-				ChatRoomMapViewPerceptionRange * TileWidth;
+				(X + 1 - PlayerX) * TileSize +
+				ChatRoomMapViewPerceptionRange * TileSize;
 			const nextY =
 				Top +
-				(Y + 1 - PlayerY) * TileHeight +
-				ChatRoomMapViewPerceptionRange * TileWidth;
+				(Y + 1 - PlayerY) * TileSize +
+				ChatRoomMapViewPerceptionRange * TileSize;
 
 			const drawX = Math.floor(currentX);
 			const drawY = Math.floor(currentY);
@@ -1685,20 +1798,19 @@ function ChatRoomMapViewDrawGrid(Left, Top, Width, Height) {
 
 
 			// Only process if the X & Y are within the visible sight range
-			let MaxRange = Math.max(Math.abs(X - PlayerX), Math.abs(Y - PlayerY));
-			if (MaxRange > MaxVisibleRange) continue;
+			if ((Math.abs(X - PlayerX) > MaxRangeX) || (Math.abs(Y - PlayerY) > MaxRangeY)) continue;
 
 			// Defines the screen X and Y positions
-			let ScreenX = (X - PlayerX) * TileWidth + ChatRoomMapViewPerceptionRange * TileWidth;
-			let ScreenY = (Y - PlayerY) * TileHeight + ChatRoomMapViewPerceptionRange * TileWidth;
+			let ScreenX = (X - PlayerX) * TileSize + OffsetX;
+			let ScreenY = (Y - PlayerY) * TileSize + OffsetY;
 
 			// If this tile's coordinates are out of the view range, we don't have to bother with it
-			if ((ScreenX < 0) || (ScreenX >= Width) || (ScreenY < 0) || (ScreenY >= Height)) continue;
+			if ((ScreenX < -TileSize) || (ScreenX >= Width) || (ScreenY < -TileSize) || (ScreenY >= Height)) continue;
 
 			// Out of sight and with known data, we draw the half fog effect
 			if (!MapManager.Map.isTileVisible(Pos))
 				if (ChatRoomMapViewTileFog[Pos] > 0)
-					DrawImageResize(MapGetAssetUrl("Tile", "Fog", "Half"), Math.floor(ScreenX), Math.floor(ScreenY), Math.ceil(TileWidth), Math.ceil(TileHeight));
+					DrawImageResize(MapGetAssetUrl("Tile", "Fog", "Half"), Math.floor(ScreenX), Math.floor(ScreenY), Math.ceil(TileSize), Math.ceil(TileSize));
 		}
 
 	// Name tags to pick each character sharing a tile, hidden while editing since clicks place doodads then
@@ -1713,7 +1825,7 @@ function ChatRoomMapViewDrawGrid(Left, Top, Width, Height) {
 		for (const shared of sharedTiles.sort((a, b) => a.y - b.y)) {
 			const tags = shared.stack.map(C => {
 				const name = CharacterNickname(C);
-				return { C, name, width: Math.min(TileWidth * 3, Math.max(80, MainCanvas.measureText(name).width + 24)) };
+				return { C, name, width: Math.min(TileSize * 3, Math.max(80, MainCanvas.measureText(name).width + 24)) };
 			});
 			tags.sort((a, b) => b.width - a.width);
 			let tagY = shared.y;
@@ -1893,7 +2005,7 @@ function ChatRoomMapViewTeleportPad() {
 	if (Player.X < 0 || Player.Y < 0) return false;
 	const destination = MapManager.Map.getTeleporterDestination(Player.X, Player.Y);
 	if (!destination || !ChatRoomMapViewCanEnterTile(destination.X, destination.Y)) return false;
-	ChatRoomMapViewMovement = null;
+	ChatRoomMapViewSetMapViewMovement(null);
 	Player.Position = destination;
 	return true;
 }
@@ -1908,7 +2020,7 @@ function ChatRoomMapViewMovementProcess() {
 	Player.MapData.Pos.Y = ChatRoomMapViewMovement.Y;
 	// Set the update flag and reduce the wait time by the time the player already waited
 	ChatRoomMapViewUpdatePlayerFlag(ChatRoomMapViewMovement.TimeStart - ChatRoomMapViewMovement.TimeEnd);
-	ChatRoomMapViewMovement = null;
+	ChatRoomMapViewSetMapViewMovement(null);
 	// After we moved, calculate the new perception masks
 	MapManager.Map.updatePlayerPerception();
 	// Get the tile and object we entered
@@ -2273,36 +2385,14 @@ function ChatRoomMapViewDrawTethers(toScreen, tileWidth, tileHeight) {
  * @returns {void} - Nothing
  */
 function ChatRoomMapViewDraw() {
-	ChatRoomMapViewDrawGrid(0, 0, 1000, 1000);
+	ChatRoomMapViewDrawGrid(0, 0, ChatRoomMapViewSplitPosition, 1000);
 }
 
 /**
  * Draws the buttons of the chat room map
  * @returns {void} - Nothing
  */
-function ChatRoomMapViewDrawUi() {
-	ChatRoomMapViewCreateUI();
-
-	// Admins can grant themselves super powers (teleport, far hearing, etc.)
-	if (ChatRoomPlayerIsAdmin())
-		DrawButton(790, 860, 60, 60, "", "White", "Icons/" + ((ChatRoomMapViewSuperPowersActive) ? "SuperPowersActive" : "SuperPowersInactive") + ".png");
-
-	// Draw the movement buttons
-	if (ChatRoomMapViewMovement == null) {
-		DrawButton(860, 860, 60, 60, "", "White", "Icons/North.png");
-		DrawButton(790, 930, 60, 60, "", "White", "Icons/West.png");
-		DrawButton(860, 930, 60, 60, "", "White", "Icons/South.png");
-		DrawButton(930, 930, 60, 60, "", "White", "Icons/East.png");
-	} else {
-		DrawButton(860, 860, 60, 60, "", (ChatRoomMapViewMovement.Direction !== "North") ? "White" : "#80FF80", "Icons/North.png");
-		DrawButton(930, 860, 60, 60, "", "White", "Icons/Cancel.png");
-		DrawButton(790, 930, 60, 60, "", (ChatRoomMapViewMovement.Direction !== "West") ? "White" : "#80FF80", "Icons/West.png");
-		DrawButton(860, 930, 60, 60, "", (ChatRoomMapViewMovement.Direction !== "South") ? "White" : "#80FF80", "Icons/South.png");
-		DrawButton(930, 930, 60, 60, "", (ChatRoomMapViewMovement.Direction !== "East") ? "White" : "#80FF80", "Icons/East.png");
-		let Progress = (CommonTime() - ChatRoomMapViewMovement.TimeStart) / (ChatRoomMapViewMovement.TimeEnd - ChatRoomMapViewMovement.TimeStart) * 100;
-		DrawProgressBar(790, 992, 200, 8, Progress);
-	}
-}
+function ChatRoomMapViewDrawUi() {}
 
 /**
  * Change the key of charachter - sender
@@ -2355,7 +2445,7 @@ function ChatRoomMapViewTeleportHiddenMessage(sender, data) {
 	if (!ChatRoomCharacterIsAdmin(sender)) return;
 	const entry = data.Dictionary?.find(e => IsMapViewTeleportEventDictionaryEntry(e));
 	if (entry) {
-		ChatRoomMapViewMovement = null;
+		ChatRoomMapViewSetMapViewMovement(null);
 		Player.Position = entry.Position;
 	}
 }
@@ -2425,15 +2515,23 @@ function ChatRoomMapViewMove(D, Force = false) {
 
 	// If we can enter the tile
 	if (Time > 0) {
-		ChatRoomMapViewMovement = {
+		ChatRoomMapViewSetMapViewMovement({
 			X: X,
 			Y: Y,
 			Direction: D,
 			TimeStart: CommonTime(),
 			TimeEnd: CommonTime() + (Force ? 0 : Time)
-		};
+		});
 	}
+}
 
+/**
+ * Sets the map view movement
+ * @param {ChatRoomMapMovement | null} movement
+ */
+function ChatRoomMapViewSetMapViewMovement(movement) {
+	ChatRoomMapViewMovement = movement;
+	ChatRoomMapViewUpdateMovementButtons();
 }
 
 /**
@@ -2525,37 +2623,8 @@ function ChatRoomMapViewClick() {
 		ChatRoomMapViewFocusedCharacterY = nameTag.charY;
 	}
 
-	// Toggle the superpowers on and off
-	if (ChatRoomPlayerIsAdmin() && MouseIn(790, 860, 60, 60)) {
-		ChatRoomMapViewSuperPowersActive = !ChatRoomMapViewSuperPowersActive;
-		MapManager.Map.updatePlayerPerception();
-		return;
-	}
-
-	// Regular movement buttons
-	if (MouseIn(930, 860, 60, 60) && ChatRoomMapViewMovement) {
-		ChatRoomMapViewMovement = null;
-		return;
-	}
-	if (MouseIn(860, 860, 60, 60)) {
-		ChatRoomMapViewMove("North");
-		return;
-	}
-	if (MouseIn(790, 930, 60, 60)) {
-		ChatRoomMapViewMove("West");
-		return;
-	}
-	if (MouseIn(860, 930, 60, 60)) {
-		ChatRoomMapViewMove("South");
-		return;
-	}
-	if (MouseIn(930, 930, 60, 60)) {
-		ChatRoomMapViewMove("East");
-		return;
-	}
-
 	// When clicking on a character
-	if ((MouseX <= 1000) && (ChatRoomMapViewFocusedCharacter != null) && (ChatRoomMapViewEditMode != "Tile") && (ChatRoomMapViewEditMode != "Object") && !ChatRoomMapViewEditStarted) {
+	if ((MouseX <= ChatRoomMapViewSplitPosition) && (ChatRoomMapViewFocusedCharacter != null) && (ChatRoomMapViewEditMode != "Tile") && (ChatRoomMapViewEditMode != "Object") && !ChatRoomMapViewEditStarted) {
 
 		// Checks if the arousal meter is showing
 		let MeterShow = ChatRoomMapViewFocusedCharacter.IsPlayer();
@@ -2636,38 +2705,32 @@ function ChatRoomMapViewMouseDown(event) {
 
 	if ((CurrentScreen != "ChatRoom") || !ChatRoomMapViewIsActive() || ChatRoomMapViewTeleportPadPicking) return;
 
-	// In tile edit mode
-	else if ((ChatRoomMapViewEditMode == "Tile") && MouseIn(0, 0, 1000, 1000)) {
-		if (MouseIn(10, 10, 60, 60)) { return; }
-		if (MouseIn(10, 80, 60, 60)) { return; }
+	const mapMouseIn = ChatRoomMapViewEditMode !== ""
+		&& MouseIn(0, 0, ChatRoomMapViewSplitPosition, 1000)
+		&& !MouseIn(10, 10, 60, 60) && !MouseIn(10, 80, 60, 60);
 
+	// In tile edit mode
+	if ((ChatRoomMapViewEditMode == "Tile") && mapMouseIn) {
 		// Enter the drawing mode
 		ChatRoomMapViewEditStarted = true;
 		ChatRoomMapViewMouseMove(event);
 		return;
 
 	// In object edit mode
-	} else if ((ChatRoomMapViewEditMode == "Object") && MouseIn(0, 0, 1000, 1000)) {
-		if (MouseIn(10, 10, 60, 60)) { return; }
-		if (MouseIn(10, 80, 60, 60)) { return; }
-
+	} else if ((ChatRoomMapViewEditMode == "Object") && mapMouseIn) {
 		// Enter the drawing mode
 		ChatRoomMapViewEditStarted = true;
 		ChatRoomMapViewMouseMove(event);
 		return;
 
-	} else if ((ChatRoomMapViewEditMode === "Effect") && MouseIn(0, 0, 1000, 1000)) {
-		// Check if we are clicking a menu button (Exit button)
-		if (MouseIn(10, 10, 60, 60)) { return; }
+	} else if ((ChatRoomMapViewEditMode === "Effect") && mapMouseIn) {
 		// If we aren't clicking a button, we are painting the map!
 		ChatRoomMapViewEditStarted = true;
 		ChatRoomMapViewMouseMove(event);
 		return;
 
 	// A tool that accepts this palette can paint here, including from a category screen
-	} else if (ChatRoomMapViewGetActiveTool()?.canPaint() && MouseIn(0, 0, 1000, 1000)) {
-		if (MouseIn(10, 10, 60, 60)) { return; }
-		if (MouseIn(10, 80, 60, 60)) { return; }
+	} else if (ChatRoomMapViewGetActiveTool()?.canPaint() && mapMouseIn) {
 		ChatRoomMapViewEditStarted = true;
 		ChatRoomMapViewMouseMove(event);
 		return;
@@ -2691,19 +2754,20 @@ function validMapData(data) {
  * @returns {{ X: number, Y: number } | null}
  */
 function ChatRoomMapViewPixelToTileCoordinates(pixelX, pixelY) {
-	const [Left, Top, Width, Height] = [0, 0, 1000, 1000]; // From ChatRoomMapViewDrawGrid
-
-	const TileWidth = Width / ((ChatRoomMapViewPerceptionRange * 2) + 1);
-	const TileHeight = Height / ((ChatRoomMapViewPerceptionRange * 2) + 1);
+	const [Left, Top, Width, Height] = [0, 0, ChatRoomMapViewSplitPosition, 1000]; // From ChatRoomMapViewDrawGrid
+	const TileSize = Height / ((ChatRoomMapViewPerceptionRange * 2) + 1);
+	const GridLeft = Left + (Width - TileSize) / 2;
+	const GridTop = Top + (Height - TileSize) / 2;
 	const { X: PlayerX = 0, Y: PlayerY = 0 } = Player.MapData?.Pos ?? {};
 
-	const ScreenX = pixelX - Left;
-	const ScreenY = pixelY - Top;
-	if (ScreenX < 0 || ScreenX >= Width || ScreenY < 0 || ScreenY >= Height) return null;
+	const ScreenX = pixelX - GridLeft;
+	const ScreenY = pixelY - GridTop;
+	// Match ChatRoomMapViewDrawGrid: draws tiles up to (PerceptionRange + 1) tiles above/left of player
+	const minScreen = -(ChatRoomMapViewPerceptionRange + 1) * TileSize;
+	if (ScreenX < minScreen || ScreenX >= Width || ScreenY < minScreen || ScreenY >= Height) return null;
 
-	// ScreenY's centering term is TileWidth, matching the draw loop.
-	const X = Math.floor(ScreenX / TileWidth) - ChatRoomMapViewPerceptionRange + PlayerX;
-	const Y = Math.floor((ScreenY - ChatRoomMapViewPerceptionRange * TileWidth) / TileHeight) + PlayerY;
+	const X = Math.floor(ScreenX / TileSize) + PlayerX;
+	const Y = Math.floor(ScreenY / TileSize) + PlayerY;
 
 	return { X, Y };
 }
@@ -2747,7 +2811,7 @@ function ChatRoomMapViewGetActiveTool() {
  */
 function ChatRoomMapViewSetActiveTool(tool) {
 	ChatRoomMapViewActiveTool = tool;
-	document.getElementById("chat-room-map-view-eraser")?.setAttribute("aria-checked", tool === "Eraser" ? "true" : "false");
+	ElementWrap("chat-room-map-view-eraser")?.setAttribute("aria-checked", tool === "Eraser" ? "true" : "false");
 }
 
 /**
@@ -2818,8 +2882,8 @@ function ChatRoomMapViewMouseUp() {
  */
 function ChatRoomMapViewMouseWheel(Event) {
 	if ((CurrentScreen != "ChatRoom") || !ChatRoomMapViewIsActive()) return;
-	if ((MouseX <= 1000) && (Event.deltaY < 0) && (ChatRoomMapViewPerceptionRange > ChatRoomMapViewPerceptionRangeMin)) ChatRoomMapViewPerceptionRange--;
-	if ((MouseX <= 1000) && (Event.deltaY > 0) && (ChatRoomMapViewPerceptionRange < ChatRoomMapViewPerceptionRangeMax)) ChatRoomMapViewPerceptionRange++;
+	if ((MouseX <= ChatRoomMapViewSplitPosition) && (Event.deltaY < 0) && (ChatRoomMapViewPerceptionRange > ChatRoomMapViewPerceptionRangeMin)) ChatRoomMapViewPerceptionRange--;
+	if ((MouseX <= ChatRoomMapViewSplitPosition) && (Event.deltaY > 0) && (ChatRoomMapViewPerceptionRange < ChatRoomMapViewPerceptionRangeMax)) ChatRoomMapViewPerceptionRange++;
 }
 
 /**

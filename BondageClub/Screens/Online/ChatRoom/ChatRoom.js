@@ -354,15 +354,22 @@ let ChatRoomResizeManager = {
  * Update the active view based on the room state
  */
 function ChatRoomRefreshActiveView() {
+	const type = ChatRoomData?.MapData?.Type ?? "Never";
+
 	if (!ChatRoomData) {
 		ChatRoomActiveView?.Deactivate?.();
 		ChatRoomActiveView = null;
-	} else if ((ChatRoomData?.MapData?.Type ?? "Never") === "Never") {
+		return;
+	}
+
+	if (type === "Never") {
 		ChatRoomActivateView(ChatRoomCharacterViewName);
-	} else if (ChatRoomData?.MapData?.Type == "Always") {
+	} else if (type === "Always") {
 		ChatRoomActivateView(ChatRoomMapViewName);
 	} else if (!ChatRoomActiveView) {
 		ChatRoomActivateView(ChatRoomCharacterViewName);
+	} else if (type === "Hybrid") {
+		ChatRoomActiveView.Activate?.();
 	}
 }
 
@@ -371,15 +378,22 @@ function ChatRoomRefreshActiveView() {
  * @param {keyof ChatRoomViews} viewName - The name of the view to activate
  * @returns {void}
  */
-function ChatRoomActivateView(viewName)
-{
+function ChatRoomActivateView(viewName) {
+	console.log("ChatRoomActivateView");
 	if (!(viewName in ChatRoomViews)) {
 		throw Error(`Tried to change to non-existing view ${viewName}`);
 	}
-	if (ChatRoomIsViewActive(viewName)) return;
+	if (ChatRoomIsViewActive(viewName)) {
+		const view = ChatRoomViews[viewName];
+		view.Activate?.();
+		return;
+	}
 	ChatRoomActiveView?.Deactivate?.();
 	ChatRoomActiveView = ChatRoomViews[viewName];
 	ChatRoomActiveView.Activate?.();
+
+	const content = ElementWrap("chat-room-content");
+	if (content) content.dataset.view = viewName;
 }
 
 /**
@@ -387,8 +401,7 @@ function ChatRoomActivateView(viewName)
  * @param {keyof typeof ChatRoomViews} viewName - The name of the view to check
  * @returns {boolean} - TRUE if the chat room character view is active, false if not
  */
-function ChatRoomIsViewActive(viewName)
-{
+function ChatRoomIsViewActive(viewName) {
 	if (!(viewName in ChatRoomViews)) {
 		return false;
 	}
@@ -1275,6 +1288,60 @@ function ChatRoomCreateElement() {
 			],
 		});
 	}
+	let isDragging = false;
+	let startX = 0;
+	let startWidth = 0;
+
+	const onMouseMove = function(/** @type {MouseEvent} */event) {
+		if (!isDragging || ChatRoomIsViewActive("Character")) return;
+		const deltaX = event.clientX - startX;
+		const newWidth = startWidth + deltaX;
+		const scale = MainCanvas.canvas.clientWidth / MainCanvasWidth;
+		ChatRoomMapViewSetSplitPosition(Math.round(newWidth / scale));
+	};
+
+	const onMouseUp = function() {
+		if (!isDragging) return;
+		isDragging = false;
+		ElementWrap("chat-room-content-resize-bar")?.classList.remove("dragging");
+		document.removeEventListener("mousemove", onMouseMove);
+		document.removeEventListener("mouseup", onMouseUp);
+	};
+
+	let wrapper = ElementWrap("chat-room-wrapper");
+	if (!wrapper) {
+		wrapper = ElementCreate({
+			tag: "div",
+			attributes: { id: "chat-room-wrapper" },
+			parent: document.body,
+			children: [
+				{
+					tag: "div",
+					attributes: { id: "chat-room-content" },
+					children: [
+						{
+							tag: "div",
+							attributes: { id: "chat-room-content-resize-bar" },
+							eventListeners: {
+								dblclick: () => ChatRoomMapViewSetSplitPosition(1000),
+								mousedown: function (event) {
+									if (event.button !== 0) return;
+									isDragging = true;
+									startX = event.clientX;
+									startWidth = this.parentElement?.offsetWidth ?? 1000;
+									this.classList.add("dragging");
+									event.preventDefault();
+									document.addEventListener("mousemove", onMouseMove);
+									document.addEventListener("mouseup", onMouseUp);
+								}
+							},
+						},
+					],
+				}
+			]
+		});
+	}
+
 
 	let elem = /** @type {null | HTMLDivElement} */(document.getElementById("chat-room-div"));
 	if (!elem) {
@@ -1284,7 +1351,7 @@ function ChatRoomCreateElement() {
 				id: "chat-room-div",
 				"screen-generated": CurrentScreen,
 			},
-			parent: document.body,
+			parent: wrapper,
 			classList: ["HideOnPopup"],
 			children: [
 				topMenu,
@@ -1481,6 +1548,7 @@ function ChatRoomAppendChat(div) {
  * @type {ScreenLoadHandler}
  */
 async function ChatRoomLoad() {
+	console.log("ChatRoomLoad");
 	ChatRoomRefreshFontSize();
 	ChatRoomCreateElement();
 
@@ -1528,7 +1596,7 @@ function ChatRoomClearAllElements() {
 	if (Player.ChatSettings?.PreserveChat ?? true) {
 		ChatRoomHideElements();
 	} else {
-		ElementRemove("chat-room-div");
+		ElementRemove("chat-room-wrapper");
 		ChatRoomTopMenuBuiltSig = "";
 		window.removeEventListener("resize", ChatRoomResizeManager.ChatRoomResizeEvent);
 		ChatRoomDivInputPrevHeight = NaN;
@@ -1995,17 +2063,11 @@ function ChatRoomStimulationMessage(Action) {
 function ChatRoomResize(load) {
 	const chatInput = document.getElementById("InputChat");
 	if (chatInput) {
-		/** @type {RectTuple} */
-		const shape = Player.ChatSettings.PreserveChat ? ChatRoomDivRect : [
-			ChatRoomDivRect[0],
-			ChatRoomDivRect[1] + 3,
-			ChatRoomDivRect[2],
-			ChatRoomDivRect[3] - 3,
-		];
-		ElementPositionFix("chat-room-div", ChatRoomFontSize, ...shape);
+		ElementPositionFix("chat-room-wrapper", ChatRoomFontSize, 0, 0, 2000, 1000);
 		chatInput.dispatchEvent(new InputEvent("input"));
 	}
 	ChatRoomActiveView?.Resize?.(false);
+	ChatRoomMapViewSetSplitPosition(ChatRoomMapViewSplitPosition);
 }
 
 /**
@@ -2465,8 +2527,8 @@ function ChatRoomDrawArousalOverlay()
 	// In orgasm mode, we add a pink filter and different controls depending on the stage.  The pink filter shows a little above 90
 	if ((Player.ArousalSettings != null) && (Player.ArousalSettings.Active != null) && (Player.ArousalSettings.Active != "Inactive") && (Player.ArousalSettings.Active != "NoMeter")) {
 		if ((Player.ArousalSettings.OrgasmTimer != null) && (typeof Player.ArousalSettings.OrgasmTimer === "number") && !isNaN(Player.ArousalSettings.OrgasmTimer) && (Player.ArousalSettings.OrgasmTimer > 0)) {
-			DrawRect(0, 0, 1003, 1000, "#FFB0B0B0");
-			DrawRect(1003, 0, 993, 63, "#FFB0B0B0");
+			DrawRect(0, 0, ChatRoomMapViewSplitPosition, 1000, "#FFB0B0B0");
+			DrawRect(ChatRoomMapViewSplitPosition, 0, 993, 63, "#FFB0B0B0");
 			if (Player.ArousalSettings.OrgasmStage == null) Player.ArousalSettings.OrgasmStage = 0;
 			if (Player.ArousalSettings.OrgasmStage == 0) {
 				DrawText(TextGet("OrgasmComing"), 500, 410, "White", "Black");
@@ -2486,7 +2548,7 @@ function ChatRoomDrawArousalOverlay()
 			else if (ChatRoomCharacterViewCharacterCount == 4) {y1 = 150; h = 700;}
 			else if (ChatRoomCharacterViewCharacterCount == 5) {y1 = 250; h = 500;}
 
-			ChatRoomDrawArousalScreenFilter(y1, h, 1003, Player.ArousalSettings.Progress);
+			ChatRoomDrawArousalScreenFilter(y1, h, ChatRoomMapViewSplitPosition, Player.ArousalSettings.Progress);
 		}
 	}
 
@@ -2498,7 +2560,7 @@ function ChatRoomDrawArousalOverlay()
 		else if (ChatRoomCharacterViewCharacterCount == 4) {y1 = 150; h = 700;}
 		else if (ChatRoomCharacterViewCharacterCount == 5) {y1 = 250; h = 500;}
 
-		ChatRoomVibrationScreenFilter(y1, h, 1003, Player);
+		ChatRoomVibrationScreenFilter(y1, h, ChatRoomMapViewSplitPosition, Player);
 	}
 
 	return orgasmScreen;
@@ -2824,7 +2886,7 @@ function ChatRoomClick(event) {
 	}
 
 	// In the left part of the screen
-	if (MouseIn(0, 0, 1000, 1000))
+	if (MouseIn(0, 0, ChatRoomMapViewSplitPosition, 1000))
 		if (ChatRoomActiveView?.Click)
 			return ChatRoomActiveView.Click(event);
 

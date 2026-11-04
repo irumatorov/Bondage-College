@@ -65,8 +65,10 @@ function resetEditor() {
 
 function paintAt(x: number, y: number, altKey = false) {
 	const tileSize = 1000 / ((Game.ChatRoomMapViewPerceptionRange * 2) + 1);
-	Game.MouseX = (x + Game.ChatRoomMapViewPerceptionRange + 0.5) * tileSize;
-	Game.MouseY = (y + Game.ChatRoomMapViewPerceptionRange + 0.5) * tileSize;
+	const offsetX = (Game.ChatRoomMapViewSplitPosition - tileSize) / 2;
+	const offsetY = (1000 - tileSize) / 2;
+	Game.MouseX = offsetX + (x + 0.5) * tileSize;
+	Game.MouseY = offsetY + (y + 0.5) * tileSize;
 	Game.ChatRoomMapViewMouseMove({ altKey });
 }
 
@@ -182,10 +184,10 @@ describe("eraser", () => {
 		paintAt(3, 3, true);
 		expect(map.getEffects(3, 3)).toEqual([]);
 
-		map.setTile(4, 4, Game.MapDataGetTile(101), 0);
+		map.setTile(1, 2, Game.MapDataGetTile(101), 0);
 		Game.ChatRoomMapViewEditMode = "TileType";
-		paintAt(4, 4, false);
-		expect(map.getTileId(4, 4)).toBe(100);
+		paintAt(1, 2, false);
+		expect(map.getTileId(1, 2)).toBe(100);
 		expect(Game.ChatRoomMapViewEditMode).toBe("TileType");
 
 		map.setObject(4, 0, Game.MapDataGetObject(2010), 0);
