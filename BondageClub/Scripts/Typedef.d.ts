@@ -2320,7 +2320,7 @@ interface CharacterOnlineSharedSettings {
 	ItemsAffectExpressions: boolean;
 	ScriptPermissions: ScriptPermissions;
 	WheelFortune: string;
-	LockTimerLimit: LockTimerLimitName
+	LockTimerLimit: LockTimerLimitName;
 }
 
 type NicknameStatus = "NicknameTooLong" | "NicknameTooShort" | "NicknameInvalidChars" | "NicknameLocked";
