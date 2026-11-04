@@ -89,7 +89,7 @@ describe("get() over the network", () => {
 
 		expect(second).toBe(first);
 		expect(Game.CommonFetch).toHaveBeenCalledTimes(1);
-		expect(Game.CommonFetch).toHaveBeenCalledWith(URL_A);
+		expect(Game.CommonFetch).toHaveBeenCalledWith(URL_A, { headers: [["accept", "image/*"]] });
 		expect(first.state).toBe(Game.CachedImageState.LOADING);
 		expect(first.isLoading()).toBe(true);
 		expect(first.lastUsed).toBe(now);
@@ -1173,7 +1173,7 @@ describe("persistent store", () => {
 
 			expect(img.isFailing()).toBe(true);
 			expect(store.store.has(KEY)).toBe(false);
-			expect(Game.CommonFetch).toHaveBeenCalledWith(URL_V123);
+			expect(Game.CommonFetch).toHaveBeenCalledWith(URL_V123, { headers: [["accept", "image/*"]] });
 			expect(Game.createImageBitmap).not.toHaveBeenCalled();
 		});
 
@@ -1227,7 +1227,7 @@ describe("persistent store", () => {
 
 			expect(img.isLoaded()).toBe(true);
 			expect(img.data).toEqual(expect.objectContaining({ width: 8, height: 8 }));
-			expect(Game.CommonFetch).toHaveBeenCalledWith(URL_V123);
+			expect(Game.CommonFetch).toHaveBeenCalledWith(URL_V123, { headers: [["accept", "image/*"]] });
 			expect(store.store.get(KEY)!.headers.get("Content-Type")).toBe("image/png");
 			expect(store.store.get(KEY)!.body).toBe("png");
 		});
@@ -1254,7 +1254,7 @@ describe("persistent store", () => {
 
 			expect(img.isLoaded()).toBe(true);
 			expect(store.store.has(KEY)).toBe(false);
-			expect(Game.CommonFetch).toHaveBeenCalledWith(URL_V123);
+			expect(Game.CommonFetch).toHaveBeenCalledWith(URL_V123, { headers: [["accept", "image/*"]] });
 		});
 
 		it("does not keep a cacheable non-image fetched on a miss", async () => {
@@ -1317,7 +1317,7 @@ describe("persistent store", () => {
 
 			expect(img.isLoaded()).toBe(true);
 			expect(Game.CommonFetch).toHaveBeenCalledTimes(1);
-			expect(Game.CommonFetch).toHaveBeenCalledWith(URL_A);
+			expect(Game.CommonFetch).toHaveBeenCalledWith(URL_A, { headers: [["accept", "image/*"]] });
 		});
 
 		it("BrowserCache.open throws when opening is refused", async () => {
