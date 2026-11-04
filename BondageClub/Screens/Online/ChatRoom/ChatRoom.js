@@ -3533,8 +3533,8 @@ function ChatRoomSendEmote(msg) {
 		msg = msg.trim();
 		if (msg == "") return;
 
-		const chance = parseInt(match[2] ? match[2] : 50);
-		const random = parseInt(Math.random() * 100);
+		const chance = CommonParseInt(match[2]) ?? 50;;
+		const random = Math.random() * 100;
 
 		const attemptSucceeded = random < chance;
 		msg += attemptSucceeded ? ": ✔" : ": ❌";

@@ -857,14 +857,15 @@ function PandoraCharacterFight() {
 	PandoraFightCharacter = /** @type {NPCCharacter} */ (CurrentCharacter);
 	let Difficulty = (InfiltrationMissionState.Difficulty * 2) + Math.floor(Math.random() * 3);
 	if (CurrentCharacter.AccountName.indexOf("RandomMistress") >= 0) Difficulty = InfiltrationMissionState.Difficulty + 6;
-	KidnapStart(CurrentCharacter, PandoraBackground, Difficulty, "PandoraCharacterFightEnd()");
+	KidnapStart(CurrentCharacter, PandoraBackground, Difficulty, (victory) => CommonPromiseCatch(PandoraCharacterFightEnd(victory)));
 }
 
 /**
  * Resolves the fight between the player and the current character
- * @returns {void} - Nothing
+ * @param {boolean} victory - Wether the player won or not
+ * @returns {SafePromise<void>} - Nothing
  */
-function PandoraCharacterFightEnd() {
+async function PandoraCharacterFightEnd(victory) {
 	if (!PandoraFightCharacter) return;
 	CharacterSetCurrent(PandoraFightCharacter);
 	if (!CurrentCharacter) return;
@@ -875,12 +876,12 @@ function PandoraCharacterFightEnd() {
 		if (PandoraWillpower > PandoraMaxWillpower) PandoraWillpower = PandoraMaxWillpower;
 	}
 	CurrentCharacter.Stage = (KidnapVictory) ? "100" : "200";
-	CharacterRelease(KidnapVictory ? Player : CurrentCharacter);
-	CurrentCharacter.AllowItem = KidnapVictory;
-	if (KidnapVictory) CurrentCharacter.AllowMove = true;
-	if (KidnapVictory && (PandoraClothes != "Random") && (PandoraClothes != "CatBurglar") && (PandoraClothes != "Cosplay")) PandoraDress(Player, PandoraClothes);
-	CommonSetScreen("Room", "Pandora");
-	CurrentCharacter.CurrentDialog = DialogFind(CurrentCharacter, (KidnapVictory) ? "FightVictory" : "FightDefeat");
+	CharacterRelease(victory ? Player : CurrentCharacter);
+	CurrentCharacter.AllowItem = victory;
+	if (victory) CurrentCharacter.AllowMove = true;
+	if (victory && (PandoraClothes != "Random") && (PandoraClothes != "CatBurglar") && (PandoraClothes != "Cosplay")) PandoraDress(Player, PandoraClothes);
+	await CommonSetScreen("Room", "Pandora");
+	CurrentCharacter.CurrentDialog = DialogFind(CurrentCharacter, victory ? "FightVictory" : "FightDefeat");
 }
 
 /**
@@ -1138,27 +1139,27 @@ function PandoraPlayerUngag() {
  * @returns {void} - Nothing
  */
 function PandoraPunishmentSentence(Minutes) {
-	if (!InfiltrationMissionState) return;
 	const minutes = typeof Minutes === "string" ? CommonParseInt(Minutes) : CommonIsNonNegativeInteger(Minutes) ? Minutes : null;
 	if (minutes === null) return;
 	Player.Infiltration.Punishment = {
 		Minutes: minutes,
 		Background: PandoraBackground,
-		Difficulty: InfiltrationMissionState.Difficulty,
+		// Because this might be a punishment from being brought to Pandora by losing a kidnap game
+		Difficulty: InfiltrationMissionState?.Difficulty ?? 0,
 	};
 }
 
 /**
  * Starts the single-player punishment
- * @returns {void} - Nothing
+ * @returns {SafePromise<void>} - Nothing
  */
-function PandoraPunishmentStart() {
+async function PandoraPunishmentStart() {
 	if (!Player.Infiltration.Punishment) return;
 	PandoraWillpower = 0;
 	Player.Infiltration.Punishment.Timer = CurrentTime + (Player.Infiltration.Punishment.Minutes * MS_PER_MIN);
 	ServerSend("AccountUpdate", { Infiltration: Player.Infiltration });
 	DialogLeave();
-	CommonSetScreen("Room", "PandoraPrison");
+	await CommonSetScreen("Room", "PandoraPrison");
 }
 
 /**

@@ -558,7 +558,7 @@ function StruggleMinigameStart(C, MiniGame, PrevItem, NextItem, Completion) {
 		StruggleExpressionStore = WardrobeGetExpression(Player);
 		for (const [Time, List] of CommonEntries(StruggleFacesList)) {
 			for (const [group, expression] of CommonEntries(List)) {
-				TimerExpressionQueuePush(C, group, parseInt(Time), expression);
+				TimerExpressionQueuePush(C, group, Time, expression);
 			}
 		}
 	} else {

@@ -229,12 +229,12 @@ function MagicSchoolLaboratoryFromRivalHouse(House) {
  * @returns {void} - Nothing
  */
 function MagicSchoolLaboratoryMagicBattleStart(Difficulty) {
-	MagicBattleStart(MagicSchoolLaboratoryTeacher, Difficulty, MagicSchoolLaboratoryBackground, "MagicSchoolLaboratoryMagicBattleEnd");
+	MagicBattleStart(MagicSchoolLaboratoryTeacher, Difficulty, MagicSchoolLaboratoryBackground, () => { MagicSchoolLaboratoryMagicBattleEnd(); });
 }
 
 /**
  * When the magic battle practice ends
- * @returns {Promise<void>} - Nothing
+ * @returns {SafePromise<void>} - Nothing
  */
 async function MagicSchoolLaboratoryMagicBattleEnd() {
 	await CommonSetScreen("Room", "MagicSchoolLaboratory");
@@ -343,12 +343,12 @@ function MagicSchoolLaboratoryBattleStudentStart(Type) {
 	if (Type == "Wage25") Difficulty = 4;
 	if (Type == "Honor") Difficulty = 6;
 	if (Type == "RainbowWand") Difficulty = 8;
-	MagicBattleStart(MagicSchoolLaboratoryStudent, Difficulty, MagicSchoolLaboratoryBackground, "MagicSchoolLaboratoryBattleStudentEnd");
+	MagicBattleStart(MagicSchoolLaboratoryStudent, Difficulty, MagicSchoolLaboratoryBackground, () => { MagicSchoolLaboratoryBattleStudentEnd(); });
 }
 
 /**
  * When a student battle ends, we release the winner, change reputation or give some money based on the wage
- * @returns {Promise<void>} - Nothing
+ * @returns {SafePromise<void>} - Nothing
  */
 async function MagicSchoolLaboratoryBattleStudentEnd() {
 	await CommonSetScreen("Room", "MagicSchoolLaboratory");
@@ -582,12 +582,12 @@ function MagicSchoolLaboratoryPlayerMainHall() {
  */
 function MagicSchoolLaboratoryBattleMasterStart() {
 	if (!MagicSchoolLaboratoryStudent) return;
-	MagicBattleStart(MagicSchoolLaboratoryStudent, 10, MagicSchoolLaboratoryBackground, "MagicSchoolLaboratoryBattleMasterEnd");
+	MagicBattleStart(MagicSchoolLaboratoryStudent, 10, MagicSchoolLaboratoryBackground, () => { MagicSchoolLaboratoryBattleMasterEnd(); });
 }
 
 /**
  * When the magic battle against the master ends
- * @returns {Promise<void>} - Nothing
+ * @returns {SafePromise<void>} - Nothing
  */
 async function MagicSchoolLaboratoryBattleMasterEnd() {
 	if (!MagicSchoolLaboratoryStudent) return;

@@ -107,7 +107,7 @@ async function EmptyShopEnd(Sold) {
  */
 function EmptySlaveMarketTrainingStart(TrainingType) {
 	if (!CurrentCharacter) return;
-	CurrentCharacter.CurrentTraining = parseInt(TrainingType);
+	CurrentCharacter.CurrentTraining = TrainingType;
 }
 
 /**
@@ -139,7 +139,7 @@ function EmptySlaveMarketTrainingProgress(Intensity) {
 	if (!CurrentCharacter.TrainingCountHigh) CurrentCharacter.TrainingCountHigh = 0;
 
 	// Intensity of activity gets added minus from 0 to 3 of random decay
-	CurrentCharacter.TrainingIntensity = CurrentCharacter.TrainingIntensity + parseInt(Intensity) - Math.floor(Math.random() * 4);
+	CurrentCharacter.TrainingIntensity = CurrentCharacter.TrainingIntensity + Intensity - Math.floor(Math.random() * 4);
 	if (CurrentCharacter.TrainingIntensity < 0) CurrentCharacter.TrainingIntensity = 0;
 	if (CurrentCharacter.TrainingIntensity > 10) CurrentCharacter.TrainingIntensity = 10;
 	CurrentCharacter.TrainingCount++;

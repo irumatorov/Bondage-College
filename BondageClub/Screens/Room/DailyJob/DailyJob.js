@@ -157,24 +157,24 @@ function DailyJobSubSearchIsActive() {
  */
 function DailyJobKidnapStart() {
 	if (!DailyJobOpponent) return;
-	KidnapStart(DailyJobOpponent, "MainHall", 7, "DailyJobKidnapEnd()");
+	KidnapStart(DailyJobOpponent, "MainHall", 7, (victory) => CommonPromiseCatch(DailyJobKidnapEnd(victory)));
 }
 
 
 /**
  * Triggered at the end of the kidnap daily job fight mini-game
+ * @param {boolean} victory - Whether the player won the encounter
  * @returns {SafePromise<void>}
  */
-async function DailyJobKidnapEnd() {
+async function DailyJobKidnapEnd(victory) {
 	if (!DailyJobOpponent) return;
 	SkillProgress(Player, "Willpower", KidnapSuccessWillpowerProgress(DailyJobOpponent));
-	DailyJobOpponent.Stage = (KidnapVictory) ? "100" : "200";
-	if (KidnapVictory) CharacterRelease(Player);
-	else CharacterRelease(DailyJobOpponent);
-	if (KidnapVictory) DailyJobOpponent.AllowItem = true;
+	DailyJobOpponent.Stage = victory ? "100" : "200";
+	CharacterRelease(victory ? Player : DailyJobOpponent);
+	if (victory) DailyJobOpponent.AllowItem = true;
 	await CommonSetScreen("Room", "DailyJob");
 	CharacterSetCurrent(DailyJobOpponent);
-	DailyJobOpponent.CurrentDialog = DialogFind(DailyJobOpponent, (KidnapVictory) ? "KidnapVictory" : "KidnapDefeat");
+	DailyJobOpponent.CurrentDialog = DialogFind(DailyJobOpponent, victory ? "KidnapVictory" : "KidnapDefeat");
 }
 
 /**

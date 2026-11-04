@@ -2238,7 +2238,7 @@ function DialogInventoryTogglePermission(item, worn) {
 
 	// Refresh the inventory item
 	const itemIndex = DialogInventory.findIndex(i => i.Asset.Name == item.Asset.Name && i.Asset.Group.Name == item.Asset.Group.Name);
-	const sortOrder = /** @type {DialogSortOrder} */ (parseInt(item.SortOrder.replace(/[^0-9].+/gm, '') || DialogSortOrder.Usable)); // only keep the number at the start
+	const sortOrder = /** @type {DialogSortOrder} */ (CommonParseInt(item.SortOrder.replace(/[^0-9].+/gm, '')) ?? DialogSortOrder.Usable); // only keep the number at the start
 	DialogInventory[itemIndex] = DialogInventoryCreateItem(Player, item, item.Worn, sortOrder, item.Craft);
 	return permission;
 }

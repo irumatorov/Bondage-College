@@ -1432,7 +1432,7 @@ function PrivateLoadCharacter(data) {
 	C.Owner = typeof data.Owner === "string" ? data.Owner : "";
 	if (data.ArousalSettings != null) C.ArousalSettings = data.ArousalSettings;
 	if (data.FromPandora != null) C.FromPandora = data.FromPandora;
-	C.Love = (data.Love == null) ? 0 : parseInt(data.Love);
+	C.Love = (data.Love == null) ? 0 : data.Love;
 
 	NPCTraitDialog(C);
 	PreferenceInit(C);
@@ -1707,7 +1707,6 @@ function PrivateActivityRun(LoveFactor) {
 	if (!CurrentCharacter) return;
 	// Changes the love factor only once per activity (except if negative)
 	PrivateActivityCount++;
-	LoveFactor = parseInt(LoveFactor);
 	if ((LoveFactor < 0) || PrivateActivityAffectLove) NPCLoveChange(CurrentCharacter, LoveFactor);
 	if ((LoveFactor > 0) && PrivateActivityAffectLove) PrivateActivityAffectLove = false;
 

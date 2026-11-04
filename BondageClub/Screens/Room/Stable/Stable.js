@@ -902,7 +902,7 @@ function StablePonyWearEquipment() {
  * @param {number} probability
  */
 function StablePonyTraining(probability) {
-	if (parseInt(probability) > Math.random() * 100) {
+	if (probability > Math.random() * 100) {
 		StablePony.CurrentDialog = DialogFind(StablePony, "StablePonyPassIntro");
 		SkillProgress(Player, "Dressage", (100 - probability));
 		StablePony.Stage = "23";

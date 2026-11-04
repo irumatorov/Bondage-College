@@ -665,7 +665,7 @@ async function KinkyDungeonLoad() {
 			KinkyDungeonEasyMode = localStorage.getItem("KinkyDungeonEasyMode") != undefined ? parseInt(localStorage.getItem("KinkyDungeonEasyMode")) || 0 : 0;
 
 			KinkyDungeonNewDress = true;
-			KDCurrentOutfit = parseInt(localStorage.getItem("kdcurrentoutfit") || 0);
+			KDCurrentOutfit = CommonParseInt(localStorage.getItem("kdcurrentoutfit")) ?? 0;
 			let appearance = LZString.decompressFromBase64(localStorage.getItem("kinkydungeonappearance" + KDCurrentOutfit));
 			if (!appearance || StandalonePatched) {
 				const app = CommonJSONParse(appearance || "{}");

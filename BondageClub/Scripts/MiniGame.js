@@ -8,7 +8,7 @@ var MiniGameDifficulty = 0;
 var MiniGameDifficultyMode = "";
 var MiniGameDifficultyRatio = 1;
 var MiniGameAdvancedPayment = 0;
-/** @type {string | (() => void) | null} */
+/** @type {(() => void) | null} */
 var MiniGameReturnFunction = null;
 var MiniGameProgress = -1;
 var MiniGameTimer = 0;
@@ -37,7 +37,7 @@ async function MiniGameStart(GameType, Difficulty, ReturnFunction) {
 	MiniGameDifficultyMode = "";
 
 	if (CommonIsNumeric(Difficulty))
-		MiniGameDifficulty = parseInt(Difficulty, 10);
+		MiniGameDifficulty = Difficulty;
 	else
 		MiniGameDifficultyMode = Difficulty;
 	MiniGameDifficultyRatio = 1;
@@ -58,11 +58,7 @@ async function MiniGameStart(GameType, Difficulty, ReturnFunction) {
 }
 
 function MiniGameEnd() {
-	if (typeof MiniGameReturnFunction === "string") {
-		CommonDynamicFunction(MiniGameReturnFunction + "()");
-	} else if (typeof MiniGameReturnFunction === "function") {
-		MiniGameReturnFunction();
-	}
+	MiniGameReturnFunction?.();
 	MiniGameReturnFunction = null;
 }
 

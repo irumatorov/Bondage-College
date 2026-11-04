@@ -401,28 +401,27 @@ function InfiltrationKidnapperSurrender() {
  */
 function InfiltrationKidnapperStartFight() {
 	if (!CurrentCharacter) return;
-	let Difficulty = SkillGetLevel(Player, "Infiltration") - 3 + Math.floor(Math.random() * 7);
-	if (Difficulty < 0) Difficulty = 0;
-	if (Difficulty > 10) Difficulty = 10;
-	KidnapStart(CurrentCharacter, InfiltrationBackground, Difficulty, "InfiltrationKidnapperEndFight()");
+	const Difficulty = CommonClamp(SkillGetLevel(Player, "Infiltration") - 3 + Math.floor(Math.random() * 7), 0, 10);
+	KidnapStart(CurrentCharacter, InfiltrationBackground, Difficulty, (victory) => CommonPromiseCatch(InfiltrationKidnapperEndFight(victory)));
 }
 
 /**
  * Ends the fight with the NPC kidnapper
+ * @param {boolean} victory - Whether the player won the encounter
  * @returns {SafePromise<void>}
  */
-async function InfiltrationKidnapperEndFight() {
+async function InfiltrationKidnapperEndFight(victory) {
 	if (!InfiltrationKidnapper) return;
 	CharacterSetCurrent(InfiltrationKidnapper);
 	if (!CurrentCharacter) return;
 	const C = CurrentCharacter;
 	SkillProgress(Player, "Willpower", KidnapSuccessWillpowerProgress(C));
-	C.Stage = (KidnapVictory) ? "100" : "200";
-	CharacterRelease(KidnapVictory ? Player : C);
-	C.AllowItem = KidnapVictory;
+	C.Stage = victory ? "100" : "200";
+	CharacterRelease(victory ? Player : C);
+	C.AllowItem = victory;
 	await CommonSetScreen("Room", "Infiltration");
 	InfiltrationBackground = MainHallBackground;
-	C.CurrentDialog = DialogFind(C, (KidnapVictory) ? "FightVictory" : "FightDefeat");
+	C.CurrentDialog = DialogFind(C, victory ? "FightVictory" : "FightDefeat");
 }
 
 /**

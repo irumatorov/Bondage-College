@@ -460,31 +460,36 @@ function SarahRestrainedBySophie(phase, domRep) {
 	}
 }
 
-// When a fight starts between the player and Sophie
+/**
+ * When a fight starts between the player and Sophie
+ */
 function SarahFightSophie() {
 	Sophie.Name = "Sophie";
-	KidnapStart(Sophie, SarahBackground, 10, "SarahFightSophieEnd()");
+	KidnapStart(Sophie, SarahBackground, 10, (victory) => CommonPromiseCatch(SarahFightSophieEnd(victory)));
 }
 
-// When the fight against Sophie ends
-function SarahFightSophieEnd() {
+/**
+ * When the fight against Sophie ends
+ * @param {boolean} victory - Wether the player won or not
+ */
+async function SarahFightSophieEnd(victory) {
 	SkillProgress(Player, "Willpower", KidnapSuccessWillpowerProgress(Sophie));
 	Sophie.Name = "Mistress Sophie";
 	SophieFightDone = true;
 	SophieUpsetCount = -100;
-	Sophie.AllowItem = KidnapVictory;
-	Sophie.Stage = (KidnapVictory) ? "60" : "70";
-	if (!KidnapVictory && Player.IsNaked()) Sophie.Stage = "50";
-	if (!KidnapVictory) CharacterRelease(Sophie);
+	Sophie.AllowItem = victory;
+	Sophie.Stage = victory ? "60" : "70";
+	if (!victory && Player.IsNaked()) Sophie.Stage = "50";
+	if (!victory) CharacterRelease(Sophie);
 	else CharacterRelease(Player);
-	if (KidnapVictory) LogAdd("KidnapSophie", "Sarah");
+	if (victory) LogAdd("KidnapSophie", "Sarah");
 	InventoryRemove(Sophie, "ItemHead");
 	InventoryRemove(Sophie, "ItemMouth");
 	InventoryRemove(Player, "ItemHead");
 	InventoryRemove(Player, "ItemMouth");
-	CommonSetScreen("Room", "Sarah");
+	await CommonSetScreen("Room", "Sarah");
 	CharacterSetCurrent(Sophie);
-	Sophie.CurrentDialog = DialogFind(Sophie, (KidnapVictory) ? "FightVictory" : "FightDefeat");
+	Sophie.CurrentDialog = DialogFind(Sophie, victory ? "FightVictory" : "FightDefeat");
 }
 
 // Gets the next punishment that Sophie will inflict to the girls
@@ -553,7 +558,7 @@ function SarahTransferSophieToRoom(Love) {
 
 /**
  * When we need to set Sophie intro
- * @param {string | number} DomRep
+ * @param {number} DomRep
  */
 function SarahSophieSetPunishmentIntro(DomRep) {
 	SarahSophiePunishEvent("", DomRep);
@@ -606,10 +611,9 @@ function SarahSophieStartBuzz(C, Intensity) {
 /**
  * Sets the Sophie punishment for the player
  * @param {string} EventType
- * @param {string|number} DomRep
+ * @param {number} DomRep
  */
 function SarahSophiePunishEvent(EventType, DomRep) {
-	DomRep = parseInt(DomRep);
 	if (DomRep != 0) ReputationChange("Dominant", DomRep);
 	if (DomRep > 0) SophieUpsetCount = SophieUpsetCount + DomRep;
 	if ((EventType == "RestrainOther") && (Amanda != null) && AmandaInside) SarahSophiePreparePunishCharacter(Amanda);
@@ -843,14 +847,11 @@ function SarahGiveFourthSlaveItem(C) {
 
 /**
  * Build the orgasm meter for the slaves
- * @param {string|number} Pleasure
- * @param {string|number} Bonus
- * @param {string|number} Intensity
+ * @param {number} Pleasure
+ * @param {number} Bonus
+ * @param {number} Intensity
  */
 function SarahSlaveOrgasmBuild(Pleasure, Bonus, Intensity) {
-	Pleasure = parseInt(Pleasure);
-	Bonus = parseInt(Bonus);
-	Intensity = parseInt(Intensity);
 	if (!CurrentCharacter) return;
 	CurrentCharacter.OrgasmMeter ??= 0;
 	CurrentCharacter.OrgasmMeter = CurrentCharacter.OrgasmMeter + Pleasure + Bonus;

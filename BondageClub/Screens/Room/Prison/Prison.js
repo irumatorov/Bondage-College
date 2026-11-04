@@ -743,16 +743,17 @@ function PrisonCatchAdmitDefeat() {
  */
 function PrisonFightPolice() {
 	PoseSetActive(Player, null, true);
-	KidnapStart(PrisonPolice, PrisonBackground, 5 + Math.floor(Math.random() * 5), "PrisonFightPoliceEnd()");
+	KidnapStart(PrisonPolice, PrisonBackground, 5 + Math.floor(Math.random() * 5), (victory) => CommonPromiseCatch(PrisonFightPoliceEnd(victory)));
 }
 
 /**
  * When the fight against Police ends
+ * @param {boolean} victory - Whether the player won the encounter
  */
-async function PrisonFightPoliceEnd() {
+async function PrisonFightPoliceEnd(victory) {
 	await CommonSetScreen("Room", "Prison");
 	SkillProgress(Player, "Willpower", KidnapSuccessWillpowerProgress(PrisonPolice));
-	if (!KidnapVictory) {
+	if (!victory) {
 		CharacterRelease(PrisonPolice);
 		InventoryRemove(PrisonPolice, "ItemNeck");
 		PrisonWearPoliceEquipment(PrisonPolice);

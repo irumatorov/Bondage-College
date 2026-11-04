@@ -133,7 +133,7 @@ async function MagicSchoolEscapeSpellEnd() {
  * @returns {void} - Nothing
  */
 function MagicSchoolEscapeSetTime(Seconds) {
-	MagicSchoolEscapeSeconds = parseInt(Seconds);
+	MagicSchoolEscapeSeconds = Seconds;
 }
 
 /**

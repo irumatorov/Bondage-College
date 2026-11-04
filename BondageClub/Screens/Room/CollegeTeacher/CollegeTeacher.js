@@ -107,9 +107,9 @@ function CollegeTeacherClick() {
  * @returns {void} - Nothing
  */
 function CollegeTeacherMildredLoveChange(LoveChange, Event) {
-	if (LoveChange != null) CollegeTeacherMildredLove += LoveChange;
-	if ((LoveChange != null) && (parseInt(LoveChange) < 0)) CharacterSetFacialExpression(CollegeTeacherMildred, "Eyes", "Dazed", 2);
-	if ((LoveChange != null) && (parseInt(LoveChange) > 0)) CharacterSetFacialExpression(CollegeTeacherMildred, "Blush", "Low", 2);
+	CollegeTeacherMildredLove += LoveChange;
+	if (LoveChange < 0) CharacterSetFacialExpression(CollegeTeacherMildred, "Eyes", "Dazed", 2);
+	if (LoveChange > 0) CharacterSetFacialExpression(CollegeTeacherMildred, "Blush", "Low", 2);
 	if (Event == "Pillory") InventoryWear(Player, "Pillory", "ItemArms");
 	if (Event == "Lock") InventoryLock(Player, "ItemArms", "IntricatePadlock", CollegeTeacherMildred);
 	if (Event == "Crop") {
