@@ -25550,8 +25550,57 @@ var AssetFemale3DCGExtended = {
 						],
 					},
 				},
+				{
+					Name: "Position",
+					Key: "Position",
+					Options: [
+						{
+							// In hands
+							PoseMapping: { ...AssetPoseMapping.ItemHandheld },
+						},
+						{
+							// On head, also when the arms are tied
+							Property: {
+								OverridePriority: 57,
+								DrawingTop: { [AssetOverride]: -315 },
+							},
+							PoseMapping: {
+								AllFours: PoseType.HIDE,
+								Hogtied: PoseType.HIDE,
+								Suspension: PoseType.HIDE,
+							},
+						},
+						{
+							// On the floor between the feet, also when the arms are tied.
+							// The ground line is at 962; plushies whose art does not end 193 px down their frame get their own top
+							Property: {
+								OverridePriority: 57,
+								DrawingLeft: { [AssetOverride]: 6 },
+								DrawingTop: {
+									[AssetOverride]: 549,
+									Brioche: 780,
+									Jakkie: 761,
+									KatrinaThunder: 779,
+									Lara: 761,
+									Lisa3: 781,
+									Mable: 790,
+									Neddle: 777,
+									Robin: 760,
+									Takao: 732,
+									VoidPsyker: 753,
+									Zannah: 746,
+								},
+							},
+							PoseMapping: { Suspension: PoseType.HIDE },
+							FixedPosition: true,
+						},
+					],
+				},
 			],
 			ScriptHooks: {
+				Load: InventoryItemHandheldPlushiesLoadHook,
+				Draw: InventoryItemHandheldPlushiesDrawHook,
+				Click: InventoryItemHandheldPlushiesClickHook,
 				SetOption: InventoryItemHandheldPlushiesSetOptionHook,
 			},
 		}, // Plushie

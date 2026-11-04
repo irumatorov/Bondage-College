@@ -1633,6 +1633,24 @@ function ExtendedItemGetDrawingOptions(item) {
 }
 
 /**
+ * Collect layout options for an item, given its current configuration: the pose mapping and fixed position its selected options give its layers
+ * @param {Item} item
+ * @returns {Pick<ExtendedItemOptionConfig, "PoseMapping" | "FixedPosition">}
+ */
+function ExtendedItemGetLayoutOptions(item) {
+	if (!item.Asset.Extended) return {};
+	/** @type {Pick<ExtendedItemOptionConfig, "PoseMapping" | "FixedPosition">} */
+	const init = {};
+	return ExtendedItemGatherOptions(item).reduce((stack, value) => {
+		if (value.PoseMapping)
+			stack.PoseMapping = { ...stack.PoseMapping, ...value.PoseMapping };
+		if (value.FixedPosition)
+			stack.FixedPosition = true;
+		return stack;
+	}, init);
+}
+
+/**
  * Namespace with extended item functions for accessing the tighten/loosen menu.
  * @namespace
  */
