@@ -23,3 +23,5 @@ CreditTypeTranslators,Translators
 CreditTypeSupport,Support
 CreditTypePatrons,Sponsors
 CreditTypeFans,And a huge thanks to the fans!
+SelectServer,Select Server
+SelectServerDisclaimer,The server you pick does not change who you can play with online. Your player data is the same on every server, but mod data might be different. Servers with lower ping load faster.

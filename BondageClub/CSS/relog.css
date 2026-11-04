@@ -49,7 +49,7 @@
 	height: min(5vh, 2.5vw);
 }
 
-#InputPassword {
+#InputPassword:has(:not(.login-field)) {
 	width: min(40vh, 20vw);
 	height: min(5vh, 2.5vw);
 }
