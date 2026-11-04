@@ -698,3 +698,187 @@ describe("map positions", () => {
 		expect(Game.MapIsPosition(null)).toBe(false);
 	});
 });
+
+describe("room items", () => {
+	// The assets aren't loaded here: these stand for a hand-held item, a plushie held in the hands and a rope
+	const assets: Record<string, object> = {
+		"ItemHandheld/Crop": { Name: "Crop", Group: { Name: "ItemHandheld" }, Attribute: [], Description: "Crop" },
+		"ItemMisc/Plushie": { Name: "Plushie", Group: { Name: "ItemMisc" }, Attribute: ["HandheldItem"], Description: "Plushie" },
+		"ItemArms/HempRope": { Name: "HempRope", Group: { Name: "ItemArms" }, Attribute: [], Description: "Rope" },
+	};
+	const worn: string[] = [];
+
+	beforeEach(() => {
+		worn.length = 0;
+		Game.AssetGet = (_family: string, group: string, name: string) => assets[`${group}/${name}`] ?? null;
+		Game.InventoryGet = () => null;
+		Game.InventoryGroupIsBlockedForCharacter = () => false;
+		Game.InventoryWear = (_C: unknown, name: string, group: string) => worn.push(`${group}/${name}`);
+		Game.ChatRoomMapViewHasSuperPowers = () => false;
+		Game.ChatRoomMapViewScheduleMapUpdate = () => {};
+		Game.ChatRoomMapViewTakenRoomItems.clear();
+		Game.Player = {
+			MemberNumber: 1,
+			AssetFamily: "Female3DCG",
+			Appearance: [{ Asset: assets["ItemHandheld/Crop"] }],
+			CanInteract: () => true,
+			GetBlindLevel: () => 0,
+			GetDeafLevel: () => 0,
+		};
+		Game.ChatRoomData = { Admin: [1], MapData: Game.ChatRoomMapViewInitialize("Always") };
+		Game.MapManager.Map.loadGlobalMapData(Game.ChatRoomData.MapData);
+		Game.Player.MapData = { Pos: { X: 1, Y: 1 } };
+	});
+
+	const tiles = () => Game.ChatRoomMapViewGetRoomItems().entries.map(({ tile, name }: { tile: number, name: string }) => [tile, name]);
+
+	it("keeps the room's items through a map copy and paste", () => {
+		const items = { Room: [[83, "ItemHandheld", "Crop", 176], [84, "ItemMisc", "Plushie", 0, 150]], Takeable: "Unlimited" };
+		Game.ChatRoomData.MapData.Items = Game.ChatRoomMapViewEncodeRoomItems(items);
+		const mapString = Game.MapManager.Map.exportString();
+		Game.ChatRoomData = { Admin: [1], MapData: Game.ChatRoomMapViewInitialize("Always") };
+		expect(Game.MapManager.Map.importString(mapString)).toBe(true);
+		expect(Game.ChatRoomMapViewValidateRoomItems(Game.ChatRoomData.MapData.Items)).toEqual(items);
+	});
+
+	it("encodes the room's items small, and reads them back the same", () => {
+		const items = {
+			Room: Array.from({ length: 10 }, (_, i) => [1599 - i, i % 2 ? "ItemHandheld" : "ItemMisc", "ModScythe".padEnd(40, "x"), 359, 200]),
+			Takeable: "OnePerPlayer",
+		};
+		const encoded = Game.ChatRoomMapViewEncodeRoomItems(items);
+		expect(Game.ChatRoomMapViewValidateRoomItems(encoded)).toEqual(items);
+		expect(encoded.length).toBeLessThan(JSON.stringify(items).length);
+		const usual = { Room: Array.from({ length: 10 }, (_, i) => [40 + i, "ItemHandheld", i % 2 ? "Crop" : "SpankingToys"]) };
+		expect(Game.ChatRoomMapViewEncodeRoomItems(usual).length).toBeLessThan(JSON.stringify(usual).length / 2);
+		const plain = { Room: [[41, "ItemHandheld", "Crop"], [42, "ItemHandheld", "ÉchoScythe"]] };
+		expect(Game.ChatRoomMapViewValidateRoomItems(Game.ChatRoomMapViewEncodeRoomItems(plain))).toEqual(plain);
+		expect(Game.ChatRoomMapViewValidateRoomItems("not items")).toBeUndefined();
+		expect(Game.ChatRoomMapViewValidateRoomItems("")).toBeUndefined();
+	});
+
+	it("checks the room's items when a map is pasted", () => {
+		Game.ChatRoomData.MapData.Items = { Room: [[83, "ItemArms", "HempRope"], [84, "ItemHandheld", "Crop"], "crop"], Takeable: "Everyone" };
+		const mapString = Game.MapManager.Map.exportString();
+		Game.ChatRoomData = { Admin: [1], MapData: { ...Game.ChatRoomMapViewInitialize("Always"), Items: { Room: [[1, "ItemHandheld", "Crop"]] } } };
+		expect(Game.MapManager.Map.importString(mapString)).toBe(true);
+		expect(Game.ChatRoomMapViewValidateRoomItems(Game.ChatRoomData.MapData.Items)).toEqual({ Room: [[84, "ItemHandheld", "Crop"]] });
+	});
+
+	it("leaves out malformed items and unchanged turns and sizes", () => {
+		const room = [
+			[0, "ItemHandheld", "Crop", 0, 110],
+			[1600, "ItemHandheld", "Crop"],
+			[-1, "ItemHandheld", "Crop"],
+			[2, "ItemHandheld"],
+			[3, "ItemHandheld", "Crop", 400],
+			[4, "ItemHandheld", "Crop", 0, 20],
+			[5, "ItemHandheld", "Crop", 90, 110, "extra"],
+			[6, "ItemHandheld", { Name: "Crop" }],
+			{ tile: 7, Group: "ItemHandheld", Name: "Crop" },
+			[8, "ItemHandheld", "Crop", 0, 200],
+			[9, "ItemHandheld", "Crop", 90],
+		];
+		expect(Game.ChatRoomMapViewValidateRoomItems({ Room: room, Takeable: "Everyone" })).toEqual({
+			Room: [[0, "ItemHandheld", "Crop"], [8, "ItemHandheld", "Crop", 0, 200], [9, "ItemHandheld", "Crop", 90]],
+		});
+		expect(Game.ChatRoomMapViewValidateRoomItems({ Room: ["junk"] })).toBeUndefined();
+		expect(Game.ChatRoomMapViewValidateRoomItems("junk")).toBeUndefined();
+	});
+
+	it("only keeps assets held in the hands", () => {
+		const room = [[0, "ItemArms", "HempRope"], [1, "ItemMisc", "Plushie"], [2, "ItemHandheld", "Crop"]];
+		expect(Game.ChatRoomMapViewValidateRoomItems({ Room: room }).Room.map((i: unknown[]) => i[2])).toEqual(["Plushie", "Crop"]);
+	});
+
+	it("keeps the items of assets this client doesn't have, unless their names are too long", () => {
+		const room = [[0, "ItemHandheld", "ModScythe"], [1, "ItemHandheld", "M".repeat(41)]];
+		expect(Game.ChatRoomMapViewValidateRoomItems({ Room: room })).toEqual({ Room: [[0, "ItemHandheld", "ModScythe"]] });
+	});
+
+	it("keeps at most 10 items", () => {
+		const room = Array.from({ length: 15 }, (_, i) => [i, "ItemHandheld", "Crop"]);
+		expect(Game.ChatRoomMapViewValidateRoomItems({ Room: room }).Room.length).toBe(10);
+	});
+
+	it("keeps a full room's items near half a kilobyte", () => {
+		const room = Array.from({ length: 10 }, (_, i) => [1590 + i, "ItemHandheld", "SmallVibratingWand", 359, 200]);
+		const items = Game.ChatRoomMapViewValidateRoomItems({ Room: room, Takeable: "OnePerPlayer" });
+		expect(items.Room.length).toBe(10);
+		expect(JSON.stringify(items).length).toBeLessThan(600);
+	});
+
+	it("lets admins place the item they hold on a tile in reach", () => {
+		Game.ChatRoomMapViewPlaceRoomItem({ X: 2, Y: 2 });
+		expect(Game.ChatRoomMapViewValidateRoomItems(Game.ChatRoomData.MapData.Items)).toEqual({ Room: [[82, "ItemHandheld", "Crop"]] });
+		Game.ChatRoomMapViewPlaceRoomItem({ X: 5, Y: 5 });
+		Game.ChatRoomData.Admin = [];
+		Game.ChatRoomMapViewPlaceRoomItem({ X: 1, Y: 2 });
+		expect(tiles()).toEqual([[82, "Crop"]]);
+	});
+
+	it("gives a tile two places, its object taking one", () => {
+		Game.MapManager.Map.setObject(2, 1, Game.MapDataGetObject(140));
+		for (let i = 0; i < 3; i++) {
+			Game.ChatRoomMapViewPlaceRoomItem({ X: 1, Y: 2 });
+			Game.ChatRoomMapViewPlaceRoomItem({ X: 2, Y: 1 });
+		}
+		expect(tiles()).toEqual([[81, "Crop"], [42, "Crop"], [81, "Crop"]]);
+	});
+
+	it("keeps the items of assets this client doesn't have when an admin changes the room's items", () => {
+		Game.ChatRoomData.MapData.Items = { Room: [[0, "ItemHandheld", "ModScythe", 45], [41, "ItemHandheld", "Crop"]] };
+		Game.ChatRoomMapViewPlaceRoomItem({ X: 2, Y: 2 });
+		const { entries } = Game.ChatRoomMapViewGetRoomItems();
+		Game.ChatRoomMapViewSaveRoomItems(entries.filter((e: { tile: number }) => e.tile !== 41));
+		expect(Game.ChatRoomMapViewValidateRoomItems(Game.ChatRoomData.MapData.Items)).toEqual({ Room: [[0, "ItemHandheld", "ModScythe", 45], [82, "ItemHandheld", "Crop"]] });
+	});
+
+	it.each<[string | undefined, number]>([
+		[undefined, 0],
+		["OnePerPlayer", 1],
+		["Unlimited", 2],
+	])(
+		"lets players take an item as often as the room says, when it says %s",
+		(takeable, expected) => {
+			Game.ChatRoomData.MapData.Items = { Room: [[41, "ItemHandheld", "Crop"], [42, "ItemHandheld", "ModScythe"]], Takeable: takeable };
+			const [crop, scythe] = Game.ChatRoomMapViewGetRoomItems().entries;
+			for (let i = 0; i < 2; i++) {
+				Game.ChatRoomMapViewTakeRoomItem(crop);
+				Game.ChatRoomMapViewTakeRoomItem(scythe);
+			}
+			expect(worn).toEqual(Array(expected).fill("ItemHandheld/Crop"));
+		}
+	);
+
+	it("remembers a one per player item taken in a room after a sync or coming back, but not in another room", () => {
+		Game.ChatRoomData.Name = "Room A";
+		Game.ChatRoomData.MapData.Items = { Room: [[41, "ItemHandheld", "Crop"]], Takeable: "OnePerPlayer" };
+		const [crop] = Game.ChatRoomMapViewGetRoomItems().entries;
+		Game.ChatRoomMapViewTakeRoomItem(crop);
+		Game.ChatRoomData = { ...Game.ChatRoomData };
+		Game.ChatRoomMapViewTakeRoomItem(crop);
+		expect(worn).toEqual(["ItemHandheld/Crop"]);
+		Game.ChatRoomData.Name = "Room B";
+		Game.ChatRoomMapViewTakeRoomItem(crop);
+		expect(worn).toEqual(["ItemHandheld/Crop", "ItemHandheld/Crop"]);
+	});
+
+	it("opens the items menu while playing, never while editing the map", () => {
+		const { ChatRoomMapViewShowTileRoomItems } = Game;
+		const opened: unknown[] = [];
+		Game.ChatRoomMapViewShowTileRoomItems = (pos: unknown) => opened.push(pos);
+		Game.Player.Appearance = [];
+		Game.ChatRoomData.MapData.Items = { Room: [[41, "ItemHandheld", "Crop"]] };
+		for (const mode of ["Tile", "Object", "TileType", "ObjectType", "Effect"]) {
+			Game.ChatRoomMapViewEditMode = mode;
+			Game.ChatRoomMapViewSetSelectedTile({ X: 1, Y: 1 });
+		}
+		expect(opened).toEqual([]);
+		Game.ChatRoomMapViewEditMode = "";
+		Game.ChatRoomMapViewSetSelectedTile({ X: 1, Y: 1 });
+		Game.ChatRoomMapViewSetSelectedTile({ X: 2, Y: 2 });
+		expect(opened).toEqual([{ X: 1, Y: 1 }]);
+		Object.assign(Game, { ChatRoomMapViewShowTileRoomItems });
+	});
+});

@@ -218,6 +218,15 @@
 	display: none;
 }
 
+:is(.chat-room-map-view-dialog-content, .chat-room-map-view-dialog-footer) :is(button, select) {
+	color: black;
+}
+
+:is(.chat-room-map-view-dialog-content, .chat-room-map-view-dialog-footer) button {
+	min-width: 6em;
+	height: 1.6em;
+}
+
 textarea.chat-room-map-view-dialog-content-text {
 	background: transparent;
 	border: none;
@@ -278,4 +287,42 @@ textarea.chat-room-map-view-dialog-content-text {
 #color-picker[data-colortheme="dark"].chat-room-map-view-color-picker,
 #color-picker[data-colortheme="dark2"].chat-room-map-view-color-picker {
 	background-color: #111;
+}
+
+.chat-room-map-view-room-items {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6em;
+	width: 100%;
+}
+
+.chat-room-map-view-room-item {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3em;
+}
+
+.chat-room-map-view-room-item-header,
+.chat-room-map-view-room-item-control,
+.chat-room-map-view-room-item-footer {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+}
+
+.chat-room-map-view-room-item-header > span,
+.chat-room-map-view-room-item-control > :first-child {
+	flex: 1;
+}
+
+.chat-room-map-view-room-item-control > :last-child {
+	flex: 2;
+}
+
+.chat-room-map-view-room-item-footer {
+	flex-wrap: wrap;
+}
+
+.chat-room-map-view-room-item-footer > button {
+	flex: 1 1 100%;
 }

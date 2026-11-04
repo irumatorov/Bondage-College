@@ -656,6 +656,70 @@ function CommonDrawComputeDrawingCoordinates(C, asset, layer, groupName, propert
 	return { X, Y, fixedYOffset };
 }
 
+/** @type {Map<string, HTMLCanvasElement | ImageBitmap>} The previews of assets lying on the map, cropped to their pixels, by URL */
+const CommonDrawAssetOnMapCache = new Map();
+
+/**
+ * Gets the preview of an asset lying on the map, cropped to its pixels when they can be read
+ *
+ * @param {Asset} asset
+ * @returns {HTMLCanvasElement | ImageBitmap | null} - The picture, or null while it's loading
+ */
+function CommonDrawAssetOnMapImage(asset) {
+	const url = `${AssetGetPreviewPath(asset)}/${asset.Name}.png`;
+	const cached = CommonDrawAssetOnMapCache.get(url);
+	if (cached) return cached;
+	const picture = DrawGetImage(url);
+	if (!picture) return null;
+	const bounds = CommonDrawImageBounds(picture);
+	/** @type {HTMLCanvasElement | ImageBitmap} */
+	let image = picture;
+	if (bounds) {
+		const [left, top, width, height] = bounds;
+		image = document.createElement("canvas");
+		image.width = width;
+		image.height = height;
+		/** @type {CanvasRenderingContext2D} */ (image.getContext("2d")).drawImage(picture, left, top, width, height, 0, 0, width, height);
+	}
+	CommonDrawAssetOnMapCache.set(url, image);
+	return image;
+}
+
+/**
+ * Gets the rectangle around the drawn pixels of an image
+ *
+ * @param {ImageBitmap} image
+ * @returns {RectTuple | null} - The rectangle, or null if every pixel is transparent or the pixels can't be read, as for images from other sites
+ */
+function CommonDrawImageBounds(image) {
+	const { width, height } = image;
+	const canvas = document.createElement("canvas");
+	canvas.width = width;
+	canvas.height = height;
+	const context = /** @type {CanvasRenderingContext2D} */ (canvas.getContext("2d", { willReadFrequently: true }));
+	context.drawImage(image, 0, 0);
+	let pixels;
+	try {
+		pixels = context.getImageData(0, 0, width, height).data;
+	} catch {
+		return null;
+	}
+	let left = width;
+	let top = height;
+	let right = -1;
+	let bottom = -1;
+	for (let y = 0; y < height; y++) {
+		for (let x = 0; x < width; x++) {
+			if (pixels[(y * width + x) * 4 + 3] === 0) continue;
+			if (x < left) left = x;
+			if (x > right) right = x;
+			if (y < top) top = y;
+			bottom = y;
+		}
+	}
+	return right < 0 ? null : [left, top, right - left + 1, bottom - top + 1];
+}
+
 /**
  * Clears out rects based on the layer's alpha masks
  *

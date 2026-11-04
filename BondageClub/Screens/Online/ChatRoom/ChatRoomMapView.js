@@ -51,6 +51,18 @@ const ChatRoomMapViewLeashRange = 2;
 const ChatRoomMapViewRemoteRange = ChatRoomMapViewPerceptionRangeMax;
 const ChatRoomMapSignTextMaxLength = 150;
 var ChatRoomMapViewEditorMaxRecentElements = 16;
+/** How many things a tile can hold, counting its object, so items stay readable */
+const ChatRoomMapViewTileCapacity = 2;
+/** How big room items are unless their size was changed, in percent */
+const ChatRoomMapViewRoomItemSize = 110;
+/** How many items admins can place in a room, so the map stays small */
+const ChatRoomMapViewRoomItemCap = 10;
+/** How long the group and asset names of a room item this client doesn't have can be */
+const ChatRoomMapViewRoomItemNameMaxLength = 40;
+/** @type {Set<string>} The room items the player took this session, by room, for the rooms where there's one per player; a sync or coming back doesn't reset it */
+var ChatRoomMapViewTakenRoomItems = new Set();
+/** @type {ChatRoomMapViewRoomItems} The room's items as last checked */
+var ChatRoomMapViewRoomItemsChecked = { raw: undefined, entries: [] };
 
 /**
  * @type {boolean[]}
@@ -95,6 +107,12 @@ var ChatRoomMapViewPanel;
 var ChatRoomMapViewPanelContainer;
 /** @type {null | number} */
 var ChatRoomMapViewSelectedObjectIndex = null;
+
+/**
+ * Where the visible part of map object images starts, as a fraction of their height, by image URL
+ * @type {Map<string, number>}
+ */
+var ChatRoomMapViewObjectTopCache = new Map();
 
 document.addEventListener("blur", () => {
 	if (ChatRoomMapViewIsActive()) ChatRoomMapViewBlur();
@@ -1555,6 +1573,7 @@ function ChatRoomMapViewDrawGrid(Left, Top, Width, Height) {
 
 		// For each characters in the chat room (don't draw when there's fog)
 		if (!Fog) {
+			ChatRoomMapViewDrawTileRoomItems({ X, Y }, ObjectData, ObjectImage, [TileCanvasX, Top + ScreenY, TileWidth, TileHeight]);
 			let C = ChatRoomMapViewGetCharacterAtPos(X, Y);
 			if (C) {
 
@@ -2361,6 +2380,473 @@ function ChatRoomMapViewTeleportHiddenMessage(sender, data) {
 }
 
 /**
+ * Checks whether the player can reach a tile with their hands
+ * @param {ChatRoomMapPos} pos
+ * @returns {boolean}
+ */
+function ChatRoomMapViewPositionOnInteractionRange(pos) {
+	const playerPos = Player.MapData?.Pos;
+	if (!playerPos) return false;
+	return Math.max(Math.abs(playerPos.X - pos.X), Math.abs(playerPos.Y - pos.Y)) <= ChatRoomMapViewInteractionRange;
+}
+
+/**
+ * Checks whether an asset is held in the hands; only the asset decides, never an item's properties
+ * @param {Asset} asset
+ * @returns {boolean}
+ */
+function ChatRoomMapViewIsHandheldAsset(asset) {
+	return asset.Group.Name === "ItemHandheld" || asset.Attribute.includes("HandheldItem");
+}
+
+/** The version of the room items' encoding, written first so that a later one can still read older maps */
+const ChatRoomMapViewRoomItemsVersion = 0;
+/** Who can take room items, in the order the encoding numbers them */
+const ChatRoomMapViewRoomItemTakeables = /** @type {const} */ ([undefined, "OnePerPlayer", "Unlimited"]);
+
+/**
+ * Writes a group or asset name: its length, then each character in 7 bits, or 16 if one doesn't fit
+ * @param {BitStringWriter} writer
+ * @param {string} text - At most 255 characters
+ * @returns {void}
+ */
+function ChatRoomMapViewWriteRoomItemName(writer, text) {
+	const wide = [...text].some(c => c.charCodeAt(0) > 0x7F);
+	writer.writeUnsigned(text.length, 8);
+	writer.writeBool(wide);
+	for (let i = 0; i < text.length; i++) writer.writeUnsigned(text.charCodeAt(i), wide ? 16 : 7);
+}
+
+/**
+ * Reads a name written by {@link ChatRoomMapViewWriteRoomItemName}
+ * @param {BitStringReader} reader
+ * @returns {string}
+ */
+function ChatRoomMapViewReadRoomItemName(reader) {
+	const length = reader.readUnsigned(8);
+	const bits = reader.readBool() ? 16 : 7;
+	let text = "";
+	for (let i = 0; i < length; i++) text += String.fromCharCode(reader.readUnsigned(bits));
+	return text;
+}
+
+/**
+ * Encodes the room's items for the map data: who can take them, the group names used once each, then for each item
+ * its tile, group, name, and its turn and size when they're changed
+ * @param {ChatRoomMapItems} items - Validated items
+ * @returns {string}
+ */
+function ChatRoomMapViewEncodeRoomItems(items) {
+	const writer = new BitStringWriter();
+	const groups = [...new Set(items.Room.map(item => item[1]))];
+	const groupBits = BitStringHelper.getBitsCountForUnsigned(groups.length - 1);
+	writer.writeUnsigned(ChatRoomMapViewRoomItemsVersion, 8);
+	writer.writeUnsigned(ChatRoomMapViewRoomItemTakeables.indexOf(items.Takeable), 2);
+	writer.writeUnsigned(groups.length, 4);
+	for (const group of groups) ChatRoomMapViewWriteRoomItemName(writer, group);
+	writer.writeUnsigned(items.Room.length, 4);
+	for (const [tile, group, name, rotation = 0, size = ChatRoomMapViewRoomItemSize] of items.Room) {
+		writer.writeUnsigned(tile, 11);
+		writer.writeUnsigned(groups.indexOf(group), groupBits);
+		ChatRoomMapViewWriteRoomItemName(writer, name);
+		writer.writeBool(rotation !== 0);
+		if (rotation !== 0) writer.writeUnsigned(rotation, 9);
+		writer.writeBool(size !== ChatRoomMapViewRoomItemSize);
+		if (size !== ChatRoomMapViewRoomItemSize) writer.writeUnsigned(size - 50, 8);
+	}
+	return writer.toBase64();
+}
+
+/**
+ * Decodes the room's items from the map data, unchecked; see {@link ChatRoomMapViewEncodeRoomItems}
+ * @param {string} encoded
+ * @returns {unknown} - The items, or undefined if they can't be read
+ */
+function ChatRoomMapViewDecodeRoomItems(encoded) {
+	try {
+		const reader = BitStringReader.fromBase64(encoded);
+		if (!reader || reader.readUnsigned(8) !== ChatRoomMapViewRoomItemsVersion) return undefined;
+		const takeable = ChatRoomMapViewRoomItemTakeables[reader.readUnsigned(2)];
+		const groups = Array.from({ length: reader.readUnsigned(4) }, () => ChatRoomMapViewReadRoomItemName(reader));
+		const groupBits = BitStringHelper.getBitsCountForUnsigned(groups.length - 1);
+		const room = Array.from({ length: reader.readUnsigned(4) }, () => {
+			const tile = reader.readUnsigned(11);
+			const group = groups[reader.readUnsigned(groupBits)];
+			const name = ChatRoomMapViewReadRoomItemName(reader);
+			const rotation = reader.readBool() ? reader.readUnsigned(9) : 0;
+			const size = reader.readBool() ? reader.readUnsigned(8) + 50 : ChatRoomMapViewRoomItemSize;
+			return [tile, group, name, rotation, size];
+		});
+		return { Room: room, Takeable: takeable };
+	} catch {
+		return undefined;
+	}
+}
+
+/**
+ * Validates the items admins placed in a room, keeping the first {@link ChatRoomMapViewRoomItemCap}.
+ * Items of assets this client doesn't have are kept as they are, so that saving the map never loses them.
+ * @param {unknown} data - The items, or the map data's encoded string of them
+ * @returns {ChatRoomMapItems | undefined} - The valid items, or undefined if there are none
+ */
+function ChatRoomMapViewValidateRoomItems(data) {
+	if (typeof data === "string") data = ChatRoomMapViewDecodeRoomItems(data);
+	if (!CommonIsObject(data)) return undefined;
+	const { Room, Takeable } = /** @type {Partial<Record<keyof ChatRoomMapItems, unknown>>} */ (data);
+	if (!CommonIsArray(Room)) return undefined;
+	/** @type {ChatRoomMapRoomItem[]} */
+	const room = [];
+	for (const roomItem of Room) {
+		if (room.length >= ChatRoomMapViewRoomItemCap) break;
+		if (!CommonIsArray(roomItem) || roomItem.length < 3 || roomItem.length > 5) continue;
+		const [tile, group, name, rotation = 0, size = ChatRoomMapViewRoomItemSize] = roomItem;
+		if (!CommonIsInteger(tile, 0, ChatRoomMapViewWidth * ChatRoomMapViewHeight - 1)
+			|| typeof group !== "string" || typeof name !== "string"
+			|| !CommonIsInteger(rotation, 0, 359) || !CommonIsInteger(size, 50, 200)) {
+			continue;
+		}
+		const asset = AssetGet(Player.AssetFamily, /** @type {AssetGroupName} */ (group), name);
+		const tooLong = group.length > ChatRoomMapViewRoomItemNameMaxLength || name.length > ChatRoomMapViewRoomItemNameMaxLength;
+		if (asset ? !ChatRoomMapViewIsHandheldAsset(asset) : tooLong) continue;
+		room.push(ChatRoomMapViewPackRoomItem(tile, group, name, rotation, size));
+	}
+	if (room.length === 0) return undefined;
+	return Takeable === "OnePerPlayer" || Takeable === "Unlimited" ? { Room: room, Takeable } : { Room: room };
+}
+
+/**
+ * Builds a room item, leaving out the turn and size when they aren't changed
+ * @param {number} tile - The tile's index on the map
+ * @param {string} group
+ * @param {string} name
+ * @param {number} rotation
+ * @param {number} size
+ * @returns {ChatRoomMapRoomItem}
+ */
+function ChatRoomMapViewPackRoomItem(tile, group, name, rotation, size) {
+	if (size !== ChatRoomMapViewRoomItemSize) return [tile, group, name, rotation, size];
+	return rotation ? [tile, group, name, rotation] : [tile, group, name];
+}
+
+/**
+ * Gets the items admins placed in the room, checked once each time the room's data changes
+ * @returns {ChatRoomMapViewRoomItems}
+ */
+function ChatRoomMapViewGetRoomItems() {
+	const raw = ChatRoomData?.MapData?.Items;
+	if (ChatRoomMapViewRoomItemsChecked.raw !== raw) {
+		const items = ChatRoomMapViewValidateRoomItems(raw);
+		ChatRoomMapViewRoomItemsChecked = {
+			raw,
+			takeable: items?.Takeable,
+			entries: (items?.Room ?? []).map(([tile, group, name, rotation = 0, size = ChatRoomMapViewRoomItemSize]) => ({
+				tile,
+				group,
+				name,
+				rotation,
+				size,
+				asset: AssetGet(Player.AssetFamily, /** @type {AssetGroupName} */ (group), name),
+			})),
+		};
+	}
+	return ChatRoomMapViewRoomItemsChecked;
+}
+
+/**
+ * Saves the room's items, and who can take them; only admins can
+ * @param {ChatRoomMapRoomItemEntry[]} entries
+ * @param {ChatRoomMapRoomItemTakeable} [takeable]
+ * @returns {void}
+ */
+function ChatRoomMapViewSaveRoomItems(entries, takeable = ChatRoomMapViewGetRoomItems().takeable) {
+	const mapData = ChatRoomData?.MapData;
+	if (!mapData || !ChatRoomPlayerIsAdmin()) return;
+	const items = ChatRoomMapViewValidateRoomItems({
+		Room: entries.map(e => ChatRoomMapViewPackRoomItem(e.tile, e.group, e.name, e.rotation, e.size)),
+		Takeable: takeable,
+	});
+	if (items) {
+		mapData.Items = ChatRoomMapViewEncodeRoomItems(items);
+	} else {
+		delete mapData.Items;
+	}
+	ChatRoomMapViewScheduleMapUpdate();
+}
+
+/**
+ * How many items can lie on a tile: its object takes up one of {@link ChatRoomMapViewTileCapacity} places
+ * @param {ChatRoomMapPos} pos
+ * @returns {number}
+ */
+function ChatRoomMapViewTileRoom(pos) {
+	const object = MapManager.Map.getObject(pos.X, pos.Y);
+	return ChatRoomMapViewTileCapacity - (object && object.ID !== ChatRoomMapViewObjectStartID ? 1 : 0);
+}
+
+/**
+ * Gets the items placed on a tile, in the order they're drawn in, the top one last
+ * @param {ChatRoomMapPos} pos
+ * @returns {ChatRoomMapRoomItemEntry[]}
+ */
+function ChatRoomMapViewGetTileRoomItems(pos) {
+	const tile = pos.Y * ChatRoomMapViewWidth + pos.X;
+	return ChatRoomMapViewGetRoomItems().entries.filter(e => e.tile === tile);
+}
+
+/**
+ * Gets the item the player holds that could be placed in the room
+ * @returns {Item | undefined}
+ */
+function ChatRoomMapViewGetHeldItem() {
+	return Player.Appearance.find(item => ChatRoomMapViewIsHandheldAsset(item.Asset));
+}
+
+/**
+ * Checks whether the player can reach a tile, from up close or with super powers
+ * @param {ChatRoomMapPos} pos
+ * @returns {boolean}
+ */
+function ChatRoomMapViewCanReachTile(pos) {
+	return ChatRoomMapViewHasSuperPowers() || ChatRoomMapViewPositionOnInteractionRange(pos);
+}
+
+/**
+ * Checks whether the player can place the item they hold on a tile; only admins can
+ * @param {ChatRoomMapPos} pos
+ * @returns {boolean}
+ */
+function ChatRoomMapViewCanPlaceRoomItem(pos) {
+	const tileType = MapManager.Map.getTile(pos.X, pos.Y)?.Type;
+	return ChatRoomPlayerIsAdmin()
+		&& !!ChatRoomMapViewGetHeldItem()
+		&& (tileType === "Floor" || tileType === "FloorExterior")
+		&& ChatRoomMapViewCanReachTile(pos)
+		&& ChatRoomMapViewGetRoomItems().entries.length < ChatRoomMapViewRoomItemCap
+		&& ChatRoomMapViewGetTileRoomItems(pos).length < ChatRoomMapViewTileRoom(pos);
+}
+
+/**
+ * Places the item the player holds on a tile, as part of the room; the player keeps holding it
+ * @param {ChatRoomMapPos} pos
+ * @returns {void}
+ */
+function ChatRoomMapViewPlaceRoomItem(pos) {
+	const held = ChatRoomMapViewGetHeldItem();
+	if (!held || !ChatRoomMapViewCanPlaceRoomItem(pos)) return;
+	ChatRoomMapViewSaveRoomItems([...ChatRoomMapViewGetRoomItems().entries, {
+		tile: pos.Y * ChatRoomMapViewWidth + pos.X,
+		group: held.Asset.Group.Name,
+		name: held.Asset.Name,
+		rotation: 0,
+		size: ChatRoomMapViewRoomItemSize,
+		asset: held.Asset,
+	}]);
+}
+
+/**
+ * Gets where items on a tile rest: on top of its object, such as a table, or on the floor
+ * @param {null | ChatRoomMapObject} object - The tile's object, if drawn
+ * @param {null | string} objectImage - The URL of the object's image
+ * @param {number} top - The tile's position on the screen
+ * @param {number} height - The tile's height on the screen
+ * @returns {number}
+ */
+function ChatRoomMapViewRoomItemRestY(object, objectImage, top, height) {
+	const floor = top + height * 0.9;
+	if (!object || !objectImage || object.CannotPlaceItems) return floor;
+	if (!ChatRoomMapViewObjectTopCache.has(objectImage)) {
+		const image = DrawGetImage(objectImage);
+		if (!image) return floor;
+		const bounds = CommonDrawImageBounds(image);
+		ChatRoomMapViewObjectTopCache.set(objectImage, bounds ? bounds[1] / image.height : 1);
+	}
+	const visibleTop = ChatRoomMapViewObjectTopCache.get(objectImage) ?? 1;
+	const objectTop = top + height * (object.Top ?? 0);
+	const objectHeight = height * (object.Height ?? 1);
+	return Math.min(floor, objectTop + objectHeight * (visibleTop + (1 - visibleTop) * 0.2));
+}
+
+/**
+ * Draws the items placed on a tile, as many as it has room for
+ * @param {ChatRoomMapPos} pos
+ * @param {null | ChatRoomMapObject} object - The tile's object, if drawn
+ * @param {null | string} objectImage - The URL of the object's image
+ * @param {RectTuple} rect - The tile's rectangle on the screen
+ * @returns {void}
+ */
+function ChatRoomMapViewDrawTileRoomItems(pos, object, objectImage, [left, top, width, height]) {
+	const onTile = ChatRoomMapViewGetTileRoomItems(pos).slice(0, ChatRoomMapViewTileRoom(pos));
+	if (onTile.length === 0) return;
+	const restY = ChatRoomMapViewRoomItemRestY(object, objectImage, top, height);
+	for (const { asset, rotation, size } of onTile) {
+		const image = asset ? CommonDrawAssetOnMapImage(asset) : null;
+		if (!image) continue;
+		const scale = Math.min(width / image.width, height / image.height) * 0.6 * size / 100;
+		const drawnWidth = image.width * scale;
+		const drawnHeight = image.height * scale;
+		const drawX = left + (width - drawnWidth) / 2;
+		const drawY = restY - drawnHeight;
+		if (rotation) {
+			MainCanvas.save();
+			MainCanvas.translate(drawX + drawnWidth / 2, drawY + drawnHeight / 2);
+			MainCanvas.rotate(rotation * Math.PI / 180);
+			DrawImageResize(image, -drawnWidth / 2, -drawnHeight / 2, drawnWidth, drawnHeight);
+			MainCanvas.restore();
+		} else {
+			DrawImageResize(image, drawX, drawY, drawnWidth, drawnHeight);
+		}
+	}
+}
+
+/**
+ * Shows a tile's items with their buttons, and the button to place the held item there
+ * @param {ChatRoomMapPos} pos
+ * @param {null | ChatRoomMapObject} object - The tile's object, whose own click stays available
+ * @returns {void}
+ */
+function ChatRoomMapViewShowTileRoomItems(pos, object) {
+	const { entries, takeable } = ChatRoomMapViewGetRoomItems();
+	const onTile = ChatRoomMapViewGetTileRoomItems(pos);
+	const isAdmin = ChatRoomPlayerIsAdmin();
+	/** @type {HTMLElement[]} */
+	const rows = onTile.filter(e => e.asset).map(entry => {
+		/** @type {HTMLElement[]} */
+		const controls = [];
+		if (isAdmin) {
+			/**
+			 * @param {"rotation" | "size"} key
+			 * @param {string} label
+			 * @param {number} min
+			 * @param {number} max
+			 */
+			const slider = (key, label, min, max) => ElementCreate({
+				tag: "label",
+				classList: ["chat-room-map-view-room-item-control"],
+				children: [
+					{ tag: "span", children: [TextGet(label)] },
+					{
+						tag: "input",
+						attributes: { type: "range", min, max, value: entry[key] },
+						eventListeners: {
+							input: (event) => {
+								entry[key] = /** @type {HTMLInputElement} */ (event.target).valueAsNumber;
+							},
+							change: () => ChatRoomMapViewSaveRoomItems(entries),
+						},
+					},
+				],
+			});
+			controls.push(
+				slider("rotation", "RoomItemRotation", 0, 359),
+				slider("size", "RoomItemSize", 50, 200),
+				ElementButton.Create(null, () => {
+					ChatRoomMapViewSaveRoomItems(entries.filter(e => e !== entry));
+					ChatRoomMapViewShowTileRoomItems(pos, object);
+				}, { label: TextGet("RoomItemRemove") }),
+			);
+		}
+		return ElementCreate({
+			tag: "div",
+			classList: ["chat-room-map-view-room-item"],
+			children: [
+				{
+					tag: "div",
+					classList: ["chat-room-map-view-room-item-header"],
+					children: [
+						{ tag: "span", children: [entry.asset?.Description ?? ""] },
+						ElementButton.Create(null, () => {
+							ChatRoomMapViewHideDialogMenu();
+							ChatRoomMapViewTakeRoomItem(entry);
+						}, { label: TextGet("RoomItemTake"), disabled: !ChatRoomMapViewCanTakeRoomItem(entry) }),
+					],
+				},
+				...controls,
+			],
+		});
+	});
+	if (isAdmin) {
+		/** @type {("No" | ChatRoomMapRoomItemTakeable)[]} */
+		const takeables = ["No", "OnePerPlayer", "Unlimited"];
+		rows.push(ElementCreate({
+			tag: "label",
+			classList: ["chat-room-map-view-room-item-control"],
+			children: [
+				{ tag: "span", children: [TextGet("RoomItemTakeableLabel")] },
+				ElementDropdown.Create(null,
+					takeables.map(value => ({ attributes: { value, selected: (takeable ?? "No") === value }, children: [TextGet(`RoomItemTakeable${value}`)] })),
+					function () {
+						const value = this.value;
+						ChatRoomMapViewSaveRoomItems(entries, value === "OnePerPlayer" || value === "Unlimited" ? value : undefined);
+					},
+				),
+			],
+		}));
+	}
+	/** @type {HTMLElement[]} */
+	const footer = [];
+	if (ChatRoomMapViewCanPlaceRoomItem(pos)) {
+		footer.push(ElementButton.Create(null, () => {
+			ChatRoomMapViewPlaceRoomItem(pos);
+			ChatRoomMapViewShowTileRoomItems(pos, object);
+		}, { label: TextGet("RoomItemPlace") }));
+	}
+	if (isAdmin && onTile.length > 1) {
+		footer.push(ElementButton.Create(null, () => {
+			const [first, second] = onTile;
+			ChatRoomMapViewSaveRoomItems(entries.map(e => {
+				if (e === first) return second;
+				return e === second ? first : e;
+			}));
+			ChatRoomMapViewShowTileRoomItems(pos, object);
+		}, { label: TextGet("RoomItemSwap") }));
+	}
+	if (object?.OnClick) {
+		footer.push(ElementButton.Create(null, () => object.OnClick?.(pos.X, pos.Y), { label: object.Name ?? TextGet("RoomItemUseObject") }));
+	}
+	ChatRoomMapViewShowDialogMenu(
+		TextGet("RoomItemTitle"),
+		ElementCreate({ tag: "div", classList: ["chat-room-map-view-room-items"], children: rows }),
+		footer.length ? ElementCreate({ tag: "div", classList: ["chat-room-map-view-room-item-footer"], children: footer }) : undefined,
+	);
+}
+
+/**
+ * Gets what tells a room item apart from the others, for the ones there's one of per player
+ * @param {ChatRoomMapRoomItemEntry} entry
+ * @returns {string}
+ */
+function ChatRoomMapViewRoomItemKey({ tile, group, name }) {
+	return `${ChatRoomData?.Name}/${tile}/${group}/${name}`;
+}
+
+/**
+ * Checks whether the player can take a room item into their hands
+ * @param {ChatRoomMapRoomItemEntry} entry
+ * @returns {boolean}
+ */
+function ChatRoomMapViewCanTakeRoomItem(entry) {
+	const { takeable } = ChatRoomMapViewGetRoomItems();
+	if (!entry.asset) return false;
+	const groupName = /** @type {AssetGroupItemName} */ (entry.asset.Group.Name);
+	return (takeable === "Unlimited" || takeable === "OnePerPlayer" && !ChatRoomMapViewTakenRoomItems.has(ChatRoomMapViewRoomItemKey(entry)))
+		&& Player.CanInteract()
+		&& InventoryGet(Player, groupName) == null
+		&& !InventoryGroupIsBlockedForCharacter(Player, groupName)
+		&& ChatRoomMapViewCanReachTile({ X: entry.tile % ChatRoomMapViewWidth, Y: Math.floor(entry.tile / ChatRoomMapViewWidth) });
+}
+
+/**
+ * Puts a new item of a room item's asset in the player's hands
+ * @param {ChatRoomMapRoomItemEntry} entry
+ * @returns {void}
+ */
+function ChatRoomMapViewTakeRoomItem(entry) {
+	if (!entry.asset || !ChatRoomMapViewCanTakeRoomItem(entry)) return;
+	if (!InventoryWear(Player, entry.asset.Name, entry.asset.Group.Name, null, null, Player.MemberNumber)) return;
+	ChatRoomMapViewTakenRoomItems.add(ChatRoomMapViewRoomItemKey(entry));
+}
+
+/**
  * Check if a tile on the map can be entered by a player, and return the number of milliseconds required to reach it
  * @param {number} X - The X position on the map
  * @param {number} Y - The Y position on the map
@@ -2622,8 +3108,12 @@ function ChatRoomMapViewSetSelectedTile(pos) {
 	const objectId = MapManager.Map.getObjectId(pos.X, pos.Y);
 	const [index] = MapManager.Map.unpackIndex(pos.Y, pos.Y);
 	ChatRoomMapViewSelectedObjectIndex = index;
-	if (objectId) {
-		const object = MapGetDoodad("Object", objectId);
+	const object = objectId ? MapGetDoodad("Object", objectId) : null;
+	// Room items are part of playing, so their menu never opens while the map is being edited
+	const playing = ChatRoomMapViewEditMode === "";
+	if (playing && ChatRoomMapViewCanReachTile(pos) && (ChatRoomMapViewGetTileRoomItems(pos).some(e => e.asset) || ChatRoomMapViewCanPlaceRoomItem(pos))) {
+		ChatRoomMapViewShowTileRoomItems(pos, object);
+	} else {
 		object?.OnClick?.(pos.X, pos.Y);
 	}
 }
